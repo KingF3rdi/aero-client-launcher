@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Monocraft (OFL, see assets/fonts/Monocraft-LICENSE.txt) - a monospace font
+   drawn in Minecraft's own glyph shapes, bundled locally so it works offline,
+   same reason NoRiskClient ships its own font files instead of a Google Fonts
+   CDN link. NoRiskClient itself bundles the real Minecraft/SmallCaps font
+   files, which are Mojang-owned and not freely redistributable; Monocraft is
+   the closest openly-licensed equivalent. Body text stays in the regular UI
+   font: this is only for short headings, not paragraph-length text. */
+@font-face {
+  font-family: "Monocraft";
+  src: url("./assets/fonts/Monocraft.ttf") format("truetype");
+  font-display: swap;
+}
+
+.font-mc {
+  font-family: "Monocraft", monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  background: #121212;
+  color: #eceaf2;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(79, 142, 255, 0.25);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
