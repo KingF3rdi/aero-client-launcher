@@ -308,19 +308,27 @@ async fn refreshed(stored: StoredAccount) -> Account {
         return Account { name: stored.name, uuid: stored.uuid, mc_token: stored.mc_token, skin_url: stored.skin_url };
     }
     match refresh_with_ms(&stored.ms_refresh).await {
-        Ok((access, refresh)) => match login_with_ms(&access).await {
-            Ok(account) => {
-                let _ = state::upsert_account(&StoredAccount {
-                    name: account.name.clone(),
-                    uuid: account.uuid.clone(),
-                    mc_token: account.mc_token.clone(),
-                    ms_refresh: refresh,
-                    skin_url: account.skin_url.clone(),
-                });
-                account
+        Ok((access, refresh)) => {
+            // Microsoft rotates refresh tokens on every use - `stored.ms_refresh` is
+            // already invalid now. Persist the new one immediately, even if the
+            // Xbox/Minecraft leg below fails, or a transient hiccup here strands the
+            // account on a dead refresh token forever (permanent "invalid session").
+            let fallback = StoredAccount { ms_refresh: refresh.clone(), ..stored.clone() };
+            let _ = state::upsert_account(&fallback);
+            match login_with_ms(&access).await {
+                Ok(account) => {
+                    let _ = state::upsert_account(&StoredAccount {
+                        name: account.name.clone(),
+                        uuid: account.uuid.clone(),
+                        mc_token: account.mc_token.clone(),
+                        ms_refresh: refresh,
+                        skin_url: account.skin_url.clone(),
+                    });
+                    account
+                }
+                Err(_) => Account { name: stored.name, uuid: stored.uuid, mc_token: stored.mc_token, skin_url: stored.skin_url },
             }
-            Err(_) => Account { name: stored.name, uuid: stored.uuid, mc_token: stored.mc_token, skin_url: stored.skin_url },
-        },
+        }
         Err(_) => Account { name: stored.name, uuid: stored.uuid, mc_token: stored.mc_token, skin_url: stored.skin_url },
     }
 }
