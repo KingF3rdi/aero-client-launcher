@@ -15,6 +15,12 @@ const KIND_LABEL: Record<ContentFile["kind"], string> = {
   shader: "Shader",
 };
 
+const KIND_ICON: Record<ContentFile["kind"], string> = {
+  mod: "solar:widget-bold",
+  resourcepack: "solar:gallery-bold",
+  shader: "solar:sun-bold",
+};
+
 /** Installed mods/resourcepacks/shader list with toggle/delete, plus quick
  * actions to browse/load/export content - shared by the instance Settings
  * modal's Content tab and the Play page, so mods are visible without opening
@@ -138,6 +144,9 @@ export function InstanceContentPanel({
                     key={file.relPath}
                     className="flex items-center gap-3 rounded-lg bg-black/30 border border-white/10 px-3 py-2"
                   >
+                    <div className="w-7 h-7 shrink-0 rounded-md bg-black/40 border border-white/10 flex items-center justify-center">
+                      <Icon icon={KIND_ICON[file.kind]} width={14} height={14} className="text-accent" />
+                    </div>
                     <span className={clsx("text-sm flex-1 truncate", !file.enabled && "text-white/40 line-through")}>
                       {file.name}
                     </span>

@@ -176,8 +176,13 @@ pub fn add_instance(name: String, mc_version: String) -> Result<Instance, String
 
 #[tauri::command]
 pub fn get_instance_log(id: String) -> Result<String, String> {
-    let path = instance_dir(&id).join("logs").join("latest.log");
-    std::fs::read_to_string(&path).map_err(|_| "Noch keine Logs für diese Instanz.".to_string())
+    let dir = instance_dir(&id);
+    // Prefer Minecraft's own log; if the JVM crashed before log4j2 even
+    // initialized (bad classpath, missing native lib, ...), that file never
+    // gets created, so fall back to the raw stdout/stderr launch.rs captured.
+    std::fs::read_to_string(dir.join("logs").join("latest.log"))
+        .or_else(|_| std::fs::read_to_string(dir.join("launcher.log")))
+        .map_err(|_| "Noch keine Logs für diese Instanz.".to_string())
 }
 
 #[derive(Serialize)]

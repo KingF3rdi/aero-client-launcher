@@ -107,6 +107,15 @@ pub async fn launch_instance(
     std::fs::create_dir_all(&natives_placeholder).map_err(|e| e.to_string())?;
 
     let cp = std::env::join_paths(classpath.iter()).map_err(|e| e.to_string())?;
+
+    // A GUI app has no console for the child to inherit, so without this any
+    // early JVM failure (bad classpath, missing class, native-library error)
+    // vanishes silently instead of reaching the Logs tab - capture it so a
+    // launch that never gets as far as Minecraft's own logs/latest.log is
+    // still diagnosable.
+    let launcher_log = std::fs::File::create(dir.join("launcher.log")).map_err(|e| e.to_string())?;
+    let launcher_log_err = launcher_log.try_clone().map_err(|e| e.to_string())?;
+
     let mut cmd = std::process::Command::new(&java);
     cmd.current_dir(&dir)
         .arg(format!("-Xmx{effective_ram_gb}G"))
@@ -133,7 +142,9 @@ pub async fn launch_instance(
         .arg("msa")
         .arg("--versionType")
         .arg("release")
-        .stdin(Stdio::null());
+        .stdin(Stdio::null())
+        .stdout(Stdio::from(launcher_log))
+        .stderr(Stdio::from(launcher_log_err));
 
     cmd.spawn().map_err(|e| format!("Minecraft konnte nicht gestartet werden: {e}"))?;
     Ok(())
