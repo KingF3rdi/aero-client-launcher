@@ -13,6 +13,13 @@ export interface InstancePatch {
   ramGb?: number | null;
 }
 
+export interface ContentFile {
+  relPath: string;
+  name: string;
+  kind: "mod" | "resourcepack" | "shader";
+  enabled: boolean;
+}
+
 export type LaunchPhase =
   | "idle"
   | "installing"

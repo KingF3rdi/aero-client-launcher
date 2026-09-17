@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
+import { toast } from "react-hot-toast";
 import { Modal } from "../ui/Modal";
 import { Button } from "../ui/Button";
 import { Toggle } from "../ui/Toggle";
 import { useInstanceStore } from "../../store/useInstanceStore";
-import type { Instance } from "../../types/instance";
+import type { ContentFile, Instance } from "../../types/instance";
 
-type Tab = "general" | "installation" | "logs";
+type Tab = "content" | "general" | "installation" | "logs";
 
 interface InstanceSettingsModalProps {
   instance: Instance;
@@ -18,7 +19,7 @@ interface InstanceSettingsModalProps {
 export function InstanceSettingsModal({ instance, onClose }: InstanceSettingsModalProps) {
   const navigate = useNavigate();
   const { updateInstance, deleteInstance, duplicateInstance, select } = useInstanceStore();
-  const [tab, setTab] = useState<Tab>("general");
+  const [tab, setTab] = useState<Tab>("content");
   const [name, setName] = useState(instance.name);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -39,6 +40,7 @@ export function InstanceSettingsModal({ instance, onClose }: InstanceSettingsMod
       <div className="flex">
         <nav className="w-40 shrink-0 border-r border-white/10 p-3 flex flex-col gap-1">
           {([
+            { id: "content", label: "Content", icon: "solar:widget-5-bold" },
             { id: "general", label: "General", icon: "solar:settings-bold" },
             { id: "installation", label: "Installation", icon: "solar:widget-bold" },
             { id: "logs", label: "Logs", icon: "solar:document-text-bold" },
@@ -125,23 +127,7 @@ export function InstanceSettingsModal({ instance, onClose }: InstanceSettingsMod
 
           {tab === "installation" && (
             <div className="flex flex-col gap-6">
-              <div>
-                <label className="text-xs uppercase tracking-wide text-white/40">Inhalte</label>
-                <p className="text-xs text-white/40 mt-1 mb-2">Mods, Resource Packs und Shader für diese Instanz durchsuchen und installieren.</p>
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    select(instance.id);
-                    onClose();
-                    navigate("/discover");
-                  }}
-                >
-                  <Icon icon="solar:compass-bold" width={16} height={16} />
-                  Inhalte durchsuchen
-                </Button>
-              </div>
-
-              <div className="flex items-center justify-between pt-4 border-t border-white/10">
+              <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm font-medium">Larp Client Mod</div>
                   <p className="text-xs text-white/40 mt-1 max-w-sm">
@@ -178,10 +164,137 @@ export function InstanceSettingsModal({ instance, onClose }: InstanceSettingsMod
             </div>
           )}
 
+          {tab === "content" && (
+            <ContentTab
+              instance={instance}
+              onBrowse={() => {
+                select(instance.id);
+                onClose();
+                navigate("/discover");
+              }}
+              onLoadModpack={() => {
+                onClose();
+                navigate("/discover", { state: { tab: "modpack" } });
+              }}
+            />
+          )}
+
           {tab === "logs" && <LogsTab instanceId={instance.id} />}
         </div>
       </div>
     </Modal>
+  );
+}
+
+const KIND_LABEL: Record<ContentFile["kind"], string> = {
+  mod: "Mods",
+  resourcepack: "Resource Packs",
+  shader: "Shader",
+};
+
+function ContentTab({
+  instance,
+  onBrowse,
+  onLoadModpack,
+}: {
+  instance: Instance;
+  onBrowse: () => void;
+  onLoadModpack: () => void;
+}) {
+  const { fetchContent, toggleContentFile, deleteContentFile } = useInstanceStore();
+  const [files, setFiles] = useState<ContentFile[] | null>(null);
+  const [busyPath, setBusyPath] = useState<string | null>(null);
+
+  const load = () => {
+    fetchContent(instance.id)
+      .then(setFiles)
+      .catch((e) => toast.error(String(e)));
+  };
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [instance.id]);
+
+  const toggle = async (file: ContentFile) => {
+    setBusyPath(file.relPath);
+    try {
+      const updated = await toggleContentFile(instance.id, file.relPath);
+      setFiles((prev) => prev?.map((f) => (f.relPath === file.relPath ? updated : f)) ?? null);
+    } catch (e) {
+      toast.error(String(e));
+    } finally {
+      setBusyPath(null);
+    }
+  };
+
+  const remove = async (file: ContentFile) => {
+    setBusyPath(file.relPath);
+    try {
+      await deleteContentFile(instance.id, file.relPath);
+      setFiles((prev) => prev?.filter((f) => f.relPath !== file.relPath) ?? null);
+    } catch (e) {
+      toast.error(String(e));
+    } finally {
+      setBusyPath(null);
+    }
+  };
+
+  const grouped = (["mod", "resourcepack", "shader"] as const).map((kind) => ({
+    kind,
+    items: files?.filter((f) => f.kind === kind) ?? [],
+  }));
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex gap-2">
+        <Button variant="ghost" onClick={onBrowse}>
+          <Icon icon="solar:compass-bold" width={16} height={16} />
+          Mods durchsuchen
+        </Button>
+        <Button variant="ghost" onClick={onLoadModpack}>
+          <Icon icon="solar:download-minimalistic-bold" width={16} height={16} />
+          Modpack laden
+        </Button>
+      </div>
+
+      {files === null && <p className="text-sm text-white/40">Lädt…</p>}
+      {files !== null && files.length === 0 && (
+        <p className="text-sm text-white/40">Noch keine Mods, Resource Packs oder Shader installiert.</p>
+      )}
+
+      {grouped.map(
+        ({ kind, items }) =>
+          items.length > 0 && (
+            <div key={kind}>
+              <label className="text-xs uppercase tracking-wide text-white/40">{KIND_LABEL[kind]}</label>
+              <div className="mt-1.5 flex flex-col gap-1">
+                {items.map((file) => (
+                  <div
+                    key={file.relPath}
+                    className="flex items-center gap-3 rounded-lg bg-black/30 border border-white/10 px-3 py-2"
+                  >
+                    <span className={clsx("text-sm flex-1 truncate", !file.enabled && "text-white/40 line-through")}>
+                      {file.name}
+                    </span>
+                    {file.kind === "mod" && (
+                      <Toggle on={file.enabled} disabled={busyPath === file.relPath} onChange={() => toggle(file)} />
+                    )}
+                    <button
+                      onClick={() => remove(file)}
+                      disabled={busyPath === file.relPath}
+                      title="Entfernen"
+                      className="text-white/30 hover:text-danger transition-colors cursor-pointer disabled:opacity-40"
+                    >
+                      <Icon icon="solar:trash-bin-trash-bold" width={14} height={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ),
+      )}
+    </div>
   );
 }
 

@@ -83,6 +83,19 @@ const DEV_MOCKS: Record<string, MockFn> = {
     return inst;
   },
   get_instance_log: () => "[12:00:01] [Render thread/INFO]: Dev-Mock - noch kein echtes Log außerhalb von Tauri.",
+  list_instance_content: () => [
+    { relPath: "mods/sodium.jar", name: "sodium.jar", kind: "mod", enabled: true },
+    { relPath: "mods/lithium.jar.disabled", name: "lithium.jar", kind: "mod", enabled: false },
+    { relPath: "resourcepacks/faithful.zip", name: "faithful.zip", kind: "resourcepack", enabled: true },
+  ],
+  toggle_content_file: (args) => {
+    const relPath = String(args?.relPath ?? "");
+    const enabled = relPath.endsWith(".disabled");
+    const name = (relPath.split("/").pop() ?? "").replace(/\.disabled$/, "");
+    const folder = relPath.split("/")[0];
+    return { relPath: `${folder}/${enabled ? name : `${name}.disabled`}`, name, kind: folder === "mods" ? "mod" : "resourcepack", enabled };
+  },
+  delete_content_file: () => null,
   upload_skin: () => null,
   search_content: (args) => {
     const type = String(args?.projectType ?? "mod");

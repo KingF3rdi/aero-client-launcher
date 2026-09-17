@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { open } from "@tauri-apps/plugin-dialog";
 import { isTauri } from "@tauri-apps/api/core";
 import { Icon } from "@iconify/react";
@@ -22,8 +23,10 @@ const TABS: { id: ProjectType; label: string; icon: string }[] = [
  * installs always know where to go without asking first.
  */
 export function DiscoverView() {
+  const location = useLocation();
+  const initialTab = (location.state as { tab?: ProjectType } | null)?.tab;
   const { instances, selectedId } = useInstanceStore();
-  const [tab, setTab] = useState<ProjectType>("mod");
+  const [tab, setTab] = useState<ProjectType>(initialTab ?? "mod");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ContentSummary[]>([]);
   const [loading, setLoading] = useState(false);

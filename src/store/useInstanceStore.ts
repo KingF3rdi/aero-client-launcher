@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { invoke } from "../lib/tauri";
-import type { Instance, InstancePatch, LaunchStatus } from "../types/instance";
+import type { ContentFile, Instance, InstancePatch, LaunchStatus } from "../types/instance";
 
 interface InstanceState {
   instances: Instance[];
@@ -16,6 +16,9 @@ interface InstanceState {
   duplicateInstance: (id: string) => Promise<void>;
   addInstance: (name: string, mcVersion: string) => Promise<void>;
   fetchLog: (id: string) => Promise<string>;
+  fetchContent: (id: string) => Promise<ContentFile[]>;
+  toggleContentFile: (id: string, relPath: string) => Promise<ContentFile>;
+  deleteContentFile: (id: string, relPath: string) => Promise<void>;
 }
 
 export const useInstanceStore = create<InstanceState>((set, get) => ({
@@ -75,4 +78,7 @@ export const useInstanceStore = create<InstanceState>((set, get) => ({
   },
 
   fetchLog: (id) => invoke<string>("get_instance_log", { id }),
+  fetchContent: (id) => invoke<ContentFile[]>("list_instance_content", { id }),
+  toggleContentFile: (id, relPath) => invoke<ContentFile>("toggle_content_file", { id, relPath }),
+  deleteContentFile: (id, relPath) => invoke("delete_content_file", { id, relPath }),
 }));

@@ -180,6 +180,91 @@ pub fn get_instance_log(id: String) -> Result<String, String> {
     std::fs::read_to_string(&path).map_err(|_| "Noch keine Logs für diese Instanz.".to_string())
 }
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ContentFile {
+    /// Path relative to the instance dir, e.g. "mods/sodium.jar" or "mods/old.jar.disabled" -
+    /// this is what toggle/delete take back, so the UI never has to reconstruct it.
+    pub rel_path: String,
+    pub name: String,
+    pub kind: String,
+    pub enabled: bool,
+}
+
+const CONTENT_KINDS: &[(&str, &str)] = &[("mods", "mod"), ("resourcepacks", "resourcepack"), ("shaderpacks", "shader")];
+
+/// Lists whatever's actually on disk for this instance - the files themselves are the source of
+/// truth (installing already writes real files, so there's nothing extra to "save"), this just
+/// surfaces them instead of leaving installed content invisible after the fact.
+#[tauri::command]
+pub fn list_instance_content(id: String) -> Result<Vec<ContentFile>, String> {
+    let dir = instance_dir(&id);
+    let mut out = Vec::new();
+    for (folder, kind) in CONTENT_KINDS {
+        let path = dir.join(folder);
+        let Ok(entries) = std::fs::read_dir(&path) else { continue };
+        for entry in entries.flatten() {
+            let file_name = entry.file_name().to_string_lossy().to_string();
+            if file_name.starts_with('.') {
+                continue;
+            }
+            let enabled = !file_name.ends_with(".disabled");
+            let display_name = file_name.strip_suffix(".disabled").unwrap_or(&file_name).to_string();
+            out.push(ContentFile {
+                rel_path: format!("{folder}/{file_name}"),
+                name: display_name,
+                kind: kind.to_string(),
+                enabled,
+            });
+        }
+    }
+    Ok(out)
+}
+
+fn safe_content_path(instance_id: &str, rel_path: &str) -> Result<PathBuf, String> {
+    // rel_path always comes from list_instance_content's own output, but this guards
+    // against it ever pointing outside the instance's content folders regardless.
+    let allowed = CONTENT_KINDS.iter().any(|(folder, _)| rel_path.starts_with(&format!("{folder}/")));
+    if !allowed || rel_path.contains("..") {
+        return Err("Ungültiger Pfad".to_string());
+    }
+    Ok(instance_dir(instance_id).join(rel_path))
+}
+
+/// Toggling renames to/from a ".disabled" suffix - the same convention Prism/MultiMC/Modrinth's
+/// own launcher use, which works because Fabric Loader (and resource/shader pack scanning) only
+/// picks up files whose name still ends in the real extension.
+#[tauri::command]
+pub fn toggle_content_file(id: String, rel_path: String) -> Result<ContentFile, String> {
+    let path = safe_content_path(&id, &rel_path)?;
+    if !path.is_file() {
+        return Err("Datei nicht gefunden".to_string());
+    }
+    let enabled_now = !rel_path.ends_with(".disabled");
+    let new_path = if enabled_now {
+        path.with_file_name(format!("{}.disabled", path.file_name().unwrap().to_string_lossy()))
+    } else {
+        path.with_file_name(path.file_name().unwrap().to_string_lossy().trim_end_matches(".disabled").to_string())
+    };
+    std::fs::rename(&path, &new_path).map_err(|e| e.to_string())?;
+
+    let folder = rel_path.split('/').next().unwrap_or_default();
+    let kind = CONTENT_KINDS.iter().find(|(f, _)| *f == folder).map(|(_, k)| *k).unwrap_or("mod");
+    let file_name = new_path.file_name().unwrap().to_string_lossy().to_string();
+    Ok(ContentFile {
+        name: file_name.strip_suffix(".disabled").unwrap_or(&file_name).to_string(),
+        rel_path: format!("{folder}/{file_name}"),
+        kind: kind.to_string(),
+        enabled: !enabled_now,
+    })
+}
+
+#[tauri::command]
+pub fn delete_content_file(id: String, rel_path: String) -> Result<(), String> {
+    let path = safe_content_path(&id, &rel_path)?;
+    std::fs::remove_file(&path).map_err(|e| e.to_string())
+}
+
 fn short_random_suffix() -> String {
     use std::time::{SystemTime, UNIX_EPOCH};
     let nanos = SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.subsec_nanos()).unwrap_or(0);
