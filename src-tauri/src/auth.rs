@@ -51,6 +51,7 @@ pub struct Account {
     pub name: String,
     pub uuid: String,
     pub mc_token: String,
+    pub skin_url: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -169,6 +170,7 @@ async fn finish_login(ms_access: &str, ms_refresh: &str) -> Result<PollResult, S
                 uuid: account.uuid.clone(),
                 mc_token: account.mc_token.clone(),
                 ms_refresh: ms_refresh.to_string(),
+                skin_url: account.skin_url.clone(),
             })
             .map_err(|e| e.to_string())?;
             Ok(PollResult::Success { account })
@@ -250,7 +252,16 @@ async fn login_with_ms(ms_access: &str) -> Result<Account, String> {
         .ok_or("Dieser Account besitzt keine Minecraft: Java Edition.")?;
     let uuid = dash_uuid(raw_id);
 
-    Ok(Account { name, uuid, mc_token: mc_token.to_string() })
+    // The profile's own skins array is the authoritative current skin - avoids
+    // depending on a third-party caching proxy (which can lag behind a recent
+    // change or simply not have this account cached) for the skin preview.
+    let skin_url = profile["skins"]
+        .as_array()
+        .and_then(|skins| skins.iter().find(|s| s["state"] == "ACTIVE").or_else(|| skins.first()))
+        .and_then(|s| s["url"].as_str())
+        .map(|s| s.to_string());
+
+    Ok(Account { name, uuid, mc_token: mc_token.to_string(), skin_url })
 }
 
 async fn refresh_with_ms(refresh_token: &str) -> Result<(String, String), String> {
@@ -294,7 +305,7 @@ fn dash_uuid(raw: &str) -> String {
 /// straight back to the login screen just because it was closed overnight.
 async fn refreshed(stored: StoredAccount) -> Account {
     if stored.ms_refresh.is_empty() {
-        return Account { name: stored.name, uuid: stored.uuid, mc_token: stored.mc_token };
+        return Account { name: stored.name, uuid: stored.uuid, mc_token: stored.mc_token, skin_url: stored.skin_url };
     }
     match refresh_with_ms(&stored.ms_refresh).await {
         Ok((access, refresh)) => match login_with_ms(&access).await {
@@ -304,12 +315,13 @@ async fn refreshed(stored: StoredAccount) -> Account {
                     uuid: account.uuid.clone(),
                     mc_token: account.mc_token.clone(),
                     ms_refresh: refresh,
+                    skin_url: account.skin_url.clone(),
                 });
                 account
             }
-            Err(_) => Account { name: stored.name, uuid: stored.uuid, mc_token: stored.mc_token },
+            Err(_) => Account { name: stored.name, uuid: stored.uuid, mc_token: stored.mc_token, skin_url: stored.skin_url },
         },
-        Err(_) => Account { name: stored.name, uuid: stored.uuid, mc_token: stored.mc_token },
+        Err(_) => Account { name: stored.name, uuid: stored.uuid, mc_token: stored.mc_token, skin_url: stored.skin_url },
     }
 }
 

@@ -12,10 +12,9 @@ type Variant = "classic" | "slim";
 
 /** Upload a local PNG as the active account's skin via Mojang's own skins API. */
 export function SkinsView() {
-  const { account } = useAuthStore();
+  const { account, selectAccount } = useAuthStore();
   const [variant, setVariant] = useState<Variant>("classic");
   const [uploading, setUploading] = useState(false);
-  const [cacheBust, setCacheBust] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const viewerRef = useRef<SkinViewer | null>(null);
 
@@ -25,14 +24,17 @@ export function SkinsView() {
       canvas: canvasRef.current,
       width: 260,
       height: 320,
-      skin: `https://mc-heads.net/skin/${account.uuid}?t=${cacheBust}`,
+      // Mojang's own texture URL (from the profile fetched at login/refresh) -
+      // avoids depending on a third-party caching proxy that might not have
+      // this account cached at all and would fall back to default Steve.
+      skin: account.skinUrl ?? `https://mc-heads.net/skin/${account.uuid}`,
     });
     viewer.controls.enableZoom = false;
     viewer.autoRotate = false;
     viewerRef.current = viewer;
     return () => viewer.dispose();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [account?.uuid, cacheBust]);
+  }, [account?.uuid, account?.skinUrl]);
 
   if (!account) return null;
 
@@ -50,7 +52,7 @@ export function SkinsView() {
     try {
       await invoke("upload_skin", { path, variant });
       toast.success("Skin hochgeladen!");
-      setCacheBust((n) => n + 1);
+      await selectAccount(account.uuid);
     } catch (e) {
       toast.error(String(e));
     } finally {

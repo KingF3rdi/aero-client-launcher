@@ -29,7 +29,7 @@ const mockInstances: Array<Record<string, unknown>> = [
   { id: "fabric-1.21.1", name: "Fabric 1.21.1", mcVersion: "1.21.1", loader: "fabric", modEnabled: false, ramGb: null },
 ];
 
-const mockAccounts: Array<{ name: string; uuid: string; mcToken: string }> = [];
+const mockAccounts: Array<{ name: string; uuid: string; mcToken: string; skinUrl: string | null }> = [];
 let mockActiveUuid: string | null = null;
 
 const DEV_MOCKS: Record<string, MockFn> = {

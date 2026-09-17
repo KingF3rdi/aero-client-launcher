@@ -25,6 +25,10 @@ pub struct StoredAccount {
     pub uuid: String,
     pub mc_token: String,
     pub ms_refresh: String,
+    /// Mojang's own texture URL for the account's current skin - `#[serde(default)]`
+    /// so accounts saved before this field existed still deserialize.
+    #[serde(default)]
+    pub skin_url: Option<String>,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
