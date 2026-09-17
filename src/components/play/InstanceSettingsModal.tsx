@@ -149,25 +149,18 @@ export function InstanceSettingsModal({ instance, onClose, initialTab }: Instanc
               </div>
 
               <div>
-                <label className="text-xs uppercase tracking-wide text-white/40">RAM-Override</label>
-                <p className="text-xs text-white/40 mt-1 mb-2">
-                  Überschreibt den allgemeinen RAM-Regler nur für diese Instanz. Leer lassen, um den allgemeinen Wert zu nutzen.
-                </p>
+                <label className="text-xs uppercase tracking-wide text-white/40">RAM</label>
+                <p className="text-xs text-white/40 mt-1 mb-2">Wie viel Arbeitsspeicher diese Instanz beim Start bekommt.</p>
                 <div className="flex items-center gap-3">
                   <input
                     type="range"
-                    min={0}
+                    min={2}
                     max={16}
-                    value={instance.ramGb ?? 0}
-                    onChange={(e) => {
-                      const v = Number(e.target.value);
-                      updateInstance(instance.id, { ramGb: v === 0 ? null : v });
-                    }}
+                    value={instance.ramGb ?? 4}
+                    onChange={(e) => updateInstance(instance.id, { ramGb: Number(e.target.value) })}
                     className="flex-1 accent-accent"
                   />
-                  <span className="text-sm w-24 text-right text-white/60">
-                    {instance.ramGb ? `${instance.ramGb} GB` : "Allgemein"}
-                  </span>
+                  <span className="text-sm w-16 text-right text-white/60">{instance.ramGb ?? 4} GB</span>
                 </div>
               </div>
             </div>

@@ -11,7 +11,7 @@ import { Button } from "../ui/Button";
 export function PlayView() {
   const navigate = useNavigate();
   const { account } = useAuthStore();
-  const { instances, selectedId, ramGb, launch, loadInstances, select, setRam, play } = useInstanceStore();
+  const { instances, selectedId, launch, loadInstances, select, play } = useInstanceStore();
   const [settingsFor, setSettingsFor] = useState<string | null>(null);
   const [modalTab, setModalTab] = useState<Tab>("content");
 
@@ -33,6 +33,7 @@ export function PlayView() {
             instance={instance}
             selected={instance.id === selectedId}
             onSelect={() => select(instance.id)}
+            onPlay={() => account && play(account, instance.id)}
             onSettings={() => {
               setModalTab("content");
               setSettingsFor(instance.id);
@@ -57,14 +58,32 @@ export function PlayView() {
       <main className="flex-1 flex flex-col p-10 gap-6 overflow-hidden">
         {selected && (
           <>
-            <div>
-              <h2 className="text-3xl font-bold tracking-wide" style={{ textShadow: "0 0 20px rgba(196,181,253,0.4)" }}>
-                {selected.name}
-              </h2>
-              <p className="text-white/40 text-sm mt-1">
-                {selected.loader === "fabric" ? "Fabric" : "Vanilla"} · {selected.mcVersion} · Larp Launcher
-              </p>
+            <div className="flex items-center gap-5">
+              <div
+                className="w-20 h-20 shrink-0 rounded-2xl bg-accent/10 border border-accent/30 flex items-center justify-center"
+                style={{ boxShadow: "0 0 30px rgba(79,142,255,0.25)" }}
+              >
+                <Icon icon="solar:box-bold" width={40} height={40} className="text-accent" />
+              </div>
+              <div>
+                <h2 className="text-4xl font-bold tracking-wide" style={{ textShadow: "0 0 20px rgba(196,181,253,0.4)" }}>
+                  {selected.name}
+                </h2>
+                <p className="text-white/40 text-sm mt-1">
+                  {selected.loader === "fabric" ? "Fabric" : "Vanilla"} · {selected.mcVersion} · Larp Launcher
+                </p>
+              </div>
+              <Button
+                variant="play"
+                disabled={!account || busy}
+                onClick={() => account && play(account)}
+                className="ml-auto !px-8 !py-4 !text-lg"
+              >
+                <Icon icon="solar:play-bold" width={26} height={26} />
+                {busy ? "Wird gestartet…" : "Play"}
+              </Button>
             </div>
+            <span className="text-sm text-white/40 -mt-3">{launch.message}</span>
 
             <div className="flex-1 min-h-0 overflow-y-auto pr-1">
               <InstanceContentPanel
@@ -76,31 +95,6 @@ export function PlayView() {
                   setSettingsFor(selected.id);
                 }}
               />
-            </div>
-
-            <div className="flex items-center gap-3 rounded-xl bg-black/30 border border-white/10 backdrop-blur px-4 py-3 w-fit shrink-0">
-              <label className="text-sm text-white/40 w-24">RAM (GB)</label>
-              <input
-                type="range"
-                min={2}
-                max={16}
-                value={ramGb}
-                onChange={(e) => setRam(Number(e.target.value))}
-                className="w-56 accent-accent"
-              />
-              <span className="text-sm w-8">{ramGb}</span>
-            </div>
-
-            <div className="flex items-center gap-4 shrink-0">
-              <Button
-                variant="play"
-                disabled={!account || busy}
-                onClick={() => account && play(account)}
-              >
-                <Icon icon="solar:play-bold" width={20} height={20} />
-                {busy ? "Wird gestartet…" : "Play"}
-              </Button>
-              <span className="text-sm text-white/40">{launch.message}</span>
             </div>
           </>
         )}

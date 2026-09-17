@@ -9,9 +9,10 @@ interface InstanceCardProps {
   onSelect: () => void;
   onSettings?: () => void;
   onLogs?: () => void;
+  onPlay?: () => void;
 }
 
-export function InstanceCard({ instance, selected, onSelect, onSettings, onLogs }: InstanceCardProps) {
+export function InstanceCard({ instance, selected, onSelect, onSettings, onLogs, onPlay }: InstanceCardProps) {
   return (
     <div
       className={clsx(
@@ -35,6 +36,18 @@ export function InstanceCard({ instance, selected, onSelect, onSettings, onLogs 
         </div>
       </button>
       <div className="absolute top-2 right-2 flex items-center gap-0.5">
+        {onPlay && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onPlay();
+            }}
+            title="Starten"
+            className="w-6 h-6 flex items-center justify-center rounded-md text-white/0 group-hover:text-accent hover:!bg-accent/20 transition-all cursor-pointer"
+          >
+            <Icon icon="solar:play-bold" width={14} height={14} />
+          </button>
+        )}
         {onLogs && (
           <button
             onClick={(e) => {

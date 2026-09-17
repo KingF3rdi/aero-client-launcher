@@ -8,6 +8,7 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use sha1::{Digest, Sha1};
 
 use crate::instances::{self, Instance};
 
@@ -316,4 +317,84 @@ pub async fn export_modpack(id: String, dest_path: String) -> Result<(), String>
 
     zip.finish().map_err(|e| e.to_string())?;
     Ok(())
+}
+
+fn sha1_hex(bytes: &[u8]) -> String {
+    let mut hasher = Sha1::new();
+    hasher.update(bytes);
+    hasher.finalize().iter().map(|b| format!("{b:02x}")).collect()
+}
+
+/// Matches installed mods/resourcepacks/shaders back to their real Modrinth
+/// project by content hash (the same lookup Modrinth's own launcher uses),
+/// so the content list can show actual project icons instead of a generic
+/// per-kind placeholder. Files that aren't on Modrinth (custom/local jars)
+/// just don't get an entry - the frontend keeps its placeholder for those.
+#[tauri::command]
+pub async fn fetch_content_icons(id: String) -> Result<HashMap<String, String>, String> {
+    let files = instances::list_instance_content(id.clone())?;
+    let dir = instances::instance_dir(&id);
+
+    let mut hash_to_relpath: HashMap<String, String> = HashMap::new();
+    for file in &files {
+        let Ok(bytes) = std::fs::read(dir.join(&file.rel_path)) else { continue };
+        hash_to_relpath.insert(sha1_hex(&bytes), file.rel_path.clone());
+    }
+    if hash_to_relpath.is_empty() {
+        return Ok(HashMap::new());
+    }
+
+    let http = client();
+    let hashes: Vec<&String> = hash_to_relpath.keys().collect();
+    let version_by_hash: Value = http
+        .post(format!("{API}/version_files"))
+        .json(&serde_json::json!({ "hashes": hashes, "algorithm": "sha1" }))
+        .send()
+        .await
+        .map_err(|e| e.to_string())?
+        .json()
+        .await
+        .map_err(|e| e.to_string())?;
+    let Some(map) = version_by_hash.as_object() else {
+        return Ok(HashMap::new());
+    };
+
+    let mut relpath_to_project: HashMap<String, String> = HashMap::new();
+    let mut project_ids: Vec<String> = Vec::new();
+    for (hash, version) in map {
+        let Some(project_id) = version["project_id"].as_str() else { continue };
+        let Some(rel_path) = hash_to_relpath.get(hash) else { continue };
+        relpath_to_project.insert(rel_path.clone(), project_id.to_string());
+        if !project_ids.iter().any(|p| p == project_id) {
+            project_ids.push(project_id.to_string());
+        }
+    }
+    if project_ids.is_empty() {
+        return Ok(HashMap::new());
+    }
+
+    let ids_json = serde_json::to_string(&project_ids).map_err(|e| e.to_string())?;
+    let projects: Value = http
+        .get(format!("{API}/projects"))
+        .query(&[("ids", ids_json.as_str())])
+        .send()
+        .await
+        .map_err(|e| e.to_string())?
+        .json()
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let mut project_icon: HashMap<String, String> = HashMap::new();
+    if let Some(arr) = projects.as_array() {
+        for p in arr {
+            if let (Some(pid), Some(icon)) = (p["id"].as_str(), p["icon_url"].as_str()) {
+                project_icon.insert(pid.to_string(), icon.to_string());
+            }
+        }
+    }
+
+    Ok(relpath_to_project
+        .into_iter()
+        .filter_map(|(rel_path, project_id)| project_icon.get(&project_id).map(|icon| (rel_path, icon.clone())))
+        .collect())
 }

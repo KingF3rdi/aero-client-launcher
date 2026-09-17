@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
+import { useAuthStore } from "../../store/useAuthStore";
 import { useInstanceStore } from "../../store/useInstanceStore";
 import { InstanceSettingsModal, type Tab } from "./InstanceSettingsModal";
 import { AddInstanceModal } from "./AddInstanceModal";
@@ -10,7 +11,8 @@ import { ModCountBadge } from "./ModCountBadge";
  * Play's compact sidebar list. */
 export function InstancesView() {
   const navigate = useNavigate();
-  const { instances, loadInstances, select } = useInstanceStore();
+  const { account } = useAuthStore();
+  const { instances, loadInstances, select, play } = useInstanceStore();
   const [settingsFor, setSettingsFor] = useState<string | null>(null);
   const [modalTab, setModalTab] = useState<Tab>("content");
   const [adding, setAdding] = useState(false);
@@ -59,6 +61,16 @@ export function InstancesView() {
               </div>
             </button>
             <div className="absolute top-3 right-3 flex items-center gap-0.5">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  account && play(account, instance.id);
+                }}
+                title="Starten"
+                className="w-7 h-7 flex items-center justify-center rounded-md text-white/0 group-hover:text-accent hover:!bg-accent/20 transition-all cursor-pointer"
+              >
+                <Icon icon="solar:play-bold" width={16} height={16} />
+              </button>
               <button
                 onClick={(e) => {
                   e.stopPropagation();

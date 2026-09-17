@@ -97,6 +97,9 @@ const DEV_MOCKS: Record<string, MockFn> = {
   },
   delete_content_file: () => null,
   export_modpack: () => null,
+  fetch_content_icons: () => ({
+    "mods/sodium.jar": "https://cdn.modrinth.com/data/AANobbMI/icon.png",
+  }),
   upload_skin: () => null,
   search_content: (args) => {
     const type = String(args?.projectType ?? "mod");

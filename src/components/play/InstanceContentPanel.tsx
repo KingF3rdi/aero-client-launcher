@@ -36,8 +36,9 @@ export function InstanceContentPanel({
   onLoadModpack: () => void;
   onSettings?: () => void;
 }) {
-  const { fetchContent, toggleContentFile, deleteContentFile, exportModpack } = useInstanceStore();
+  const { fetchContent, toggleContentFile, deleteContentFile, exportModpack, fetchContentIcons } = useInstanceStore();
   const [files, setFiles] = useState<ContentFile[] | null>(null);
+  const [icons, setIcons] = useState<Record<string, string>>({});
   const [busyPath, setBusyPath] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
 
@@ -45,6 +46,9 @@ export function InstanceContentPanel({
     fetchContent(instance.id)
       .then(setFiles)
       .catch((e) => toast.error(String(e)));
+    fetchContentIcons(instance.id)
+      .then(setIcons)
+      .catch(() => setIcons({}));
   };
 
   useEffect(() => {
@@ -144,8 +148,12 @@ export function InstanceContentPanel({
                     key={file.relPath}
                     className="flex items-center gap-3 rounded-lg bg-black/30 border border-white/10 px-3 py-2"
                   >
-                    <div className="w-7 h-7 shrink-0 rounded-md bg-black/40 border border-white/10 flex items-center justify-center">
-                      <Icon icon={KIND_ICON[file.kind]} width={14} height={14} className="text-accent" />
+                    <div className="w-7 h-7 shrink-0 rounded-md bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden">
+                      {icons[file.relPath] ? (
+                        <img src={icons[file.relPath]} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <Icon icon={KIND_ICON[file.kind]} width={14} height={14} className="text-accent" />
+                      )}
                     </div>
                     <span className={clsx("text-sm flex-1 truncate", !file.enabled && "text-white/40 line-through")}>
                       {file.name}

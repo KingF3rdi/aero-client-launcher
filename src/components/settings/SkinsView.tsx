@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { SkinViewer } from "skinview3d";
 import { open } from "@tauri-apps/plugin-dialog";
 import { isTauri } from "@tauri-apps/api/core";
 import { Icon } from "@iconify/react";
@@ -15,6 +16,23 @@ export function SkinsView() {
   const [variant, setVariant] = useState<Variant>("classic");
   const [uploading, setUploading] = useState(false);
   const [cacheBust, setCacheBust] = useState(0);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const viewerRef = useRef<SkinViewer | null>(null);
+
+  useEffect(() => {
+    if (!account || !canvasRef.current) return;
+    const viewer = new SkinViewer({
+      canvas: canvasRef.current,
+      width: 260,
+      height: 320,
+      skin: `https://mc-heads.net/skin/${account.uuid}?t=${cacheBust}`,
+    });
+    viewer.controls.enableZoom = false;
+    viewer.autoRotate = false;
+    viewerRef.current = viewer;
+    return () => viewer.dispose();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [account?.uuid, cacheBust]);
 
   if (!account) return null;
 
@@ -45,14 +63,10 @@ export function SkinsView() {
       <h2 className="text-2xl font-bold tracking-wide">Skin</h2>
 
       <div className="flex gap-8 items-start">
-        <div className="rounded-xl bg-black/30 border border-white/10 backdrop-blur p-6 flex flex-col items-center gap-3">
-          <img
-            key={cacheBust}
-            src={`https://mc-heads.net/body/${account.uuid}/100?t=${cacheBust}`}
-            alt="Aktueller Skin"
-            className="h-48"
-          />
+        <div className="rounded-xl bg-black/30 border border-white/10 backdrop-blur p-3 flex flex-col items-center gap-2">
+          <canvas ref={canvasRef} className="cursor-grab active:cursor-grabbing" />
           <span className="text-xs text-white/40">{account.name}</span>
+          <span className="text-[10px] text-white/25">Zum Drehen ziehen</span>
         </div>
 
         <div className="flex-1 flex flex-col gap-5">
