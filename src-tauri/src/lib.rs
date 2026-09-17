@@ -1,4 +1,5 @@
 mod auth;
+mod content;
 mod instances;
 mod launch;
 mod skin;
@@ -38,6 +39,10 @@ pub fn run() {
             instances::get_instance_log,
             launch::launch_instance,
             skin::upload_skin,
+            content::search_content,
+            content::install_content,
+            content::install_modpack,
+            content::import_modpack_file,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

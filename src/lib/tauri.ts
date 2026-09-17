@@ -84,6 +84,35 @@ const DEV_MOCKS: Record<string, MockFn> = {
   },
   get_instance_log: () => "[12:00:01] [Render thread/INFO]: Dev-Mock - noch kein echtes Log außerhalb von Tauri.",
   upload_skin: () => null,
+  search_content: (args) => {
+    const type = String(args?.projectType ?? "mod");
+    return Array.from({ length: 6 }, (_, i) => ({
+      id: `dev-${type}-${i}`,
+      slug: `dev-${type}-${i}`,
+      title: `Dev-Mock ${type} #${i + 1}`,
+      description: "Nur sichtbar außerhalb von Tauri - echte Suche läuft über Modrinths API.",
+      iconUrl: null,
+      downloads: 1000 * (i + 1),
+      projectType: type,
+    }));
+  },
+  install_content: () => "dev-mock.jar",
+  install_modpack: (args) => ({
+    id: "dev-modpack",
+    name: String(args?.instanceName ?? "Dev Modpack"),
+    mcVersion: "1.21.11",
+    loader: "fabric",
+    modEnabled: false,
+    ramGb: null,
+  }),
+  import_modpack_file: () => ({
+    id: "dev-modpack-import",
+    name: "Importiertes Modpack",
+    mcVersion: "1.21.11",
+    loader: "fabric",
+    modEnabled: false,
+    ramGb: null,
+  }),
   begin_device_code_login: () => ({
     userCode: "ABCD-EFGH",
     verificationUri: "https://microsoft.com/link",

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import clsx from "clsx";
+import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { Modal } from "../ui/Modal";
 import { Button } from "../ui/Button";
@@ -15,7 +16,8 @@ interface InstanceSettingsModalProps {
 }
 
 export function InstanceSettingsModal({ instance, onClose }: InstanceSettingsModalProps) {
-  const { updateInstance, deleteInstance, duplicateInstance } = useInstanceStore();
+  const navigate = useNavigate();
+  const { updateInstance, deleteInstance, duplicateInstance, select } = useInstanceStore();
   const [tab, setTab] = useState<Tab>("general");
   const [name, setName] = useState(instance.name);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -123,7 +125,23 @@ export function InstanceSettingsModal({ instance, onClose }: InstanceSettingsMod
 
           {tab === "installation" && (
             <div className="flex flex-col gap-6">
-              <div className="flex items-center justify-between">
+              <div>
+                <label className="text-xs uppercase tracking-wide text-white/40">Inhalte</label>
+                <p className="text-xs text-white/40 mt-1 mb-2">Mods, Resource Packs und Shader für diese Instanz durchsuchen und installieren.</p>
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    select(instance.id);
+                    onClose();
+                    navigate("/discover");
+                  }}
+                >
+                  <Icon icon="solar:compass-bold" width={16} height={16} />
+                  Inhalte durchsuchen
+                </Button>
+              </div>
+
+              <div className="flex items-center justify-between pt-4 border-t border-white/10">
                 <div>
                   <div className="text-sm font-medium">Larp Client Mod</div>
                   <p className="text-xs text-white/40 mt-1 max-w-sm">

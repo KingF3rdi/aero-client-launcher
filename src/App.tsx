@@ -7,6 +7,7 @@ import { PlayView } from "./components/play/PlayView";
 import { InstancesView } from "./components/play/InstancesView";
 import { SettingsView } from "./components/settings/SettingsView";
 import { SkinsView } from "./components/settings/SkinsView";
+import { DiscoverView } from "./components/discover/DiscoverView";
 import { useAuthStore } from "./store/useAuthStore";
 
 export function App() {
@@ -36,6 +37,7 @@ export function App() {
           <Route path="/play" element={<PlayView />} />
           <Route path="/instances" element={<InstancesView />} />
           <Route path="/skins" element={<SkinsView />} />
+          <Route path="/discover" element={<DiscoverView />} />
           <Route path="/settings" element={<SettingsView />} />
           <Route path="*" element={<Navigate to="/play" replace />} />
         </Routes>
