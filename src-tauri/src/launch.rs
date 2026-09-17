@@ -382,12 +382,25 @@ fn ensure_mod_jar(dir: &Path, instance: &Instance) -> Result<(), String> {
     if !instance.mod_enabled || instance.mc_version != "1.21.11" {
         return Ok(());
     }
-    let source = PathBuf::from("../liteclient/build/libs/larp-launcher-1.21-1.0.0.jar");
-    if !source.is_file() {
+    // The dev-relative path only resolves when run via `tauri dev`/`cargo run`
+    // from the project checkout - an installed exe's cwd has nothing to do
+    // with the source tree, so it silently found nothing and never copied
+    // the mod. Also check next to the exe itself, so dropping the jar there
+    // (however it gets there - manually, or a future packaging step) works
+    // for the real installed app too.
+    let dev_relative = PathBuf::from("../liteclient/build/libs/larp-launcher-1.21-1.0.0.jar");
+    let next_to_exe = std::env::current_exe()
+        .ok()
+        .and_then(|exe| exe.parent().map(|p| p.join("aero-client.jar")));
+    let source = [Some(dev_relative), next_to_exe]
+        .into_iter()
+        .flatten()
+        .find(|p| p.is_file());
+    let Some(source) = source else {
         return Ok(());
-    }
+    };
     let mods_dir = dir.join("mods");
     std::fs::create_dir_all(&mods_dir).map_err(|e| e.to_string())?;
-    std::fs::copy(&source, mods_dir.join("larp-launcher.jar")).map_err(|e| e.to_string())?;
+    std::fs::copy(&source, mods_dir.join("aero-client.jar")).map_err(|e| e.to_string())?;
     Ok(())
 }
