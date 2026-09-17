@@ -71,6 +71,10 @@ export function PlayView() {
                 instance={selected}
                 onBrowse={() => navigate("/discover")}
                 onLoadModpack={() => navigate("/discover", { state: { tab: "modpack" } })}
+                onSettings={() => {
+                  setModalTab("general");
+                  setSettingsFor(selected.id);
+                }}
               />
             </div>
 

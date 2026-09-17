@@ -19,7 +19,7 @@ export function ModCountBadge({ instanceId }: { instanceId: string }) {
 
   if (!count) return null;
   return (
-    <span className="text-xs text-white/40">
+    <span className="text-xs text-white/40 shrink-0">
       {count} {count === 1 ? "Mod" : "Mods"}
     </span>
   );

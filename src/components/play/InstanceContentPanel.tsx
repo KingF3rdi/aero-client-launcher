@@ -23,10 +23,12 @@ export function InstanceContentPanel({
   instance,
   onBrowse,
   onLoadModpack,
+  onSettings,
 }: {
   instance: Instance;
   onBrowse: () => void;
   onLoadModpack: () => void;
+  onSettings?: () => void;
 }) {
   const { fetchContent, toggleContentFile, deleteContentFile, exportModpack } = useInstanceStore();
   const [files, setFiles] = useState<ContentFile[] | null>(null);
@@ -109,6 +111,15 @@ export function InstanceContentPanel({
           <Icon icon="solar:upload-minimalistic-bold" width={16} height={16} />
           {exporting ? "Exportiert…" : "Modpack exportieren"}
         </Button>
+        {onSettings && (
+          <button
+            onClick={onSettings}
+            title="Instanz-Einstellungen"
+            className="w-9 h-9 flex items-center justify-center rounded-lg border border-white/10 text-white/50 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+          >
+            <Icon icon="solar:settings-bold" width={16} height={16} />
+          </button>
+        )}
       </div>
 
       {files === null && <p className="text-sm text-white/40">Lädt…</p>}

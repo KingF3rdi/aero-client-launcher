@@ -2,6 +2,17 @@ import { create } from "zustand";
 import { invoke } from "../lib/tauri";
 import type { ContentFile, Instance, InstancePatch, LaunchStatus } from "../types/instance";
 
+const RAM_STORAGE_KEY = "larp-launcher.ramGb";
+
+function loadRamGb(): number {
+  try {
+    const stored = localStorage.getItem(RAM_STORAGE_KEY);
+    return stored ? Number(stored) : 4;
+  } catch {
+    return 4;
+  }
+}
+
 interface InstanceState {
   instances: Instance[];
   selectedId: string | null;
@@ -25,7 +36,7 @@ interface InstanceState {
 export const useInstanceStore = create<InstanceState>((set, get) => ({
   instances: [],
   selectedId: null,
-  ramGb: 4,
+  ramGb: loadRamGb(),
   launch: { phase: "idle", message: "Bereit" },
 
   loadInstances: async () => {
@@ -37,7 +48,14 @@ export const useInstanceStore = create<InstanceState>((set, get) => ({
   },
 
   select: (id) => set({ selectedId: id }),
-  setRam: (gb) => set({ ramGb: gb }),
+  setRam: (gb) => {
+    set({ ramGb: gb });
+    try {
+      localStorage.setItem(RAM_STORAGE_KEY, String(gb));
+    } catch {
+      // localStorage unavailable (e.g. private mode) - RAM just won't persist across restarts.
+    }
+  },
 
   play: async (account) => {
     const { selectedId, ramGb } = get();
