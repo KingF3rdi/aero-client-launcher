@@ -41,6 +41,7 @@ export function InstanceContentPanel({
   const [icons, setIcons] = useState<Record<string, string>>({});
   const [busyPath, setBusyPath] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [query, setQuery] = useState("");
 
   const load = () => {
     fetchContent(instance.id)
@@ -80,9 +81,10 @@ export function InstanceContentPanel({
     }
   };
 
+  const q = query.trim().toLowerCase();
   const grouped = (["mod", "resourcepack", "shader"] as const).map((kind) => ({
     kind,
-    items: files?.filter((f) => f.kind === kind) ?? [],
+    items: (files?.filter((f) => f.kind === kind) ?? []).filter((f) => f.name.toLowerCase().includes(q)),
   }));
 
   const exportPack = async () => {
@@ -132,9 +134,30 @@ export function InstanceContentPanel({
         )}
       </div>
 
+      {files !== null && files.length > 0 && (
+        <div className="relative">
+          <Icon
+            icon="solar:magnifer-linear"
+            width={16}
+            height={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30"
+          />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Suchen…"
+            className="w-full rounded-lg bg-black/30 border border-white/10 pl-9 pr-3 py-2 text-sm text-text placeholder:text-white/30 outline-none focus:border-accent/50"
+          />
+        </div>
+      )}
+
       {files === null && <p className="text-sm text-white/40">Lädt…</p>}
       {files !== null && files.length === 0 && (
         <p className="text-sm text-white/40">Noch keine Mods, Resource Packs oder Shader installiert.</p>
+      )}
+      {files !== null && files.length > 0 && grouped.every((g) => g.items.length === 0) && (
+        <p className="text-sm text-white/40">Keine Treffer für "{query}".</p>
       )}
 
       {grouped.map(
