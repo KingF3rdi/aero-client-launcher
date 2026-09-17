@@ -14,18 +14,21 @@ interface VerticalNavbarProps {
   activeItem: string;
   onItemClick: (id: string) => void;
   version: string;
+  onAddInstance: () => void;
 }
 
 const ACCENT = "#4f8eff";
 
 /** Icon rail on the left, active item pilled and glowing - mirrors NoRiskClient's VerticalNavbar. */
-export function VerticalNavbar({ items, activeItem, onItemClick, version }: VerticalNavbarProps) {
+export function VerticalNavbar({ items, activeItem, onItemClick, version, onAddInstance }: VerticalNavbarProps) {
   return (
     <div
       className="h-full w-20 flex flex-col items-center border-r-2 bg-black/30 backdrop-blur-lg py-4 gap-2 relative z-10"
       style={{ borderColor: `${ACCENT}30` }}
     >
-      <LarpMark size={40} className="mb-4" />
+      <button onClick={onAddInstance} title="Neue Instanz" className="mb-4 cursor-pointer transition-transform hover:scale-105">
+        <LarpMark size={40} />
+      </button>
       {items.map((item) => {
         const active = activeItem === item.id;
         return (

@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useInstanceStore } from "../../store/useInstanceStore";
 import { InstanceCard } from "./InstanceCard";
 import { InstanceSettingsModal, type Tab } from "./InstanceSettingsModal";
+import { InstanceContentPanel } from "./InstanceContentPanel";
 import { Button } from "../ui/Button";
 
 export function PlayView() {
+  const navigate = useNavigate();
   const { account } = useAuthStore();
   const { instances, selectedId, ramGb, launch, loadInstances, select, setRam, play } = useInstanceStore();
   const [settingsFor, setSettingsFor] = useState<string | null>(null);
@@ -51,7 +54,7 @@ export function PlayView() {
         />
       )}
 
-      <main className="flex-1 flex flex-col justify-end p-10 gap-6">
+      <main className="flex-1 flex flex-col p-10 gap-6 overflow-hidden">
         {selected && (
           <>
             <div>
@@ -63,7 +66,15 @@ export function PlayView() {
               </p>
             </div>
 
-            <div className="flex items-center gap-3 rounded-xl bg-black/30 border border-white/10 backdrop-blur px-4 py-3 w-fit">
+            <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+              <InstanceContentPanel
+                instance={selected}
+                onBrowse={() => navigate("/discover")}
+                onLoadModpack={() => navigate("/discover", { state: { tab: "modpack" } })}
+              />
+            </div>
+
+            <div className="flex items-center gap-3 rounded-xl bg-black/30 border border-white/10 backdrop-blur px-4 py-3 w-fit shrink-0">
               <label className="text-sm text-white/40 w-24">RAM (GB)</label>
               <input
                 type="range"
@@ -76,7 +87,7 @@ export function PlayView() {
               <span className="text-sm w-8">{ramGb}</span>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 shrink-0">
               <Button
                 variant="play"
                 disabled={!account || busy}

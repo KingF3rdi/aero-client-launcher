@@ -14,6 +14,7 @@ const NAV_ITEMS: NavItem[] = [
 interface AppLayoutProps {
   activeTab: string;
   onNavChange: (id: string) => void;
+  onAddInstance: () => void;
   children: ReactNode;
 }
 
@@ -26,7 +27,7 @@ const ACCENT = "#4f8eff";
  * scrollable content, a drifting particle field behind everything (see
  * ParticleField for why this isn't a full Three.js scene like theirs).
  */
-export function AppLayout({ activeTab, onNavChange, children }: AppLayoutProps) {
+export function AppLayout({ activeTab, onNavChange, onAddInstance, children }: AppLayoutProps) {
   return (
     <div
       className="h-screen w-screen flex overflow-hidden relative border-2 bg-black/50 backdrop-blur-lg"
@@ -44,7 +45,7 @@ export function AppLayout({ activeTab, onNavChange, children }: AppLayoutProps) 
         <ParticleField color={ACCENT} />
       </div>
 
-      <VerticalNavbar items={NAV_ITEMS} activeItem={activeTab} onItemClick={onNavChange} version="v0.1.0" />
+      <VerticalNavbar items={NAV_ITEMS} activeItem={activeTab} onItemClick={onNavChange} version="v0.1.0" onAddInstance={onAddInstance} />
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">
         <HeaderBar />
         <div className="flex-1 overflow-y-auto">{children}</div>
