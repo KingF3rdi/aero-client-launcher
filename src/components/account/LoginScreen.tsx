@@ -12,7 +12,7 @@ const ACCENT = "#4f8eff";
  * Microsoft device-code login: show a short code, open the browser to
  * microsoft.com/link, poll until the user finishes there. Simpler and more
  * modern than the "paste the redirect URL back in" flow the earlier Python/
- * C++ Larp Launcher prototypes used.
+ * C++ launcher prototypes used.
  */
 export function LoginScreen() {
   const { deviceCode, loginError, beginLogin, cancelLogin } = useAuthStore();
@@ -37,7 +37,7 @@ export function LoginScreen() {
       <div className="relative z-10 flex flex-col items-center gap-4 text-center max-w-sm">
         <LarpMark size={64} />
         <h1 className="font-mc text-lg tracking-wide" style={{ textShadow: `0 0 20px ${ACCENT}80` }}>
-          Larp Launcher
+          Aero Client
         </h1>
         <p className="text-white/50 text-sm">Mit deinem Minecraft-Account anmelden</p>
 

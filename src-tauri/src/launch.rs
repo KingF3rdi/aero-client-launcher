@@ -39,7 +39,7 @@ pub struct LaunchAccount {
 
 fn client() -> reqwest::Client {
     reqwest::Client::builder()
-        .user_agent("LarpLauncher/0.1")
+        .user_agent("AeroClient/0.1")
         .build()
         .expect("failed to build http client")
 }
@@ -371,8 +371,8 @@ fn maven_coordinate_to_path(coordinate: &str) -> Option<String> {
     Some(format!("{group_path}/{artifact}/{version}/{artifact}-{version}.jar"))
 }
 
-/// Copies the built Larp Launcher mod jar into this instance's mods folder, if
-/// the "Larp Client" toggle is on for this instance (Installation tab in its
+/// Copies the built Aero Client mod jar into this instance's mods folder, if
+/// the "Aero Client" toggle is on for this instance (Installation tab in its
 /// settings) and one is found next to this launcher's project checkout.
 /// Best-effort: a missing/mismatched jar just means this instance launches
 /// without the mod rather than failing the whole launch - the jar is only

@@ -24,7 +24,7 @@ pub async fn upload_skin(path: String, variant: String) -> Result<(), String> {
         .part("file", part);
 
     let http = reqwest::Client::builder()
-        .user_agent("LarpLauncher/0.1")
+        .user_agent("AeroClient/0.1")
         .build()
         .map_err(|e| e.to_string())?;
 

@@ -63,7 +63,7 @@ pub enum PollResult {
 
 fn client() -> reqwest::Client {
     reqwest::Client::builder()
-        .user_agent("LarpLauncher/0.1")
+        .user_agent("AeroClient/0.1")
         .build()
         .expect("failed to build http client")
 }

@@ -60,7 +60,7 @@ export function AddInstanceModal({ onClose }: AddInstanceModalProps) {
               </option>
             ))}
           </select>
-          <p className="text-xs text-white/30 mt-1">Loader ist immer Fabric - passend zum Larp Client Mod.</p>
+          <p className="text-xs text-white/30 mt-1">Loader ist immer Fabric - passend zum Aero Client Mod.</p>
         </div>
 
         {error && <p className="text-xs text-danger">{error}</p>}

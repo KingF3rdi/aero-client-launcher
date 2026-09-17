@@ -70,7 +70,7 @@ export function PlayView() {
                   {selected.name}
                 </h2>
                 <p className="text-white/40 text-sm mt-1">
-                  {selected.loader === "fabric" ? "Fabric" : "Vanilla"} · {selected.mcVersion} · Larp Launcher
+                  {selected.loader === "fabric" ? "Fabric" : "Vanilla"} · {selected.mcVersion} · Aero Client
                 </p>
               </div>
               <Button

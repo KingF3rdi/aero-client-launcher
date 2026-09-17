@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Larp Launcher",
+  "productName": "Aero Client",
   "version": "0.1.0",
   "identifier": "gg.larp.launcher",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Larp Launcher",
+        "title": "Aero Client",
         "width": 1280,
         "height": 800,
         "minWidth": 960,

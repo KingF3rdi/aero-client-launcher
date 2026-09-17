@@ -16,7 +16,7 @@ const API: &str = "https://api.modrinth.com/v2";
 
 fn client() -> reqwest::Client {
     reqwest::Client::builder()
-        .user_agent("LarpLauncher/0.1 (larp.gg)")
+        .user_agent("AeroClient/0.1")
         .build()
         .expect("failed to build http client")
 }

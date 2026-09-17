@@ -20,9 +20,9 @@ export function HeaderBar() {
           className="font-mc text-base tracking-wide"
           style={{ textShadow: `0 0 16px ${ACCENT}80` }}
         >
-          Larp Launcher
+          Aero Client
         </h1>
-        <span className="text-xs text-white/40">larp.gg</span>
+        <span className="text-xs text-white/40">Minecraft Launcher</span>
       </div>
 
       <div className="flex items-center gap-4">

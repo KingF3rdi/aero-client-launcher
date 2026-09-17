@@ -54,7 +54,7 @@ export function InstancesView() {
                 <div className="text-xs text-white/40 flex items-center gap-1.5">
                   <span>
                     {instance.loader === "fabric" ? "Fabric" : "Vanilla"} · {instance.mcVersion}
-                    {instance.modEnabled && " · Larp Client"}
+                    {instance.modEnabled && " · Aero Client"}
                   </span>
                   <ModCountBadge instanceId={instance.id} />
                 </div>

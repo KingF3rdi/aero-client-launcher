@@ -138,11 +138,11 @@ export function InstanceSettingsModal({ instance, onClose, initialTab }: Instanc
             <div className="flex flex-col gap-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm font-medium">Larp Client Mod</div>
+                  <div className="text-sm font-medium">Aero Client Mod</div>
                   <p className="text-xs text-white/40 mt-1 max-w-sm">
                     {instance.mcVersion === "1.21.11"
-                      ? "Fügt den Larp Client (ClickGUI, HUD, Optimizer, …) beim Start dieser Instanz hinzu."
-                      : "Der Larp Client ist aktuell nur für 1.21.11 gebaut - dieser Schalter hat für diese Version noch keine Wirkung."}
+                      ? "Fügt den Aero Client (ClickGUI, HUD, Optimizer, …) beim Start dieser Instanz hinzu."
+                      : "Der Aero Client ist aktuell nur für 1.21.11 gebaut - dieser Schalter hat für diese Version noch keine Wirkung."}
                   </p>
                 </div>
                 <Toggle on={instance.modEnabled} onChange={(v) => updateInstance(instance.id, { modEnabled: v })} />

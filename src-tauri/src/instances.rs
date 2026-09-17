@@ -11,7 +11,7 @@ pub struct Instance {
     pub name: String,
     pub mc_version: String,
     pub loader: String,
-    /// Whether the Larp Client Fabric mod jar gets copied into this instance's
+    /// Whether the Aero Client Fabric mod jar gets copied into this instance's
     /// mods folder on launch. Defaults on only for versions the mod actually
     /// targets, so a fresh instance doesn't silently try to load a mismatched jar.
     #[serde(default)]
