@@ -1,22 +1,27 @@
 import { create } from "zustand";
 import { invoke } from "../lib/tauri";
-import type { Account, DeviceCodePollResult, DeviceCodeStart } from "../types/account";
+import type { Account, AccountSummary, DeviceCodePollResult, DeviceCodeStart } from "../types/account";
 
 interface AuthState {
   account: Account | null;
+  accounts: AccountSummary[];
   loading: boolean;
   deviceCode: DeviceCodeStart | null;
   loginError: string | null;
   init: () => Promise<void>;
+  loadAccounts: () => Promise<void>;
   beginLogin: () => Promise<void>;
   cancelLogin: () => void;
+  selectAccount: (uuid: string) => Promise<void>;
+  removeAccount: (uuid: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
 let pollHandle: ReturnType<typeof setTimeout> | null = null;
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   account: null,
+  accounts: [],
   loading: true,
   deviceCode: null,
   loginError: null,
@@ -27,6 +32,16 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ account, loading: false });
     } catch {
       set({ account: null, loading: false });
+    }
+    get().loadAccounts();
+  },
+
+  loadAccounts: async () => {
+    try {
+      const accounts = await invoke<AccountSummary[]>("list_accounts");
+      set({ accounts });
+    } catch {
+      // Non-fatal - the account dropdown just shows an empty list.
     }
   },
 
@@ -45,6 +60,7 @@ export const useAuthStore = create<AuthState>((set) => ({
           const result = await invoke<DeviceCodePollResult>("poll_device_code_login");
           if (result.status === "success" && result.account) {
             set({ account: result.account, deviceCode: null });
+            get().loadAccounts();
             return;
           }
           if (result.status === "error") {
@@ -71,9 +87,31 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ deviceCode: null });
   },
 
+  selectAccount: async (uuid) => {
+    const account = await invoke<Account>("select_account", { uuid });
+    set({ account });
+    get().loadAccounts();
+  },
+
+  removeAccount: async (uuid) => {
+    await invoke("remove_account", { uuid });
+    const stillActive = get().account?.uuid === uuid;
+    await get().loadAccounts();
+    if (stillActive) {
+      const next = get().accounts[0];
+      if (next) {
+        await get().selectAccount(next.uuid);
+      } else {
+        set({ account: null });
+      }
+    }
+  },
+
   logout: async () => {
-    await invoke("logout").catch(() => {});
-    set({ account: null });
+    const uuid = get().account?.uuid;
+    if (uuid) {
+      await get().removeAccount(uuid);
+    }
   },
 }));
 

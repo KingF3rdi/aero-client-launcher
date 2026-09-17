@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { invoke } from "../lib/tauri";
-import type { Instance, LaunchStatus } from "../types/instance";
+import type { Instance, InstancePatch, LaunchStatus } from "../types/instance";
 
 interface InstanceState {
   instances: Instance[];
@@ -11,6 +11,11 @@ interface InstanceState {
   select: (id: string) => void;
   setRam: (gb: number) => void;
   play: (account: { name: string; uuid: string; mcToken: string }) => Promise<void>;
+  updateInstance: (id: string, patch: InstancePatch) => Promise<void>;
+  deleteInstance: (id: string) => Promise<void>;
+  duplicateInstance: (id: string) => Promise<void>;
+  addInstance: (name: string, mcVersion: string) => Promise<void>;
+  fetchLog: (id: string) => Promise<string>;
 }
 
 export const useInstanceStore = create<InstanceState>((set, get) => ({
@@ -45,4 +50,29 @@ export const useInstanceStore = create<InstanceState>((set, get) => ({
       set({ launch: { phase: "error", message: String(e) } });
     }
   },
+
+  updateInstance: async (id, patch) => {
+    const updated = await invoke<Instance>("update_instance", { id, patch });
+    set((state) => ({ instances: state.instances.map((i) => (i.id === id ? updated : i)) }));
+  },
+
+  deleteInstance: async (id) => {
+    await invoke("delete_instance", { id });
+    set((state) => ({
+      instances: state.instances.filter((i) => i.id !== id),
+      selectedId: state.selectedId === id ? (state.instances.find((i) => i.id !== id)?.id ?? null) : state.selectedId,
+    }));
+  },
+
+  duplicateInstance: async (id) => {
+    const copy = await invoke<Instance>("duplicate_instance", { id });
+    set((state) => ({ instances: [...state.instances, copy] }));
+  },
+
+  addInstance: async (name, mcVersion) => {
+    const created = await invoke<Instance>("add_instance", { name, mcVersion });
+    set((state) => ({ instances: [...state.instances, created], selectedId: created.id }));
+  },
+
+  fetchLog: (id) => invoke<string>("get_instance_log", { id }),
 }));

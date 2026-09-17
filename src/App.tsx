@@ -6,6 +6,7 @@ import { LoginScreen } from "./components/account/LoginScreen";
 import { PlayView } from "./components/play/PlayView";
 import { InstancesView } from "./components/play/InstancesView";
 import { SettingsView } from "./components/settings/SettingsView";
+import { SkinsView } from "./components/settings/SkinsView";
 import { useAuthStore } from "./store/useAuthStore";
 
 export function App() {
@@ -34,6 +35,7 @@ export function App() {
         <Routes>
           <Route path="/play" element={<PlayView />} />
           <Route path="/instances" element={<InstancesView />} />
+          <Route path="/skins" element={<SkinsView />} />
           <Route path="/settings" element={<SettingsView />} />
           <Route path="*" element={<Navigate to="/play" replace />} />
         </Routes>

@@ -5,6 +5,12 @@ export interface Account {
   mcToken: string;
 }
 
+export interface AccountSummary {
+  name: string;
+  uuid: string;
+  active: boolean;
+}
+
 export interface DeviceCodeStart {
   userCode: string;
   verificationUri: string;

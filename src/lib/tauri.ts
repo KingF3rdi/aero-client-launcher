@@ -20,14 +20,70 @@ export async function invoke<T>(command: string, args?: Record<string, unknown>)
 
 type MockFn = (args?: Record<string, unknown>) => unknown;
 
+// A plain mutable array (not a store) so dev-mode invoke() mocks can read/write
+// it across calls the same way the real Rust side persists instances.json.
+const mockInstances: Array<Record<string, unknown>> = [
+  { id: "fabric-1.21.11", name: "Fabric 1.21.11", mcVersion: "1.21.11", loader: "fabric", modEnabled: true, ramGb: null },
+  { id: "fabric-1.21.8", name: "Fabric 1.21.8", mcVersion: "1.21.8", loader: "fabric", modEnabled: false, ramGb: null },
+  { id: "fabric-1.21.4", name: "Fabric 1.21.4", mcVersion: "1.21.4", loader: "fabric", modEnabled: false, ramGb: null },
+  { id: "fabric-1.21.1", name: "Fabric 1.21.1", mcVersion: "1.21.1", loader: "fabric", modEnabled: false, ramGb: null },
+];
+
+const mockAccounts: Array<{ name: string; uuid: string; mcToken: string }> = [];
+let mockActiveUuid: string | null = null;
+
 const DEV_MOCKS: Record<string, MockFn> = {
-  get_saved_account: () => null,
-  get_instances: () => [
-    { id: "fabric-1.21.11", name: "Fabric 1.21.11", mcVersion: "1.21.11", loader: "fabric" },
-    { id: "fabric-1.21.8", name: "Fabric 1.21.8", mcVersion: "1.21.8", loader: "fabric" },
-    { id: "fabric-1.21.4", name: "Fabric 1.21.4", mcVersion: "1.21.4", loader: "fabric" },
-    { id: "fabric-1.21.1", name: "Fabric 1.21.1", mcVersion: "1.21.1", loader: "fabric" },
-  ],
+  get_saved_account: () => mockAccounts.find((a) => a.uuid === mockActiveUuid) ?? null,
+  list_accounts: () => mockAccounts.map((a) => ({ name: a.name, uuid: a.uuid, active: a.uuid === mockActiveUuid })),
+  select_account: (args) => {
+    const account = mockAccounts.find((a) => a.uuid === args?.uuid);
+    if (!account) throw new Error("Unbekannter Account");
+    mockActiveUuid = account.uuid;
+    return account;
+  },
+  remove_account: (args) => {
+    const idx = mockAccounts.findIndex((a) => a.uuid === args?.uuid);
+    if (idx >= 0) mockAccounts.splice(idx, 1);
+    if (mockActiveUuid === args?.uuid) mockActiveUuid = mockAccounts[0]?.uuid ?? null;
+    return null;
+  },
+  get_instances: () => mockInstances,
+  update_instance: (args) => {
+    const inst = mockInstances.find((i) => i.id === args?.id);
+    if (!inst) throw new Error("Unbekannte Instanz");
+    const patch = (args?.patch as Record<string, unknown>) ?? {};
+    if (typeof patch.name === "string") inst.name = patch.name;
+    if (typeof patch.modEnabled === "boolean") inst.modEnabled = patch.modEnabled;
+    if ("ramGb" in patch) inst.ramGb = patch.ramGb;
+    return inst;
+  },
+  delete_instance: (args) => {
+    const idx = mockInstances.findIndex((i) => i.id === args?.id);
+    if (idx >= 0) mockInstances.splice(idx, 1);
+    return null;
+  },
+  duplicate_instance: (args) => {
+    const inst = mockInstances.find((i) => i.id === args?.id);
+    if (!inst) throw new Error("Unbekannte Instanz");
+    const copy = { ...inst, id: `${inst.id}-copy-${Date.now().toString(16).slice(-5)}`, name: `${inst.name} (Kopie)` };
+    mockInstances.push(copy);
+    return copy;
+  },
+  add_instance: (args) => {
+    const mcVersion = String(args?.mcVersion ?? "1.21.11");
+    const inst = {
+      id: `fabric-${mcVersion}-${Date.now().toString(16).slice(-5)}`,
+      name: String(args?.name ?? "Neue Instanz"),
+      mcVersion,
+      loader: "fabric",
+      modEnabled: mcVersion === "1.21.11",
+      ramGb: null,
+    };
+    mockInstances.push(inst);
+    return inst;
+  },
+  get_instance_log: () => "[12:00:01] [Render thread/INFO]: Dev-Mock - noch kein echtes Log außerhalb von Tauri.",
+  upload_skin: () => null,
   begin_device_code_login: () => ({
     userCode: "ABCD-EFGH",
     verificationUri: "https://microsoft.com/link",

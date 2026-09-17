@@ -1,6 +1,7 @@
 mod auth;
 mod instances;
 mod launch;
+mod skin;
 mod state;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -9,6 +10,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_dialog::init())
         .manage(auth::AuthState::default())
         .setup(|app| {
             if cfg!(debug_assertions) {
@@ -24,9 +26,18 @@ pub fn run() {
             auth::begin_device_code_login,
             auth::poll_device_code_login,
             auth::get_saved_account,
+            auth::list_accounts,
+            auth::select_account,
+            auth::remove_account,
             auth::logout,
             instances::get_instances,
+            instances::update_instance,
+            instances::delete_instance,
+            instances::duplicate_instance,
+            instances::add_instance,
+            instances::get_instance_log,
             launch::launch_instance,
+            skin::upload_skin,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

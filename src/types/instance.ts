@@ -3,6 +3,14 @@ export interface Instance {
   name: string;
   mcVersion: string;
   loader: "fabric" | "vanilla";
+  modEnabled: boolean;
+  ramGb: number | null;
+}
+
+export interface InstancePatch {
+  name?: string;
+  modEnabled?: boolean;
+  ramGb?: number | null;
 }
 
 export type LaunchPhase =

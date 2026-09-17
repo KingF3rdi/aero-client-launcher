@@ -17,7 +17,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use crate::instances::{self, Instance};
-use crate::state::game_dir;
 
 const VERSION_MANIFEST: &str = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
 
@@ -43,8 +42,9 @@ pub async fn launch_instance(
     account: LaunchAccount,
 ) -> Result<(), String> {
     let instance = instances::find(&instance_id).ok_or("Unbekannte Instanz")?;
-    let dir = game_dir();
+    let dir = instances::instance_dir(&instance.id);
     std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    let effective_ram_gb = instance.ram_gb.unwrap_or(ram_gb);
 
     let java = find_java().ok_or("Java wurde nicht gefunden. Bitte JDK 21+ installieren.")?;
 
@@ -59,7 +59,7 @@ pub async fn launch_instance(
         .map_err(|e| e.to_string())?;
     let version_url = manifest["versions"]
         .as_array()
-        .and_then(|versions| versions.iter().find(|v| v["id"] == instance.mc_version))
+        .and_then(|versions| versions.iter().find(|v| v["id"] == instance.mc_version.as_str()))
         .and_then(|v| v["url"].as_str())
         .ok_or(format!("Version {} nicht in Mojangs Manifest gefunden", instance.mc_version))?
         .to_string();
@@ -98,10 +98,10 @@ pub async fn launch_instance(
         .to_string();
 
     if instance.loader == "fabric" {
-        main_class = install_fabric(&http, &dir, instance.mc_version, &mut classpath).await?;
+        main_class = install_fabric(&http, &dir, &instance.mc_version, &mut classpath).await?;
     }
 
-    ensure_mod_jar(&dir, instance)?;
+    ensure_mod_jar(&dir, &instance)?;
 
     let natives_placeholder = dir.join("versions").join(&instance.mc_version).join("natives");
     std::fs::create_dir_all(&natives_placeholder).map_err(|e| e.to_string())?;
@@ -109,8 +109,8 @@ pub async fn launch_instance(
     let cp = std::env::join_paths(classpath.iter()).map_err(|e| e.to_string())?;
     let mut cmd = std::process::Command::new(&java);
     cmd.current_dir(&dir)
-        .arg(format!("-Xmx{ram_gb}G"))
-        .arg(format!("-Xms{}G", (ram_gb / 2).max(1)))
+        .arg(format!("-Xmx{effective_ram_gb}G"))
+        .arg(format!("-Xms{}G", (effective_ram_gb / 2).max(1)))
         .arg(format!("-Djava.library.path={}", natives_placeholder.display()))
         .arg("-cp")
         .arg(cp)
@@ -343,13 +343,14 @@ fn maven_coordinate_to_path(coordinate: &str) -> Option<String> {
 }
 
 /// Copies the built Larp Launcher mod jar into this instance's mods folder, if
-/// one is found next to this launcher's project checkout and the instance is
-/// the version it was built for. Best-effort: a missing/mismatched jar just
-/// means this instance launches without the mod rather than failing the
-/// whole launch - today that's every instance except 1.21.11, since that's
-/// the only version the Fabric mod is currently built for.
-fn ensure_mod_jar(dir: &Path, instance: Instance) -> Result<(), String> {
-    if instance.mc_version != "1.21.11" {
+/// the "Larp Client" toggle is on for this instance (Installation tab in its
+/// settings) and one is found next to this launcher's project checkout.
+/// Best-effort: a missing/mismatched jar just means this instance launches
+/// without the mod rather than failing the whole launch - the jar is only
+/// ever built for 1.21.11 today, so the toggle is a no-op on other versions
+/// until the mod itself supports them.
+fn ensure_mod_jar(dir: &Path, instance: &Instance) -> Result<(), String> {
+    if !instance.mod_enabled || instance.mc_version != "1.21.11" {
         return Ok(());
     }
     let source = PathBuf::from("../liteclient/build/libs/larp-launcher-1.21-1.0.0.jar");

@@ -6,6 +6,8 @@ import { ParticleField } from "../effects/ParticleField";
 const NAV_ITEMS: NavItem[] = [
   { id: "play", label: "Play", icon: "solar:play-bold" },
   { id: "instances", label: "Instanzen", icon: "solar:box-bold" },
+  { id: "discover", label: "Entdecken", icon: "solar:compass-bold" },
+  { id: "skins", label: "Skin", icon: "solar:t-shirt-bold" },
   { id: "settings", label: "Optionen", icon: "solar:settings-bold" },
 ];
 

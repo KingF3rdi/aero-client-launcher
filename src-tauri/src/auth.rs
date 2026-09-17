@@ -12,6 +12,14 @@ use std::time::{Duration, Instant};
 
 use crate::state::{self, StoredAccount};
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AccountSummary {
+    pub name: String,
+    pub uuid: String,
+    pub active: bool,
+}
+
 const CLIENT_ID: &str = "00000000402b5328";
 const SCOPE: &str = "XboxLive.signin offline_access";
 
@@ -156,7 +164,7 @@ pub async fn poll_device_code_login(
 async fn finish_login(ms_access: &str, ms_refresh: &str) -> Result<PollResult, String> {
     match login_with_ms(ms_access).await {
         Ok(account) => {
-            state::save_account(&StoredAccount {
+            state::upsert_account(&StoredAccount {
                 name: account.name.clone(),
                 uuid: account.uuid.clone(),
                 mc_token: account.mc_token.clone(),
@@ -280,35 +288,64 @@ fn dash_uuid(raw: &str) -> String {
     )
 }
 
-#[tauri::command]
-pub async fn get_saved_account() -> Result<Option<Account>, String> {
-    let Some(stored) = state::load_account() else {
-        return Ok(None);
-    };
+/// Refreshes a stored account's Microsoft/Minecraft tokens if it has a refresh
+/// token, falling back to the last-known (possibly stale) tokens on failure -
+/// better to show a launcher that might need a re-login on Play than to bounce
+/// straight back to the login screen just because it was closed overnight.
+async fn refreshed(stored: StoredAccount) -> Account {
     if stored.ms_refresh.is_empty() {
-        return Ok(Some(Account { name: stored.name, uuid: stored.uuid, mc_token: stored.mc_token }));
+        return Account { name: stored.name, uuid: stored.uuid, mc_token: stored.mc_token };
     }
-    // The saved Minecraft token is typically only valid for a matter of hours,
-    // so a launcher that was closed overnight needs this refresh to still show
-    // the account as logged in instead of bouncing back to the login screen.
     match refresh_with_ms(&stored.ms_refresh).await {
         Ok((access, refresh)) => match login_with_ms(&access).await {
             Ok(account) => {
-                let _ = state::save_account(&StoredAccount {
+                let _ = state::upsert_account(&StoredAccount {
                     name: account.name.clone(),
                     uuid: account.uuid.clone(),
                     mc_token: account.mc_token.clone(),
                     ms_refresh: refresh,
                 });
-                Ok(Some(account))
+                account
             }
-            Err(_) => Ok(Some(Account { name: stored.name, uuid: stored.uuid, mc_token: stored.mc_token })),
+            Err(_) => Account { name: stored.name, uuid: stored.uuid, mc_token: stored.mc_token },
         },
-        Err(_) => Ok(Some(Account { name: stored.name, uuid: stored.uuid, mc_token: stored.mc_token })),
+        Err(_) => Account { name: stored.name, uuid: stored.uuid, mc_token: stored.mc_token },
     }
 }
 
 #[tauri::command]
+pub async fn get_saved_account() -> Result<Option<Account>, String> {
+    let Some(stored) = state::load_active_account() else {
+        return Ok(None);
+    };
+    Ok(Some(refreshed(stored).await))
+}
+
+#[tauri::command]
+pub fn list_accounts() -> Vec<AccountSummary> {
+    let accounts = state::load_all_accounts();
+    let active = state::load_active_account().map(|a| a.uuid);
+    accounts
+        .into_iter()
+        .map(|a| AccountSummary { active: Some(a.uuid.clone()) == active, name: a.name, uuid: a.uuid })
+        .collect()
+}
+
+#[tauri::command]
+pub async fn select_account(uuid: String) -> Result<Account, String> {
+    let stored = state::set_active_account(&uuid)?;
+    Ok(refreshed(stored).await)
+}
+
+#[tauri::command]
+pub fn remove_account(uuid: String) -> Result<(), String> {
+    state::remove_account(&uuid).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub fn logout() -> Result<(), String> {
-    state::clear_account().map_err(|e| e.to_string())
+    if let Some(active) = state::load_active_account() {
+        state::remove_account(&active.uuid).map_err(|e| e.to_string())?;
+    }
+    Ok(())
 }

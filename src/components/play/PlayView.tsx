@@ -1,19 +1,22 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useInstanceStore } from "../../store/useInstanceStore";
 import { InstanceCard } from "./InstanceCard";
+import { InstanceSettingsModal } from "./InstanceSettingsModal";
 import { Button } from "../ui/Button";
 
 export function PlayView() {
   const { account } = useAuthStore();
   const { instances, selectedId, ramGb, launch, loadInstances, select, setRam, play } = useInstanceStore();
+  const [settingsFor, setSettingsFor] = useState<string | null>(null);
 
   useEffect(() => {
     loadInstances();
   }, [loadInstances]);
 
   const selected = instances.find((i) => i.id === selectedId) ?? null;
+  const settingsInstance = instances.find((i) => i.id === settingsFor) ?? null;
   const busy = launch.phase !== "idle" && launch.phase !== "error" && launch.phase !== "running";
 
   return (
@@ -26,9 +29,14 @@ export function PlayView() {
             instance={instance}
             selected={instance.id === selectedId}
             onSelect={() => select(instance.id)}
+            onSettings={() => setSettingsFor(instance.id)}
           />
         ))}
       </aside>
+
+      {settingsInstance && (
+        <InstanceSettingsModal instance={settingsInstance} onClose={() => setSettingsFor(null)} />
+      )}
 
       <main className="flex-1 flex flex-col justify-end p-10 gap-6">
         {selected && (
