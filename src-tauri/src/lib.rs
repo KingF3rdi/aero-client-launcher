@@ -46,6 +46,7 @@ pub fn run() {
             content::install_content,
             content::install_modpack,
             content::import_modpack_file,
+            content::export_modpack,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

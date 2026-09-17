@@ -6,7 +6,7 @@ import { Icon } from "@iconify/react";
 import { toast } from "react-hot-toast";
 import { invoke } from "../../lib/tauri";
 import { useInstanceStore } from "../../store/useInstanceStore";
-import type { ContentSummary, ProjectType } from "../../types/content";
+import type { ContentPage, ContentSummary, ProjectType } from "../../types/content";
 import { Button } from "../ui/Button";
 
 const TABS: { id: ProjectType; label: string; icon: string }[] = [
@@ -29,7 +29,9 @@ export function DiscoverView() {
   const [tab, setTab] = useState<ProjectType>(initialTab ?? "mod");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<ContentSummary[]>([]);
+  const [totalHits, setTotalHits] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [targetInstanceId, setTargetInstanceId] = useState(selectedId ?? "");
   const [installing, setInstalling] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
@@ -39,16 +41,36 @@ export function DiscoverView() {
   const search = async () => {
     setLoading(true);
     try {
-      const res = await invoke<ContentSummary[]>("search_content", {
+      const res = await invoke<ContentPage>("search_content", {
         query,
         projectType: tab,
         mcVersion: targetInstance?.mcVersion ?? "",
+        offset: 0,
       });
-      setResults(res);
+      setResults(res.hits);
+      setTotalHits(res.totalHits);
     } catch (e) {
       toast.error(String(e));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadMore = async () => {
+    setLoadingMore(true);
+    try {
+      const res = await invoke<ContentPage>("search_content", {
+        query,
+        projectType: tab,
+        mcVersion: targetInstance?.mcVersion ?? "",
+        offset: results.length,
+      });
+      setResults((prev) => [...prev, ...res.hits]);
+      setTotalHits(res.totalHits);
+    } catch (e) {
+      toast.error(String(e));
+    } finally {
+      setLoadingMore(false);
     }
   };
 
@@ -180,6 +202,12 @@ export function DiscoverView() {
           </div>
         ))}
       </div>
+
+      {!loading && results.length > 0 && results.length < totalHits && (
+        <Button variant="ghost" onClick={loadMore} disabled={loadingMore} className="self-center">
+          {loadingMore ? "Lädt…" : `Mehr laden (${results.length} / ${totalHits})`}
+        </Button>
+      )}
     </div>
   );
 }

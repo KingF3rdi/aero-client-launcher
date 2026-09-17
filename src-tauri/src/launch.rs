@@ -277,12 +277,10 @@ async fn download_assets(http: &reqwest::Client, dir: &Path, index_url: &str, in
 /// Fetches the latest stable Fabric loader for `mc_version`, downloads its
 /// libraries (intermediary mappings + loader itself), and returns the Fabric
 /// entrypoint main class to launch with.
-async fn install_fabric(
-    http: &reqwest::Client,
-    dir: &Path,
-    mc_version: &str,
-    classpath: &mut Vec<PathBuf>,
-) -> Result<String, String> {
+/// Also used by `content::export_modpack` to fill in a `.mrpack`'s
+/// `fabric-loader` dependency, since that's the only piece of loader info an
+/// exported instance needs (the rest lives in the copied mod/config files).
+pub async fn latest_fabric_loader_version(http: &reqwest::Client, mc_version: &str) -> Result<String, String> {
     let loaders: Value = http
         .get(format!("https://meta.fabricmc.net/v2/versions/loader/{mc_version}"))
         .send()
@@ -291,13 +289,22 @@ async fn install_fabric(
         .json()
         .await
         .map_err(|e| e.to_string())?;
-    let loader_version = loaders
+    loaders
         .as_array()
         .and_then(|l| l.iter().find(|entry| entry["loader"]["stable"] == true))
         .or_else(|| loaders.as_array().and_then(|l| l.first()))
         .and_then(|entry| entry["loader"]["version"].as_str())
-        .ok_or(format!("Kein Fabric Loader für {mc_version} gefunden"))?
-        .to_string();
+        .map(|s| s.to_string())
+        .ok_or(format!("Kein Fabric Loader für {mc_version} gefunden"))
+}
+
+async fn install_fabric(
+    http: &reqwest::Client,
+    dir: &Path,
+    mc_version: &str,
+    classpath: &mut Vec<PathBuf>,
+) -> Result<String, String> {
+    let loader_version = latest_fabric_loader_version(http, mc_version).await?;
 
     let profile: Value = http
         .get(format!(

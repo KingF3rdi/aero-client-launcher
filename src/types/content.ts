@@ -9,3 +9,8 @@ export interface ContentSummary {
   downloads: number;
   projectType: ProjectType;
 }
+
+export interface ContentPage {
+  hits: ContentSummary[];
+  totalHits: number;
+}

@@ -96,18 +96,22 @@ const DEV_MOCKS: Record<string, MockFn> = {
     return { relPath: `${folder}/${enabled ? name : `${name}.disabled`}`, name, kind: folder === "mods" ? "mod" : "resourcepack", enabled };
   },
   delete_content_file: () => null,
+  export_modpack: () => null,
   upload_skin: () => null,
   search_content: (args) => {
     const type = String(args?.projectType ?? "mod");
-    return Array.from({ length: 6 }, (_, i) => ({
-      id: `dev-${type}-${i}`,
-      slug: `dev-${type}-${i}`,
-      title: `Dev-Mock ${type} #${i + 1}`,
+    const offset = Number(args?.offset ?? 0);
+    const totalHits = 42;
+    const hits = Array.from({ length: Math.min(6, Math.max(0, totalHits - offset)) }, (_, i) => ({
+      id: `dev-${type}-${offset + i}`,
+      slug: `dev-${type}-${offset + i}`,
+      title: `Dev-Mock ${type} #${offset + i + 1}`,
       description: "Nur sichtbar außerhalb von Tauri - echte Suche läuft über Modrinths API.",
       iconUrl: null,
-      downloads: 1000 * (i + 1),
+      downloads: 1000 * (offset + i + 1),
       projectType: type,
     }));
+    return { hits, totalHits };
   },
   install_content: () => "dev-mock.jar",
   install_modpack: (args) => ({

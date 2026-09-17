@@ -19,6 +19,7 @@ interface InstanceState {
   fetchContent: (id: string) => Promise<ContentFile[]>;
   toggleContentFile: (id: string, relPath: string) => Promise<ContentFile>;
   deleteContentFile: (id: string, relPath: string) => Promise<void>;
+  exportModpack: (id: string, destPath: string) => Promise<void>;
 }
 
 export const useInstanceStore = create<InstanceState>((set, get) => ({
@@ -81,4 +82,5 @@ export const useInstanceStore = create<InstanceState>((set, get) => ({
   fetchContent: (id) => invoke<ContentFile[]>("list_instance_content", { id }),
   toggleContentFile: (id, relPath) => invoke<ContentFile>("toggle_content_file", { id, relPath }),
   deleteContentFile: (id, relPath) => invoke("delete_content_file", { id, relPath }),
+  exportModpack: (id, destPath) => invoke("export_modpack", { id, destPath }),
 }));

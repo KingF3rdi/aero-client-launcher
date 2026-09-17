@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { useNavigate } from "react-router-dom";
+import { save } from "@tauri-apps/plugin-dialog";
+import { isTauri } from "@tauri-apps/api/core";
 import { Icon } from "@iconify/react";
 import { toast } from "react-hot-toast";
 import { Modal } from "../ui/Modal";
@@ -9,17 +11,18 @@ import { Toggle } from "../ui/Toggle";
 import { useInstanceStore } from "../../store/useInstanceStore";
 import type { ContentFile, Instance } from "../../types/instance";
 
-type Tab = "content" | "general" | "installation" | "logs";
+export type Tab = "content" | "general" | "installation" | "logs";
 
 interface InstanceSettingsModalProps {
   instance: Instance;
   onClose: () => void;
+  initialTab?: Tab;
 }
 
-export function InstanceSettingsModal({ instance, onClose }: InstanceSettingsModalProps) {
+export function InstanceSettingsModal({ instance, onClose, initialTab }: InstanceSettingsModalProps) {
   const navigate = useNavigate();
   const { updateInstance, deleteInstance, duplicateInstance, select } = useInstanceStore();
-  const [tab, setTab] = useState<Tab>("content");
+  const [tab, setTab] = useState<Tab>(initialTab ?? "content");
   const [name, setName] = useState(instance.name);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -201,9 +204,10 @@ function ContentTab({
   onBrowse: () => void;
   onLoadModpack: () => void;
 }) {
-  const { fetchContent, toggleContentFile, deleteContentFile } = useInstanceStore();
+  const { fetchContent, toggleContentFile, deleteContentFile, exportModpack } = useInstanceStore();
   const [files, setFiles] = useState<ContentFile[] | null>(null);
   const [busyPath, setBusyPath] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   const load = () => {
     fetchContent(instance.id)
@@ -245,6 +249,27 @@ function ContentTab({
     items: files?.filter((f) => f.kind === kind) ?? [],
   }));
 
+  const exportPack = async () => {
+    if (!isTauri()) {
+      toast.error("Modpack-Export braucht die native App.");
+      return;
+    }
+    const path = await save({
+      defaultPath: `${instance.name}.mrpack`,
+      filters: [{ name: "Modrinth Modpack", extensions: ["mrpack"] }],
+    });
+    if (!path) return;
+    setExporting(true);
+    try {
+      await exportModpack(instance.id, path);
+      toast.success("Modpack exportiert!");
+    } catch (e) {
+      toast.error(String(e));
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2">
@@ -255,6 +280,10 @@ function ContentTab({
         <Button variant="ghost" onClick={onLoadModpack}>
           <Icon icon="solar:download-minimalistic-bold" width={16} height={16} />
           Modpack laden
+        </Button>
+        <Button variant="ghost" onClick={exportPack} disabled={exporting}>
+          <Icon icon="solar:upload-minimalistic-bold" width={16} height={16} />
+          {exporting ? "Exportiert…" : "Modpack exportieren"}
         </Button>
       </div>
 

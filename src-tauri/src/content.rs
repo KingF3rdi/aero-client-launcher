@@ -3,8 +3,8 @@
 //! Modrinth's own launcher uses, so packs exported from there import here too.
 
 use std::collections::HashMap;
-use std::io::{Cursor, Read};
-use std::path::PathBuf;
+use std::io::{Cursor, Read, Write};
+use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -32,13 +32,24 @@ pub struct ContentSummary {
     pub project_type: String,
 }
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ContentPage {
+    pub hits: Vec<ContentSummary>,
+    pub total_hits: u64,
+}
+
 /// `project_type` is one of "mod" | "resourcepack" | "shader" | "modpack".
+/// Paginated (100 per page, Modrinth's max) and sorted by downloads by
+/// default so an empty query still surfaces the whole catalog page by page
+/// instead of an arbitrary 30-result snapshot.
 #[tauri::command]
 pub async fn search_content(
     query: String,
     project_type: String,
     mc_version: String,
-) -> Result<Vec<ContentSummary>, String> {
+    offset: u32,
+) -> Result<ContentPage, String> {
     let mut facets = vec![vec![format!("project_type:{project_type}")]];
     if !mc_version.is_empty() {
         facets.push(vec![format!("versions:{mc_version}")]);
@@ -47,10 +58,17 @@ pub async fn search_content(
         facets.push(vec!["categories:fabric".to_string()]);
     }
     let facets_json = serde_json::to_string(&facets).map_err(|e| e.to_string())?;
+    let offset_str = offset.to_string();
 
     let res: Value = client()
         .get(format!("{API}/search"))
-        .query(&[("query", query.as_str()), ("facets", facets_json.as_str()), ("limit", "30")])
+        .query(&[
+            ("query", query.as_str()),
+            ("facets", facets_json.as_str()),
+            ("index", "downloads"),
+            ("limit", "100"),
+            ("offset", offset_str.as_str()),
+        ])
         .send()
         .await
         .map_err(|e| e.to_string())?
@@ -59,18 +77,21 @@ pub async fn search_content(
         .map_err(|e| e.to_string())?;
 
     let hits = res["hits"].as_array().cloned().unwrap_or_default();
-    Ok(hits
-        .into_iter()
-        .map(|h| ContentSummary {
-            id: h["project_id"].as_str().unwrap_or_default().to_string(),
-            slug: h["slug"].as_str().unwrap_or_default().to_string(),
-            title: h["title"].as_str().unwrap_or_default().to_string(),
-            description: h["description"].as_str().unwrap_or_default().to_string(),
-            icon_url: h["icon_url"].as_str().map(|s| s.to_string()),
-            downloads: h["downloads"].as_u64().unwrap_or(0),
-            project_type: h["project_type"].as_str().unwrap_or(&project_type).to_string(),
-        })
-        .collect())
+    Ok(ContentPage {
+        total_hits: res["total_hits"].as_u64().unwrap_or(0),
+        hits: hits
+            .into_iter()
+            .map(|h| ContentSummary {
+                id: h["project_id"].as_str().unwrap_or_default().to_string(),
+                slug: h["slug"].as_str().unwrap_or_default().to_string(),
+                title: h["title"].as_str().unwrap_or_default().to_string(),
+                description: h["description"].as_str().unwrap_or_default().to_string(),
+                icon_url: h["icon_url"].as_str().map(|s| s.to_string()),
+                downloads: h["downloads"].as_u64().unwrap_or(0),
+                project_type: h["project_type"].as_str().unwrap_or(&project_type).to_string(),
+            })
+            .collect(),
+    })
 }
 
 /// Picks the best version of a Modrinth project for an instance: prefers one
@@ -239,4 +260,60 @@ pub async fn install_modpack(project_id: String, instance_name: Option<String>) 
 pub async fn import_modpack_file(path: String, instance_name: Option<String>) -> Result<Instance, String> {
     let bytes = std::fs::read(&path).map_err(|e| format!("Datei konnte nicht gelesen werden: {e}"))?;
     apply_mrpack(bytes, instance_name).await
+}
+
+/// Zips an instance's mods/resourcepacks/shaderpacks/config as `overrides/` in a
+/// `.mrpack`, with an empty `files: []` list - valid per the mrpack spec, and
+/// simpler than resolving each installed jar back to a Modrinth project/version
+/// (which would need a hash lookup per file for no real benefit here, since the
+/// actual bytes are already on disk and get bundled directly).
+fn add_dir_recursive(zip: &mut zip::ZipWriter<std::fs::File>, dir: &Path, zip_prefix: &str, options: zip::write::SimpleFileOptions) -> Result<(), String> {
+    let Ok(entries) = std::fs::read_dir(dir) else { return Ok(()) };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        let name = entry.file_name().to_string_lossy().to_string();
+        let zip_path = format!("{zip_prefix}/{name}");
+        if path.is_dir() {
+            add_dir_recursive(zip, &path, &zip_path, options)?;
+        } else {
+            let bytes = std::fs::read(&path).map_err(|e| e.to_string())?;
+            zip.start_file(zip_path, options).map_err(|e| e.to_string())?;
+            zip.write_all(&bytes).map_err(|e| e.to_string())?;
+        }
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn export_modpack(id: String, dest_path: String) -> Result<(), String> {
+    let instance = instances::find(&id).ok_or("Unbekannte Instanz")?;
+    let loader_version = crate::launch::latest_fabric_loader_version(&client(), &instance.mc_version).await?;
+
+    let index = serde_json::json!({
+        "formatVersion": 1,
+        "game": "minecraft",
+        "versionId": "1.0.0",
+        "name": instance.name,
+        "files": [],
+        "dependencies": {
+            "minecraft": instance.mc_version,
+            "fabric-loader": loader_version,
+        }
+    });
+
+    let file = std::fs::File::create(&dest_path).map_err(|e| e.to_string())?;
+    let mut zip = zip::ZipWriter::new(file);
+    let options = zip::write::SimpleFileOptions::default().compression_method(zip::CompressionMethod::Deflated);
+
+    zip.start_file("modrinth.index.json", options).map_err(|e| e.to_string())?;
+    zip.write_all(serde_json::to_string_pretty(&index).map_err(|e| e.to_string())?.as_bytes())
+        .map_err(|e| e.to_string())?;
+
+    let dir = instances::instance_dir(&instance.id);
+    for folder in ["mods", "resourcepacks", "shaderpacks", "config"] {
+        add_dir_recursive(&mut zip, &dir.join(folder), &format!("overrides/{folder}"), options)?;
+    }
+
+    zip.finish().map_err(|e| e.to_string())?;
+    Ok(())
 }

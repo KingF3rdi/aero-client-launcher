@@ -3,13 +3,14 @@ import { Icon } from "@iconify/react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useInstanceStore } from "../../store/useInstanceStore";
 import { InstanceCard } from "./InstanceCard";
-import { InstanceSettingsModal } from "./InstanceSettingsModal";
+import { InstanceSettingsModal, type Tab } from "./InstanceSettingsModal";
 import { Button } from "../ui/Button";
 
 export function PlayView() {
   const { account } = useAuthStore();
   const { instances, selectedId, ramGb, launch, loadInstances, select, setRam, play } = useInstanceStore();
   const [settingsFor, setSettingsFor] = useState<string | null>(null);
+  const [modalTab, setModalTab] = useState<Tab>("content");
 
   useEffect(() => {
     loadInstances();
@@ -29,13 +30,25 @@ export function PlayView() {
             instance={instance}
             selected={instance.id === selectedId}
             onSelect={() => select(instance.id)}
-            onSettings={() => setSettingsFor(instance.id)}
+            onSettings={() => {
+              setModalTab("content");
+              setSettingsFor(instance.id);
+            }}
+            onLogs={() => {
+              setModalTab("logs");
+              setSettingsFor(instance.id);
+            }}
           />
         ))}
       </aside>
 
       {settingsInstance && (
-        <InstanceSettingsModal instance={settingsInstance} onClose={() => setSettingsFor(null)} />
+        <InstanceSettingsModal
+          key={settingsInstance.id}
+          instance={settingsInstance}
+          initialTab={modalTab}
+          onClose={() => setSettingsFor(null)}
+        />
       )}
 
       <main className="flex-1 flex flex-col justify-end p-10 gap-6">
