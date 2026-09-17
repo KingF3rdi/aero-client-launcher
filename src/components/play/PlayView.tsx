@@ -11,7 +11,7 @@ import { Button } from "../ui/Button";
 export function PlayView() {
   const navigate = useNavigate();
   const { account } = useAuthStore();
-  const { instances, selectedId, launch, loadInstances, select, play } = useInstanceStore();
+  const { instances, selectedId, launch, launchedInstanceId, loadInstances, select, play, stop } = useInstanceStore();
   const [settingsFor, setSettingsFor] = useState<string | null>(null);
   const [modalTab, setModalTab] = useState<Tab>("content");
 
@@ -21,7 +21,9 @@ export function PlayView() {
 
   const selected = instances.find((i) => i.id === selectedId) ?? null;
   const settingsInstance = instances.find((i) => i.id === settingsFor) ?? null;
-  const busy = launch.phase !== "idle" && launch.phase !== "error" && launch.phase !== "running";
+  const isThisLaunching = !!selected && launchedInstanceId === selected.id;
+  const busy = isThisLaunching && launch.phase !== "idle" && launch.phase !== "error" && launch.phase !== "running";
+  const isRunning = isThisLaunching && launch.phase === "running";
 
   return (
     <div className="flex h-full">
@@ -73,17 +75,28 @@ export function PlayView() {
                   {selected.loader === "fabric" ? "Fabric" : "Vanilla"} · {selected.mcVersion} · Aero Client
                 </p>
               </div>
-              <Button
-                variant="play"
-                disabled={!account || busy}
-                onClick={() => account && play(account)}
-                className="ml-auto !px-8 !py-4 !text-lg"
-              >
-                <Icon icon="solar:play-bold" width={26} height={26} />
-                {busy ? "Wird gestartet…" : "Play"}
-              </Button>
+              {busy || isRunning ? (
+                <Button
+                  variant="stop"
+                  onClick={() => stop()}
+                  className="ml-auto !px-8 !py-4 !text-lg"
+                >
+                  <Icon icon="solar:stop-bold" width={26} height={26} />
+                  Stop
+                </Button>
+              ) : (
+                <Button
+                  variant="play"
+                  disabled={!account}
+                  onClick={() => account && play(account)}
+                  className="ml-auto !px-8 !py-4 !text-lg"
+                >
+                  <Icon icon="solar:play-bold" width={26} height={26} />
+                  Play
+                </Button>
+              )}
             </div>
-            <span className="text-sm text-white/40 -mt-3">{launch.message}</span>
+            <span className="text-sm text-white/40 -mt-3">{isThisLaunching ? launch.message : "Bereit"}</span>
 
             <div className="flex-1 min-h-0 overflow-y-auto pr-1">
               <InstanceContentPanel

@@ -143,5 +143,6 @@ const DEV_MOCKS: Record<string, MockFn> = {
     status: "pending",
   }),
   launch_instance: () => null,
+  stop_instance: () => null,
   logout: () => null,
 };

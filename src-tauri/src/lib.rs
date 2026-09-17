@@ -13,6 +13,7 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
         .manage(auth::AuthState::default())
+        .manage(launch::GameState::default())
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(
@@ -41,6 +42,7 @@ pub fn run() {
             instances::toggle_content_file,
             instances::delete_content_file,
             launch::launch_instance,
+            launch::stop_instance,
             skin::upload_skin,
             content::search_content,
             content::install_content,

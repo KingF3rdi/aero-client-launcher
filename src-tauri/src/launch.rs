@@ -10,10 +10,12 @@
 //! ships LWJGL's own per-OS classifier jars straight on the classpath, so
 //! there's no separate native-extraction step to get right here.
 
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
-#[cfg(windows)]
-use std::os::windows::process::CommandExt;
+use std::sync::Mutex;
+
+use tauri::{Emitter, Manager};
 
 /// Windows CREATE_NO_WINDOW: java.exe is a console-subsystem program, so
 /// without this Windows pops up a blank console window for it every launch
@@ -37,6 +39,14 @@ pub struct LaunchAccount {
     pub mc_token: String,
 }
 
+/// Tracks currently-running game processes by instance id, so `stop_instance`
+/// can kill one and the exit-watcher task can tell the frontend when it ends
+/// on its own (crash or the player quitting normally).
+#[derive(Default)]
+pub struct GameState {
+    children: Mutex<HashMap<String, tokio::process::Child>>,
+}
+
 fn client() -> reqwest::Client {
     reqwest::Client::builder()
         .user_agent("AeroClient/0.1")
@@ -44,20 +54,56 @@ fn client() -> reqwest::Client {
         .expect("failed to build http client")
 }
 
+/// Best-effort append to the instance's launcher.log - a launch that fails
+/// before ever spawning java (bad manifest, a download that errors out, no
+/// disk space, ...) used to vanish with nothing written anywhere; every
+/// stage now leaves a trace so a failure is diagnosable from the Logs tab
+/// instead of just an ephemeral toast.
+fn log_line(log_path: &Path, line: &str) {
+    use std::io::Write;
+    if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open(log_path) {
+        let _ = writeln!(f, "{line}");
+    }
+}
+
 #[tauri::command]
 pub async fn launch_instance(
     instance_id: String,
     ram_gb: u32,
     account: LaunchAccount,
+    app: tauri::AppHandle,
+    state: tauri::State<'_, GameState>,
 ) -> Result<(), String> {
-    let instance = instances::find(&instance_id).ok_or("Unbekannte Instanz")?;
-    let dir = instances::instance_dir(&instance.id);
-    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    let dir = instances::instance_dir(&instance_id);
+    let _ = std::fs::create_dir_all(&dir);
+    let log_path = dir.join("launcher.log");
+    let _ = std::fs::write(&log_path, "");
+
+    match launch_inner(&instance_id, ram_gb, &account, &dir, &log_path, &app, &state).await {
+        Ok(()) => Ok(()),
+        Err(e) => {
+            log_line(&log_path, &format!("Start fehlgeschlagen: {e}"));
+            Err(e)
+        }
+    }
+}
+
+async fn launch_inner(
+    instance_id: &str,
+    ram_gb: u32,
+    account: &LaunchAccount,
+    dir: &Path,
+    log_path: &Path,
+    app: &tauri::AppHandle,
+    state: &tauri::State<'_, GameState>,
+) -> Result<(), String> {
+    let instance = instances::find(instance_id).ok_or("Unbekannte Instanz")?;
     let effective_ram_gb = instance.ram_gb.unwrap_or(ram_gb);
 
     let java = find_java().ok_or("Java wurde nicht gefunden. Bitte JDK 21+ installieren.")?;
 
     let http = client();
+    log_line(log_path, "Lade Versions-Manifest...");
     let manifest: Value = http
         .get(VERSION_MANIFEST)
         .send()
@@ -78,6 +124,7 @@ pub async fn launch_instance(
     let mut classpath: Vec<PathBuf> = Vec::new();
 
     // Client jar
+    log_line(log_path, "Lade Client-Jar...");
     let client_jar = dir
         .join("versions")
         .join(&instance.mc_version)
@@ -88,15 +135,17 @@ pub async fn launch_instance(
     classpath.push(client_jar);
 
     // Vanilla libraries
+    log_line(log_path, "Lade Bibliotheken...");
     if let Some(libs) = version_json["libraries"].as_array() {
-        download_libraries(&http, &dir, libs, &mut classpath).await?;
+        download_libraries(&http, dir, libs, &mut classpath).await?;
     }
 
     // Assets (asset index + objects) - not on the classpath, just needs to be
     // on disk before launch so the client can find sounds/textures/language files.
+    log_line(log_path, "Lade Assets (kann beim ersten Start dauern)...");
     if let Some(asset_index_url) = version_json["assetIndex"]["url"].as_str() {
         let asset_index_id = version_json["assetIndex"]["id"].as_str().unwrap_or("legacy");
-        download_assets(&http, &dir, asset_index_url, asset_index_id).await?;
+        download_assets(&http, dir, asset_index_url, asset_index_id).await?;
     }
     let assets_dir = dir.join("assets");
     let asset_index_id = version_json["assetIndex"]["id"].as_str().unwrap_or("legacy").to_string();
@@ -107,10 +156,11 @@ pub async fn launch_instance(
         .to_string();
 
     if instance.loader == "fabric" {
-        main_class = install_fabric(&http, &dir, &instance.mc_version, &mut classpath).await?;
+        log_line(log_path, "Installiere Fabric Loader...");
+        main_class = install_fabric(&http, dir, &instance.mc_version, &mut classpath).await?;
     }
 
-    ensure_mod_jar(&dir, &instance)?;
+    ensure_mod_jar(dir, &instance)?;
 
     let natives_placeholder = dir.join("versions").join(&instance.mc_version).join("natives");
     std::fs::create_dir_all(&natives_placeholder).map_err(|e| e.to_string())?;
@@ -119,14 +169,18 @@ pub async fn launch_instance(
 
     // A GUI app has no console for the child to inherit, so without this any
     // early JVM failure (bad classpath, missing class, native-library error)
-    // vanishes silently instead of reaching the Logs tab - capture it so a
-    // launch that never gets as far as Minecraft's own logs/latest.log is
-    // still diagnosable.
-    let launcher_log = std::fs::File::create(dir.join("launcher.log")).map_err(|e| e.to_string())?;
+    // vanishes silently instead of reaching the Logs tab - append to the same
+    // log the pre-spawn stages above already wrote to.
+    let launcher_log = std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(log_path)
+        .map_err(|e| e.to_string())?;
     let launcher_log_err = launcher_log.try_clone().map_err(|e| e.to_string())?;
 
-    let mut cmd = std::process::Command::new(&java);
-    cmd.current_dir(&dir)
+    log_line(log_path, "Starte Java...");
+    let mut cmd = tokio::process::Command::new(&java);
+    cmd.current_dir(dir)
         .arg(format!("-Xmx{effective_ram_gb}G"))
         .arg(format!("-Xms{}G", (effective_ram_gb / 2).max(1)))
         .arg(format!("-Djava.library.path={}", natives_placeholder.display()))
@@ -153,12 +207,65 @@ pub async fn launch_instance(
         .arg("release")
         .stdin(Stdio::null())
         .stdout(Stdio::from(launcher_log))
-        .stderr(Stdio::from(launcher_log_err));
+        .stderr(Stdio::from(launcher_log_err))
+        .kill_on_drop(true);
     #[cfg(windows)]
     cmd.creation_flags(CREATE_NO_WINDOW);
 
-    cmd.spawn().map_err(|e| format!("Minecraft konnte nicht gestartet werden: {e}"))?;
+    let child = cmd.spawn().map_err(|e| format!("Minecraft konnte nicht gestartet werden: {e}"))?;
+
+    {
+        let mut children = state.children.lock().unwrap();
+        children.insert(instance_id.to_string(), child);
+    }
+    watch_process(app.clone(), instance_id.to_string());
     Ok(())
+}
+
+/// Polls the child every couple seconds instead of a blocking `.wait()`, so
+/// `stop_instance` can concurrently take the same entry out of the map to
+/// kill it without fighting over ownership of the Child.
+fn watch_process(app: tauri::AppHandle, instance_id: String) {
+    tauri::async_runtime::spawn(async move {
+        loop {
+            tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+            let state = app.state::<GameState>();
+            let exited = {
+                let mut children = state.children.lock().unwrap();
+                match children.get_mut(&instance_id) {
+                    None => true,
+                    Some(child) => match child.try_wait() {
+                        Ok(Some(_)) => {
+                            children.remove(&instance_id);
+                            true
+                        }
+                        Ok(None) => false,
+                        Err(_) => {
+                            children.remove(&instance_id);
+                            true
+                        }
+                    },
+                }
+            };
+            if exited {
+                let _ = app.emit("game-exited", &instance_id);
+                break;
+            }
+        }
+    });
+}
+
+/// Kills a running instance's game process - used for both cancelling a
+/// launch still stuck downloading/starting and quitting an already-running
+/// game from the launcher's own Stop button.
+#[tauri::command]
+pub async fn stop_instance(instance_id: String, state: tauri::State<'_, GameState>) -> Result<(), String> {
+    let child = {
+        let mut children = state.children.lock().unwrap();
+        children.remove(&instance_id)
+    };
+    let Some(mut child) = child else { return Ok(()) };
+    child.kill().await.map_err(|e| e.to_string())
 }
 
 fn find_java() -> Option<String> {

@@ -1,4 +1,6 @@
 import { create } from "zustand";
+import { isTauri } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { invoke } from "../lib/tauri";
 import type { ContentFile, Instance, InstancePatch, LaunchStatus } from "../types/instance";
 
@@ -35,10 +37,16 @@ interface InstanceState {
   selectedId: string | null;
   ramGb: number;
   launch: LaunchStatus;
+  /** Which instance the current `launch` state belongs to - kept separate from
+   * `selectedId` so switching instances while one is still running doesn't
+   * lose track of which one to stop. */
+  launchedInstanceId: string | null;
   loadInstances: () => Promise<void>;
   select: (id: string) => void;
   setRam: (gb: number) => void;
   play: (account: { name: string; uuid: string; mcToken: string }, instanceId?: string) => Promise<void>;
+  stop: () => Promise<void>;
+  initLaunchListener: () => void;
   updateInstance: (id: string, patch: InstancePatch) => Promise<void>;
   deleteInstance: (id: string) => Promise<void>;
   duplicateInstance: (id: string) => Promise<void>;
@@ -56,6 +64,7 @@ export const useInstanceStore = create<InstanceState>((set, get) => ({
   selectedId: null,
   ramGb: loadRamGb(),
   launch: { phase: "idle", message: "Bereit" },
+  launchedInstanceId: null,
 
   loadInstances: async () => {
     const instances = await invoke<Instance[]>("get_instances");
@@ -81,7 +90,11 @@ export const useInstanceStore = create<InstanceState>((set, get) => ({
     const { ramGb } = get();
     const targetId = instanceId ?? get().selectedId;
     if (!targetId) return;
-    set({ selectedId: targetId, launch: { phase: "installing", message: "Wird vorbereitet…" } });
+    set({
+      selectedId: targetId,
+      launchedInstanceId: targetId,
+      launch: { phase: "installing", message: "Wird vorbereitet…" },
+    });
     try {
       await invoke("launch_instance", {
         instanceId: targetId,
@@ -91,8 +104,27 @@ export const useInstanceStore = create<InstanceState>((set, get) => ({
       saveLastPlayedId(targetId);
       set({ launch: { phase: "running", message: "Gestartet" } });
     } catch (e) {
-      set({ launch: { phase: "error", message: String(e) } });
+      set({ launch: { phase: "error", message: String(e) }, launchedInstanceId: null });
     }
+  },
+
+  stop: async () => {
+    const { launchedInstanceId } = get();
+    if (!launchedInstanceId) return;
+    try {
+      await invoke("stop_instance", { instanceId: launchedInstanceId });
+    } finally {
+      set({ launch: { phase: "idle", message: "Bereit" }, launchedInstanceId: null });
+    }
+  },
+
+  initLaunchListener: () => {
+    if (!isTauri()) return;
+    listen<string>("game-exited", (event) => {
+      if (get().launchedInstanceId === event.payload) {
+        set({ launch: { phase: "idle", message: "Bereit" }, launchedInstanceId: null });
+      }
+    });
   },
 
   updateInstance: async (id, patch) => {

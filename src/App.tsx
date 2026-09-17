@@ -10,9 +10,11 @@ import { SettingsView } from "./components/settings/SettingsView";
 import { SkinsView } from "./components/settings/SkinsView";
 import { DiscoverView } from "./components/discover/DiscoverView";
 import { useAuthStore } from "./store/useAuthStore";
+import { useInstanceStore } from "./store/useInstanceStore";
 
 export function App() {
   const { account, loading, init } = useAuthStore();
+  const { initLaunchListener } = useInstanceStore();
   const location = useLocation();
   const navigate = useNavigate();
   const [addingInstance, setAddingInstance] = useState(false);
@@ -20,6 +22,10 @@ export function App() {
   useEffect(() => {
     init();
   }, [init]);
+
+  useEffect(() => {
+    initLaunchListener();
+  }, [initLaunchListener]);
 
   if (loading) {
     return <div className="h-screen w-screen flex items-center justify-center bg-bg text-muted">Wird geladen…</div>;
