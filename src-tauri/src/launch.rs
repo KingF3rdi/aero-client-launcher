@@ -12,6 +12,15 @@
 
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
+
+/// Windows CREATE_NO_WINDOW: java.exe is a console-subsystem program, so
+/// without this Windows pops up a blank console window for it every launch
+/// (stdout/stderr are already redirected to launcher.log, so nothing would
+/// show in it anyway - it'd just flash on screen and worry people).
+#[cfg(windows)]
+const CREATE_NO_WINDOW: u32 = 0x08000000;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -145,6 +154,8 @@ pub async fn launch_instance(
         .stdin(Stdio::null())
         .stdout(Stdio::from(launcher_log))
         .stderr(Stdio::from(launcher_log_err));
+    #[cfg(windows)]
+    cmd.creation_flags(CREATE_NO_WINDOW);
 
     cmd.spawn().map_err(|e| format!("Minecraft konnte nicht gestartet werden: {e}"))?;
     Ok(())
