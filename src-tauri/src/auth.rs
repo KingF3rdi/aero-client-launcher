@@ -215,7 +215,9 @@ async fn login_with_ms(ms_access: &str) -> Result<Account, String> {
         .json()
         .await
         .map_err(|e| e.to_string())?;
-    let mc_token = mc["access_token"].as_str().ok_or("Kein Minecraft-Token erhalten")?;
+    let mc_token = mc["access_token"]
+        .as_str()
+        .ok_or_else(|| format!("Kein Minecraft-Token erhalten: {mc}"))?;
 
     let profile: serde_json::Value = http
         .get("https://api.minecraftservices.com/minecraft/profile")
