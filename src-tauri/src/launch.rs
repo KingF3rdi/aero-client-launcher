@@ -161,7 +161,7 @@ async fn launch_inner(
         ensure_sodium(dir, &instance, log_path).await;
     }
 
-    ensure_mod_jar(dir, &instance)?;
+    ensure_mod_jar(dir, &instance, log_path).await?;
     ensure_optimized_options(dir);
 
     let natives_placeholder = dir.join("versions").join(&instance.mc_version).join("natives");
@@ -185,6 +185,18 @@ async fn launch_inner(
     cmd.current_dir(dir)
         .arg(format!("-Xmx{effective_ram_gb}G"))
         .arg(format!("-Xms{}G", (effective_ram_gb / 2).max(1)))
+        // GC tuning for smooth frame times: short, frequent young collections instead of long pauses.
+        .args([
+            "-XX:+UnlockExperimentalVMOptions",
+            "-XX:+UseG1GC",
+            "-XX:G1NewSizePercent=30",
+            "-XX:G1MaxNewSizePercent=40",
+            "-XX:G1HeapRegionSize=16M",
+            "-XX:G1ReservePercent=20",
+            "-XX:MaxGCPauseMillis=40",
+            "-XX:+ParallelRefProcEnabled",
+            "-XX:+DisableExplicitGC",
+        ])
         .arg(format!("-Djava.library.path={}", natives_placeholder.display()))
         .arg("-cp")
         .arg(cp)
@@ -487,16 +499,17 @@ fn maven_coordinate_to_path(coordinate: &str) -> Option<String> {
 /// without the mod rather than failing the whole launch - the jar is only
 /// ever built for 1.21.11 today, so the toggle is a no-op on other versions
 /// until the mod itself supports them.
-fn ensure_mod_jar(dir: &Path, instance: &Instance) -> Result<(), String> {
+async fn ensure_mod_jar(dir: &Path, instance: &Instance, log_path: &Path) -> Result<(), String> {
     if !instance.mod_enabled || instance.mc_version != "1.21.11" {
         return Ok(());
     }
-    // The dev-relative path only resolves when run via `tauri dev`/`cargo run`
-    // from the project checkout - an installed exe's cwd has nothing to do
-    // with the source tree, so it silently found nothing and never copied
-    // the mod. Also check next to the exe itself, so dropping the jar there
-    // (however it gets there - manually, or a future packaging step) works
-    // for the real installed app too.
+    // Auto-update: pull the newest mod jar from the GitHub release on every start.
+    match update_mod_from_github(dir, log_path).await {
+        Ok(true) => return Ok(()),
+        Ok(false) => {}
+        Err(e) => log_line(log_path, &format!("Mod-Update von GitHub fehlgeschlagen: {e}")),
+    }
+    // Offline / no release yet: fall back to a jar shipped next to the exe (or the dev build).
     let dev_relative = PathBuf::from("../liteclient/build/libs/aero-client-1.21-1.0.0.jar");
     let next_to_exe = std::env::current_exe()
         .ok()
@@ -512,6 +525,64 @@ fn ensure_mod_jar(dir: &Path, instance: &Instance) -> Result<(), String> {
     std::fs::create_dir_all(&mods_dir).map_err(|e| e.to_string())?;
     std::fs::copy(&source, mods_dir.join("aero-client.jar")).map_err(|e| e.to_string())?;
     Ok(())
+}
+
+const MOD_RELEASE_API: &str = "https://api.github.com/repos/KingF3rdi/aero-client/releases/latest";
+
+/// Returns Ok(true) when the mods folder now holds the latest release jar (already current or freshly
+/// downloaded), Ok(false) when there is no release to use.
+async fn update_mod_from_github(dir: &Path, log_path: &Path) -> Result<bool, String> {
+    let http = reqwest::Client::builder()
+        .user_agent("AeroClient-Launcher")
+        .timeout(std::time::Duration::from_secs(30))
+        .build()
+        .map_err(|e| e.to_string())?;
+    let rel: serde_json::Value = http
+        .get(MOD_RELEASE_API)
+        .send()
+        .await
+        .map_err(|e| e.to_string())?
+        .error_for_status()
+        .map_err(|e| e.to_string())?
+        .json()
+        .await
+        .map_err(|e| e.to_string())?;
+    let Some(asset) = rel["assets"]
+        .as_array()
+        .and_then(|a| a.iter().find(|x| x["name"].as_str() == Some("aero-client.jar")))
+    else {
+        return Ok(false);
+    };
+    let (Some(url), Some(stamp)) = (
+        asset["browser_download_url"].as_str(),
+        asset["updated_at"].as_str(),
+    ) else {
+        return Ok(false);
+    };
+    let mods_dir = dir.join("mods");
+    std::fs::create_dir_all(&mods_dir).map_err(|e| e.to_string())?;
+    let jar = mods_dir.join("aero-client.jar");
+    let version_file = mods_dir.join(".aero-client.version");
+    if jar.is_file() && std::fs::read_to_string(&version_file).map(|v| v.trim() == stamp).unwrap_or(false) {
+        return Ok(true);
+    }
+    let bytes = http
+        .get(url)
+        .send()
+        .await
+        .map_err(|e| e.to_string())?
+        .error_for_status()
+        .map_err(|e| e.to_string())?
+        .bytes()
+        .await
+        .map_err(|e| e.to_string())?;
+    if bytes.len() < 10_000 {
+        return Err("Heruntergeladene Mod-Datei ist zu klein".to_string());
+    }
+    std::fs::write(&jar, &bytes).map_err(|e| e.to_string())?;
+    std::fs::write(&version_file, stamp).map_err(|e| e.to_string())?;
+    log_line(log_path, &format!("Mod aktualisiert ({} KB) von GitHub", bytes.len() / 1024));
+    Ok(true)
 }
 
 /// Downloads Sodium from Modrinth into the instance the first time it launches - skipped if a
