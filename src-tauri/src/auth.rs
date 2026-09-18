@@ -32,7 +32,7 @@ pub struct AccountSummary {
 // portal.azure.com App registrations, "Personal Microsoft accounts only",
 // with a "Mobile and desktop applications" platform redirect of
 // "http://localhost").
-const CLIENT_ID: &str = "93dc5f4d-de19-4dff-b7d8-1a3739dce372";
+const CLIENT_ID: &str = "f478eeee-9251-4669-937d-7d3283658938";
 const SCOPE: &str = "XboxLive.signin offline_access";
 
 #[derive(Serialize)]
