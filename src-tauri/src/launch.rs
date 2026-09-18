@@ -554,6 +554,7 @@ fn ensure_optimized_options(dir: &Path) {
         maxFps:260\n\
         enableVsync:false\n\
         bobView:false\n\
-        biomeBlendRadius:0\n";
+        biomeBlendRadius:0\n\
+        menuBackgroundBlurriness:0.0\n";
     let _ = std::fs::write(path, defaults);
 }
