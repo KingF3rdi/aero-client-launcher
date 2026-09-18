@@ -158,9 +158,11 @@ async fn launch_inner(
     if instance.loader == "fabric" {
         log_line(log_path, "Installiere Fabric Loader...");
         main_class = install_fabric(&http, dir, &instance.mc_version, &mut classpath).await?;
+        ensure_sodium(dir, &instance, log_path).await;
     }
 
     ensure_mod_jar(dir, &instance)?;
+    ensure_optimized_options(dir);
 
     let natives_placeholder = dir.join("versions").join(&instance.mc_version).join("natives");
     std::fs::create_dir_all(&natives_placeholder).map_err(|e| e.to_string())?;
@@ -510,4 +512,48 @@ fn ensure_mod_jar(dir: &Path, instance: &Instance) -> Result<(), String> {
     std::fs::create_dir_all(&mods_dir).map_err(|e| e.to_string())?;
     std::fs::copy(&source, mods_dir.join("aero-client.jar")).map_err(|e| e.to_string())?;
     Ok(())
+}
+
+/// Downloads Sodium from Modrinth into the instance the first time it launches - skipped if a
+/// sodium jar (enabled or user-disabled) is already there, so this only ever seeds it once rather
+/// than fighting a player who deliberately removed or disabled it. Best-effort: a failed download
+/// (offline, Modrinth down, no matching version for this mc_version) just means the instance
+/// launches without it rather than failing the whole launch.
+async fn ensure_sodium(dir: &Path, instance: &Instance, log_path: &Path) {
+    let mods_dir = dir.join("mods");
+    let already_present = std::fs::read_dir(&mods_dir)
+        .map(|entries| {
+            entries
+                .flatten()
+                .any(|e| e.file_name().to_string_lossy().to_lowercase().contains("sodium"))
+        })
+        .unwrap_or(false);
+    if already_present {
+        return;
+    }
+    log_line(log_path, "Installiere Sodium (Performance)...");
+    if let Err(e) = crate::content::install_content("sodium".to_string(), "mod".to_string(), instance.id.clone()).await {
+        log_line(log_path, &format!("Sodium-Installation übersprungen: {e}"));
+    }
+}
+
+/// Seeds performance-friendly video settings on an instance's very first launch - only when
+/// options.txt doesn't exist yet, so this never overwrites settings a player has since changed.
+fn ensure_optimized_options(dir: &Path) {
+    let path = dir.join("options.txt");
+    if path.exists() {
+        return;
+    }
+    let defaults = "renderDistance:8\n\
+        simulationDistance:8\n\
+        particles:2\n\
+        graphicsMode:0\n\
+        ao:0\n\
+        entityShadows:false\n\
+        renderClouds:false\n\
+        maxFps:260\n\
+        enableVsync:false\n\
+        bobView:false\n\
+        biomeBlendRadius:0\n";
+    let _ = std::fs::write(path, defaults);
 }
