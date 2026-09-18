@@ -169,16 +169,16 @@ export function InstanceContentPanel({
                 {items.map((file) => (
                   <div
                     key={file.relPath}
-                    className="flex items-center gap-3 rounded-lg bg-black/30 border border-white/10 px-3 py-2"
+                    className="flex items-center gap-3 rounded-lg bg-black/30 border border-white/10 px-4 py-3"
                   >
-                    <div className="w-7 h-7 shrink-0 rounded-md bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden">
+                    <div className="w-9 h-9 shrink-0 rounded-md bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden">
                       {icons[file.relPath] ? (
                         <img src={icons[file.relPath]} alt="" className="w-full h-full object-cover" />
                       ) : (
-                        <Icon icon={KIND_ICON[file.kind]} width={14} height={14} className="text-accent" />
+                        <Icon icon={KIND_ICON[file.kind]} width={18} height={18} className="text-accent" />
                       )}
                     </div>
-                    <span className={clsx("text-sm flex-1 truncate", !file.enabled && "text-white/40 line-through")}>
+                    <span className={clsx("text-base flex-1 truncate", !file.enabled && "text-white/40 line-through")}>
                       {file.name}
                     </span>
                     {file.kind === "mod" && (
@@ -190,7 +190,7 @@ export function InstanceContentPanel({
                       title="Entfernen"
                       className="text-white/30 hover:text-danger transition-colors cursor-pointer disabled:opacity-40"
                     >
-                      <Icon icon="solar:trash-bin-trash-bold" width={14} height={14} />
+                      <Icon icon="solar:trash-bin-trash-bold" width={16} height={16} />
                     </button>
                   </div>
                 ))}
