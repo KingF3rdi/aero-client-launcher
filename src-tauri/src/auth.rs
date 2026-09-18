@@ -1,24 +1,21 @@
-//! Microsoft login (authorization code + PKCE, via the system browser) ->
+//! Microsoft login (authorization code + PKCE, in a native app window) ->
 //! Xbox Live -> XSTS -> Minecraft profile.
 //!
-//! A loopback HTTP listener on an ephemeral localhost port stands in for a
-//! registered redirect URI - Azure treats plain "http://localhost" (no fixed
-//! port) as valid for any port on a "Mobile and desktop applications"
-//! registration, so this needs no custom URL scheme or embedded webview.
-//! Nicer UX than the earlier device-code flow: the browser goes straight to
-//! Microsoft's real sign-in page instead of showing a code to retype elsewhere.
+//! Opens Microsoft's real sign-in page directly in its own Tauri window
+//! (same idea as the official launcher's embedded login popup) instead of
+//! the system browser - navigation to the redirect URI is intercepted
+//! in-window, so no local HTTP listener or custom URL scheme is needed.
+//! Nicer than the earlier device-code flow: no code to retype elsewhere.
 
 use serde::Serialize;
 use serde_json::json;
 use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
 use rand::RngCore;
 use sha2::{Digest, Sha256};
-use tauri_plugin_opener::OpenerExt;
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use tokio::net::TcpListener;
 
 use crate::state::{self, StoredAccount};
 
@@ -60,14 +57,12 @@ fn random_url_safe(len: usize) -> String {
     URL_SAFE_NO_PAD.encode(bytes)
 }
 
-/// Opens the system browser straight at Microsoft's sign-in page and waits
-/// for it to redirect back to a one-shot local listener - no code to copy,
-/// no polling loop, just "sign in, tab closes itself, you're back here".
+/// Opens Microsoft's real sign-in page in its own app window and waits for
+/// it to navigate to the redirect URI, catching that navigation in-window
+/// instead of letting it actually load (nothing needs to be listening there).
 #[tauri::command]
 pub async fn login_with_browser(app: tauri::AppHandle) -> Result<Account, String> {
-    let listener = TcpListener::bind("127.0.0.1:0").await.map_err(|e| e.to_string())?;
-    let port = listener.local_addr().map_err(|e| e.to_string())?.port();
-    let redirect_uri = format!("http://localhost:{port}");
+    let redirect_uri = "http://localhost";
 
     let verifier = random_url_safe(64);
     let challenge = URL_SAFE_NO_PAD.encode(Sha256::digest(verifier.as_bytes()));
@@ -79,38 +74,50 @@ pub async fn login_with_browser(app: tauri::AppHandle) -> Result<Account, String
         .query_pairs_mut()
         .append_pair("client_id", CLIENT_ID)
         .append_pair("response_type", "code")
-        .append_pair("redirect_uri", &redirect_uri)
+        .append_pair("redirect_uri", redirect_uri)
         .append_pair("response_mode", "query")
         .append_pair("scope", SCOPE)
         .append_pair("state", &csrf_state)
         .append_pair("code_challenge", &challenge)
         .append_pair("code_challenge_method", "S256");
 
-    app.opener()
-        .open_url(authorize_url.as_str(), None::<&str>)
+    let (tx, rx) = tokio::sync::oneshot::channel::<Result<HashMap<String, String>, String>>();
+    let tx = Arc::new(Mutex::new(Some(tx)));
+
+    let tx_nav = tx.clone();
+    let window = tauri::WebviewWindowBuilder::new(&app, "ms-login", tauri::WebviewUrl::External(authorize_url))
+        .title("Mit Microsoft anmelden")
+        .inner_size(480.0, 720.0)
+        .resizable(false)
+        .center()
+        .on_navigation(move |url| {
+            if url.as_str().starts_with(redirect_uri) {
+                if let Some(sender) = tx_nav.lock().unwrap().take() {
+                    let _ = sender.send(Ok(url.query_pairs().into_owned().collect()));
+                }
+                false
+            } else {
+                true
+            }
+        })
+        .build()
         .map_err(|e| e.to_string())?;
 
-    let (mut stream, _) = tokio::time::timeout(Duration::from_secs(300), listener.accept())
+    let tx_close = tx.clone();
+    window.on_window_event(move |event| {
+        if let tauri::WindowEvent::CloseRequested { .. } = event {
+            if let Some(sender) = tx_close.lock().unwrap().take() {
+                let _ = sender.send(Err("Anmeldung abgebrochen.".to_string()));
+            }
+        }
+    });
+
+    let params = tokio::time::timeout(Duration::from_secs(300), rx)
         .await
         .map_err(|_| "Login-Zeitlimit überschritten - bitte erneut versuchen.".to_string())?
-        .map_err(|e| e.to_string())?;
+        .map_err(|_| "Anmeldung abgebrochen.".to_string())??;
 
-    let mut buf = [0u8; 8192];
-    let n = stream.read(&mut buf).await.map_err(|e| e.to_string())?;
-    let request = String::from_utf8_lossy(&buf[..n]);
-    let path = request.lines().next().unwrap_or("").split_whitespace().nth(1).unwrap_or("/");
-    let parsed = url::Url::parse(&format!("http://localhost{path}")).map_err(|e| e.to_string())?;
-    let params: HashMap<String, String> = parsed.query_pairs().into_owned().collect();
-
-    let body = "<html><body style=\"font-family:sans-serif;text-align:center;padding-top:15vh;\
-        background:#0a0e17;color:#eee\"><h2>Anmeldung abgeschlossen</h2>\
-        <p>Du kannst dieses Fenster jetzt schließen.</p></body></html>";
-    let response = format!(
-        "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
-        body.len(),
-        body
-    );
-    let _ = stream.write_all(response.as_bytes()).await;
+    let _ = window.close();
 
     if params.get("state").map(String::as_str) != Some(csrf_state.as_str()) {
         return Err("Ungültige Anmeldeantwort (state mismatch).".to_string());
@@ -126,7 +133,7 @@ pub async fn login_with_browser(app: tauri::AppHandle) -> Result<Account, String
             ("client_id", CLIENT_ID),
             ("grant_type", "authorization_code"),
             ("code", code.as_str()),
-            ("redirect_uri", redirect_uri.as_str()),
+            ("redirect_uri", redirect_uri),
             ("code_verifier", verifier.as_str()),
         ])
         .send()
