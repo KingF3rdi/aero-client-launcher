@@ -1,3 +1,6 @@
+import { Icon } from "@iconify/react";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import { isTauri } from "@tauri-apps/api/core";
 import { useAuthStore } from "../../store/useAuthStore";
 import { Button } from "../ui/Button";
 import { LarpMark } from "../ui/LarpMark";
@@ -12,9 +15,11 @@ const ACCENT = "#4f8eff";
  */
 export function LoginScreen() {
   const { loggingIn, loginError, login } = useAuthStore();
+  const win = isTauri() ? getCurrentWindow() : null;
 
   return (
     <div
+      data-tauri-drag-region
       className="h-screen w-screen flex items-center justify-center text-text relative overflow-hidden border-2 bg-black/50 backdrop-blur-lg"
       style={{
         backgroundImage: [
@@ -24,6 +29,23 @@ export function LoginScreen() {
         borderColor: `${ACCENT}30`,
       }}
     >
+      <div className="absolute top-0 right-0 flex items-center gap-3 px-5 py-4 z-20">
+        <button
+          onClick={() => win?.minimize()}
+          title="Minimieren"
+          className="text-white/50 hover:text-white transition-colors cursor-pointer"
+        >
+          <Icon icon="pixel:minus-solid" width={14} height={14} />
+        </button>
+        <button
+          onClick={() => win?.close()}
+          title="Schließen"
+          className="text-white/50 hover:text-danger transition-colors cursor-pointer"
+        >
+          <Icon icon="pixel:window-close-solid" width={14} height={14} />
+        </button>
+      </div>
+
       <div className="absolute inset-0 opacity-60">
         <ParticleField color={ACCENT} count={80} />
       </div>
