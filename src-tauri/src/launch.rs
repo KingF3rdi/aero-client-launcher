@@ -495,7 +495,7 @@ fn ensure_mod_jar(dir: &Path, instance: &Instance) -> Result<(), String> {
     // the mod. Also check next to the exe itself, so dropping the jar there
     // (however it gets there - manually, or a future packaging step) works
     // for the real installed app too.
-    let dev_relative = PathBuf::from("../liteclient/build/libs/larp-launcher-1.21-1.0.0.jar");
+    let dev_relative = PathBuf::from("../liteclient/build/libs/aero-client-1.21-1.0.0.jar");
     let next_to_exe = std::env::current_exe()
         .ok()
         .and_then(|exe| exe.parent().map(|p| p.join("aero-client.jar")));
