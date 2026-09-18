@@ -1,6 +1,3 @@
-import { useEffect } from "react";
-import { openUrl } from "@tauri-apps/plugin-opener";
-import { isTauri } from "@tauri-apps/api/core";
 import { useAuthStore } from "../../store/useAuthStore";
 import { Button } from "../ui/Button";
 import { LarpMark } from "../ui/LarpMark";
@@ -9,15 +6,12 @@ import { ParticleField } from "../effects/ParticleField";
 const ACCENT = "#4f8eff";
 
 /**
- * Microsoft device-code login: show a short code, open the browser to
- * microsoft.com/link, poll until the user finishes there. Simpler and more
- * modern than the "paste the redirect URL back in" flow the earlier Python/
- * C++ launcher prototypes used.
+ * Microsoft sign-in: opens the system browser straight at Microsoft's login
+ * page (authorization code + PKCE, redirected to a local one-shot listener) -
+ * no device code to type on a separate page.
  */
 export function LoginScreen() {
-  const { deviceCode, loginError, beginLogin, cancelLogin } = useAuthStore();
-
-  useEffect(() => () => cancelLogin(), [cancelLogin]);
+  const { loggingIn, loginError, login } = useAuthStore();
 
   return (
     <div
@@ -41,34 +35,9 @@ export function LoginScreen() {
         </h1>
         <p className="text-white/50 text-sm">Mit deinem Minecraft-Account anmelden</p>
 
-        {!deviceCode && (
-          <Button variant="primary" onClick={() => beginLogin()} className="mt-2">
-            Mit Microsoft anmelden
-          </Button>
-        )}
-
-        {deviceCode && (
-          <div
-            className="mt-2 flex flex-col items-center gap-3 rounded-xl bg-black/40 border border-white/10 backdrop-blur-lg px-6 py-5 w-full"
-            style={{ boxShadow: `0 0 20px ${ACCENT}20` }}
-          >
-            <p className="text-sm text-white/50">Code auf microsoft.com/link eingeben:</p>
-            <div className="text-3xl font-bold tracking-[0.3em] text-accent" style={{ textShadow: `0 0 16px ${ACCENT}60` }}>
-              {deviceCode.userCode}
-            </div>
-            <Button
-              variant="ghost"
-              onClick={() =>
-                isTauri()
-                  ? openUrl(deviceCode.verificationUri)
-                  : window.open(deviceCode.verificationUri, "_blank")
-              }
-            >
-              Browser öffnen
-            </Button>
-            <p className="text-xs text-white/40">Wird automatisch erkannt, sobald du dich angemeldet hast…</p>
-          </div>
-        )}
+        <Button variant="primary" onClick={() => login()} disabled={loggingIn} className="mt-2">
+          {loggingIn ? "Warte auf Anmeldung im Browser…" : "Mit Microsoft anmelden"}
+        </Button>
 
         {loginError && <p className="text-sm text-danger">{loginError}</p>}
 

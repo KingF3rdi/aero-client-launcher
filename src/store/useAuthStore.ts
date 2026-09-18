@@ -1,29 +1,26 @@
 import { create } from "zustand";
 import { invoke } from "../lib/tauri";
-import type { Account, AccountSummary, DeviceCodePollResult, DeviceCodeStart } from "../types/account";
+import type { Account, AccountSummary } from "../types/account";
 
 interface AuthState {
   account: Account | null;
   accounts: AccountSummary[];
   loading: boolean;
-  deviceCode: DeviceCodeStart | null;
+  loggingIn: boolean;
   loginError: string | null;
   init: () => Promise<void>;
   loadAccounts: () => Promise<void>;
-  beginLogin: () => Promise<void>;
-  cancelLogin: () => void;
+  login: () => Promise<void>;
   selectAccount: (uuid: string) => Promise<void>;
   removeAccount: (uuid: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
-let pollHandle: ReturnType<typeof setTimeout> | null = null;
-
 export const useAuthStore = create<AuthState>((set, get) => ({
   account: null,
   accounts: [],
   loading: true,
-  deviceCode: null,
+  loggingIn: false,
   loginError: null,
 
   init: async () => {
@@ -45,46 +42,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  beginLogin: async () => {
-    set({ loginError: null });
+  // Opens the system browser straight at Microsoft's sign-in page and waits
+  // for the Rust side's local redirect listener to catch the result - no
+  // device code to type, no polling loop on this side either.
+  login: async () => {
+    set({ loginError: null, loggingIn: true });
     try {
-      const start = await invoke<DeviceCodeStart>("begin_device_code_login");
-      set({ deviceCode: start });
-      const deadline = Date.now() + start.expiresIn * 1000;
-      const poll = async () => {
-        if (Date.now() > deadline) {
-          set({ deviceCode: null, loginError: "Login-Code abgelaufen. Bitte erneut versuchen." });
-          return;
-        }
-        try {
-          const result = await invoke<DeviceCodePollResult>("poll_device_code_login");
-          if (result.status === "success" && result.account) {
-            set({ account: result.account, deviceCode: null });
-            get().loadAccounts();
-            return;
-          }
-          if (result.status === "error") {
-            set({ deviceCode: null, loginError: result.message ?? "Login fehlgeschlagen." });
-            return;
-          }
-          // still pending - keep polling at the interval Microsoft asked for
-          pollHandle = setTimeout(poll, start.interval * 1000);
-        } catch (e) {
-          set({ deviceCode: null, loginError: String(e) });
-        }
-      };
-      pollHandle = setTimeout(poll, start.interval * 1000);
+      const account = await invoke<Account>("login_with_browser");
+      set({ account, loggingIn: false });
+      get().loadAccounts();
     } catch (e) {
-      set({ loginError: String(e) });
+      set({ loginError: String(e), loggingIn: false });
     }
-  },
-
-  cancelLogin: () => {
-    if (pollHandle) {
-      clearTimeout(pollHandle);
-      pollHandle = null;
-    }
-    set({ deviceCode: null });
   },
 
   selectAccount: async (uuid) => {

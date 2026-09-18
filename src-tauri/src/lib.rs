@@ -12,7 +12,6 @@ pub fn run() {
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
-        .manage(auth::AuthState::default())
         .manage(launch::GameState::default())
         .setup(|app| {
             if cfg!(debug_assertions) {
@@ -25,8 +24,7 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            auth::begin_device_code_login,
-            auth::poll_device_code_login,
+            auth::login_with_browser,
             auth::get_saved_account,
             auth::list_accounts,
             auth::select_account,

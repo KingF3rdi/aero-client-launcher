@@ -12,18 +12,3 @@ export interface AccountSummary {
   uuid: string;
   active: boolean;
 }
-
-export interface DeviceCodeStart {
-  userCode: string;
-  verificationUri: string;
-  expiresIn: number;
-  interval: number;
-}
-
-export type DeviceCodePollStatus = "pending" | "success" | "expired" | "error";
-
-export interface DeviceCodePollResult {
-  status: DeviceCodePollStatus;
-  account?: Account;
-  message?: string;
-}

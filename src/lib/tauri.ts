@@ -133,15 +133,12 @@ const DEV_MOCKS: Record<string, MockFn> = {
     modEnabled: false,
     ramGb: null,
   }),
-  begin_device_code_login: () => ({
-    userCode: "ABCD-EFGH",
-    verificationUri: "https://microsoft.com/link",
-    expiresIn: 900,
-    interval: 5,
-  }),
-  poll_device_code_login: () => ({
-    status: "pending",
-  }),
+  login_with_browser: () => {
+    const account = { name: "DevTester", uuid: "dev-uuid", mcToken: "dev-token", skinUrl: null };
+    if (!mockAccounts.some((a) => a.uuid === account.uuid)) mockAccounts.push(account);
+    mockActiveUuid = account.uuid;
+    return account;
+  },
   launch_instance: () => null,
   stop_instance: () => null,
   logout: () => null,
