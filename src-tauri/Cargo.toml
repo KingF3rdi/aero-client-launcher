@@ -1,8 +1,8 @@
 [package]
 name = "app"
 version = "0.1.0"
-description = "Larp Launcher"
-authors = ["Larp"]
+description = "Aero Client - open-source Minecraft launcher"
+authors = ["Aero Client contributors"]
 license = ""
 repository = ""
 edition = "2021"
