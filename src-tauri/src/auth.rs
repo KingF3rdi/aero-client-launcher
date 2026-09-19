@@ -15,6 +15,7 @@ use std::time::Duration;
 
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
 use rand::RngCore;
+use sha2::{Digest, Sha256};
 
 use crate::state::{self, StoredAccount};
 
@@ -26,12 +27,13 @@ pub struct AccountSummary {
     pub active: bool,
 }
 
-// Mojang's official-launcher client ID: works for any normal purchased Minecraft account with
-// no Azure app registration. A launcher's own Azure app is rejected by login_with_xbox
-// ("Invalid app registration") until Mojang manually approves it via https://aka.ms/AppRegInfo.
-const CLIENT_ID: &str = "00000000402b5328";
-const SCOPE: &str = "service::user.auth.xboxlive.com::MBI_SSL";
-const REDIRECT_URI: &str = "https://login.live.com/oauth20_desktop.srf";
+// Registered under this launcher's own Azure app (Microsoft killed the old
+// shared/hardcoded client ID other unofficial launchers relied on - see
+// portal.azure.com App registrations, "Personal Microsoft accounts only",
+// with a "Mobile and desktop applications" platform redirect of
+// "http://localhost").
+const CLIENT_ID: &str = "93dc5f4d-de19-4dff-b7d8-1a3739dce372";
+const SCOPE: &str = "XboxLive.signin offline_access";
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -60,19 +62,24 @@ fn random_url_safe(len: usize) -> String {
 /// instead of letting it actually load (nothing needs to be listening there).
 #[tauri::command]
 pub async fn login_with_browser(app: tauri::AppHandle) -> Result<Account, String> {
-    let redirect_uri = REDIRECT_URI;
+    let redirect_uri = "http://localhost";
 
+    let verifier = random_url_safe(64);
+    let challenge = URL_SAFE_NO_PAD.encode(Sha256::digest(verifier.as_bytes()));
     let csrf_state = random_url_safe(16);
 
-    let mut authorize_url = url::Url::parse("https://login.live.com/oauth20_authorize.srf")
+    let mut authorize_url = url::Url::parse("https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize")
         .map_err(|e| e.to_string())?;
     authorize_url
         .query_pairs_mut()
         .append_pair("client_id", CLIENT_ID)
         .append_pair("response_type", "code")
         .append_pair("redirect_uri", redirect_uri)
+        .append_pair("response_mode", "query")
         .append_pair("scope", SCOPE)
-        .append_pair("state", &csrf_state);
+        .append_pair("state", &csrf_state)
+        .append_pair("code_challenge", &challenge)
+        .append_pair("code_challenge_method", "S256");
 
     let (tx, rx) = tokio::sync::oneshot::channel::<Result<HashMap<String, String>, String>>();
     let tx = Arc::new(Mutex::new(Some(tx)));
@@ -131,12 +138,13 @@ pub async fn login_with_browser(app: tauri::AppHandle) -> Result<Account, String
     let code = params.get("code").ok_or("Kein Code von Microsoft erhalten.")?;
 
     let res: serde_json::Value = client()
-        .post("https://login.live.com/oauth20_token.srf")
+        .post("https://login.microsoftonline.com/consumers/oauth2/v2.0/token")
         .form(&[
             ("client_id", CLIENT_ID),
             ("grant_type", "authorization_code"),
             ("code", code.as_str()),
             ("redirect_uri", redirect_uri),
+            ("code_verifier", verifier.as_str()),
         ])
         .send()
         .await
@@ -168,29 +176,23 @@ async fn finish_login(ms_access: &str, ms_refresh: &str) -> Result<Account, Stri
 async fn login_with_ms(ms_access: &str) -> Result<Account, String> {
     let http = client();
 
-    let mut xbox = serde_json::Value::Null;
-    for prefix in ["t", "d"] {
-        xbox = http
-            .post("https://user.auth.xboxlive.com/user/authenticate")
-            .json(&json!({
-                "Properties": {
-                    "AuthMethod": "RPS",
-                    "SiteName": "user.auth.xboxlive.com",
-                    "RpsTicket": format!("{prefix}={ms_access}"),
-                },
-                "RelyingParty": "http://auth.xboxlive.com",
-                "TokenType": "JWT",
-            }))
-            .send()
-            .await
-            .map_err(|e| e.to_string())?
-            .json()
-            .await
-            .map_err(|e| e.to_string())?;
-        if xbox["Token"].is_string() {
-            break;
-        }
-    }
+    let xbox: serde_json::Value = http
+        .post("https://user.auth.xboxlive.com/user/authenticate")
+        .json(&json!({
+            "Properties": {
+                "AuthMethod": "RPS",
+                "SiteName": "user.auth.xboxlive.com",
+                "RpsTicket": format!("d={ms_access}"),
+            },
+            "RelyingParty": "http://auth.xboxlive.com",
+            "TokenType": "JWT",
+        }))
+        .send()
+        .await
+        .map_err(|e| e.to_string())?
+        .json()
+        .await
+        .map_err(|e| e.to_string())?;
     let xbox_token = xbox["Token"].as_str().ok_or("Xbox Live hat kein Token geliefert")?;
 
     let xsts: serde_json::Value = http
@@ -260,13 +262,11 @@ async fn login_with_ms(ms_access: &str) -> Result<Account, String> {
 async fn refresh_with_ms(refresh_token: &str) -> Result<(String, String), String> {
     let http = client();
     let res: serde_json::Value = http
-        .post("https://login.live.com/oauth20_token.srf")
+        .post("https://login.microsoftonline.com/consumers/oauth2/v2.0/token")
         .form(&[
             ("client_id", CLIENT_ID),
             ("grant_type", "refresh_token"),
             ("refresh_token", refresh_token),
-            ("redirect_uri", REDIRECT_URI),
-            ("scope", SCOPE),
         ])
         .send()
         .await
