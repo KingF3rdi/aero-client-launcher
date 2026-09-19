@@ -23,6 +23,21 @@ use tauri::{Emitter, Manager};
 /// show in it anyway - it'd just flash on screen and worry people).
 #[cfg(windows)]
 const CREATE_NO_WINDOW: u32 = 0x08000000;
+/// Windows HIGH_PRIORITY_CLASS: the game gets scheduled ahead of background apps.
+#[cfg(windows)]
+const HIGH_PRIORITY_CLASS: u32 = 0x00000080;
+
+/// Tells Windows to run this java on the fast (discrete) GPU instead of the integrated one.
+#[cfg(windows)]
+fn prefer_high_performance_gpu(java: &str) {
+    use std::os::windows::process::CommandExt;
+    let _ = std::process::Command::new("reg")
+        .args(["add", r"HKCU\Software\Microsoft\DirectX\UserGpuPreferences", "/v"])
+        .arg(java)
+        .args(["/t", "REG_SZ", "/d", "GpuPreference=2;", "/f"])
+        .creation_flags(CREATE_NO_WINDOW)
+        .output();
+}
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -184,7 +199,8 @@ async fn launch_inner(
     let mut cmd = tokio::process::Command::new(&java);
     cmd.current_dir(dir)
         .arg(format!("-Xmx{effective_ram_gb}G"))
-        .arg(format!("-Xms{}G", (effective_ram_gb / 2).max(1)))
+        // Fixed-size heap: no resize pauses while playing.
+        .arg(format!("-Xms{effective_ram_gb}G"))
         // GC tuning for smooth frame times: short, frequent young collections instead of long pauses.
         .args([
             "-XX:+UnlockExperimentalVMOptions",
@@ -196,6 +212,9 @@ async fn launch_inner(
             "-XX:MaxGCPauseMillis=40",
             "-XX:+ParallelRefProcEnabled",
             "-XX:+DisableExplicitGC",
+            "-XX:ReservedCodeCacheSize=400M",
+            "-XX:+PerfDisableSharedMem",
+            "-XX:-DontCompileHugeMethods",
         ])
         .arg(format!("-Djava.library.path={}", natives_placeholder.display()))
         .arg("-cp")
@@ -224,7 +243,10 @@ async fn launch_inner(
         .stderr(Stdio::from(launcher_log_err))
         .kill_on_drop(true);
     #[cfg(windows)]
-    cmd.creation_flags(CREATE_NO_WINDOW);
+    {
+        prefer_high_performance_gpu(&java);
+        cmd.creation_flags(CREATE_NO_WINDOW | HIGH_PRIORITY_CLASS);
+    }
 
     let child = cmd.spawn().map_err(|e| format!("Minecraft konnte nicht gestartet werden: {e}"))?;
 
