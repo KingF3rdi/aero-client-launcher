@@ -78,6 +78,7 @@ pub async fn login_with_browser(app: tauri::AppHandle) -> Result<Account, String
     let tx = Arc::new(Mutex::new(Some(tx)));
 
     let tx_nav = tx.clone();
+    let tx_load = tx.clone();
     let window = tauri::WebviewWindowBuilder::new(&app, "ms-login", tauri::WebviewUrl::External(authorize_url))
         .title("Mit Microsoft anmelden")
         .inner_size(480.0, 720.0)
@@ -91,6 +92,15 @@ pub async fn login_with_browser(app: tauri::AppHandle) -> Result<Account, String
                 false
             } else {
                 true
+            }
+        })
+        .on_page_load(move |_, payload| {
+            // Fallback if a redirect slipped past on_navigation: catch it once the page loads.
+            let url = payload.url();
+            if url.as_str().starts_with(redirect_uri) {
+                if let Some(sender) = tx_load.lock().unwrap().take() {
+                    let _ = sender.send(Ok(url.query_pairs().into_owned().collect()));
+                }
             }
         })
         .build()
