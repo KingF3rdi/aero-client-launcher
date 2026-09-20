@@ -549,7 +549,7 @@ async fn ensure_mod_jar(dir: &Path, instance: &Instance, log_path: &Path) -> Res
     Ok(())
 }
 
-const MOD_RELEASE_API: &str = "https://api.github.com/repos/KingF3rdi/aero-client/releases/latest";
+const MOD_RELEASE_API: &str = "https://api.github.com/repos/KingF3rdi/aero-client-launcher/releases/latest";
 
 /// Returns Ok(true) when the mods folder now holds the latest release jar (already current or freshly
 /// downloaded), Ok(false) when there is no release to use.

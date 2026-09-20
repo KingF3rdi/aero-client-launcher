@@ -2,6 +2,7 @@ mod auth;
 mod content;
 mod instances;
 mod launch;
+mod selfupdate;
 mod skin;
 mod state;
 
@@ -14,6 +15,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .manage(launch::GameState::default())
         .setup(|app| {
+            tauri::async_runtime::spawn(selfupdate::check(app.handle().clone()));
             if cfg!(debug_assertions) {
                 app.handle().plugin(
                     tauri_plugin_log::Builder::default()
