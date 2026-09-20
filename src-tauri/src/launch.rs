@@ -549,6 +549,7 @@ async fn ensure_mod_jar(dir: &Path, instance: &Instance, log_path: &Path) -> Res
     Ok(())
 }
 
+const MOD_COUNTED_URL: &str = "https://aero.gamekni9ht.workers.dev/download/mod";
 const MOD_RELEASE_API: &str = "https://api.github.com/repos/KingF3rdi/aero-client-launcher/releases/latest";
 
 /// Returns Ok(true) when the mods folder now holds the latest release jar (already current or freshly
@@ -588,16 +589,26 @@ async fn update_mod_from_github(dir: &Path, log_path: &Path) -> Result<bool, Str
     if jar.is_file() && std::fs::read_to_string(&version_file).map(|v| v.trim() == stamp).unwrap_or(false) {
         return Ok(true);
     }
-    let bytes = http
-        .get(url)
-        .send()
-        .await
-        .map_err(|e| e.to_string())?
-        .error_for_status()
-        .map_err(|e| e.to_string())?
-        .bytes()
-        .await
-        .map_err(|e| e.to_string())?;
+    // Go through the Aero server first (it counts the download and redirects to the same release asset),
+    // and fall back to GitHub directly if it is unreachable.
+    let counted = async {
+        let r = http.get(MOD_COUNTED_URL).send().await.ok()?.error_for_status().ok()?;
+        r.bytes().await.ok()
+    }
+    .await;
+    let bytes = match counted {
+        Some(b) if b.len() >= 10_000 => b,
+        _ => http
+            .get(url)
+            .send()
+            .await
+            .map_err(|e| e.to_string())?
+            .error_for_status()
+            .map_err(|e| e.to_string())?
+            .bytes()
+            .await
+            .map_err(|e| e.to_string())?,
+    };
     if bytes.len() < 10_000 {
         return Err("Heruntergeladene Mod-Datei ist zu klein".to_string());
     }
