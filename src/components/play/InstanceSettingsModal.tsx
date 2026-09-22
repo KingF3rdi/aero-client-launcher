@@ -106,7 +106,7 @@ export function InstanceSettingsModal({ instance, onClose, initialTab }: Instanc
                   Löscht diese Instanz dauerhaft, inklusive Welten, Mods und Configs. Kann nicht rückgängig gemacht werden.
                 </p>
                 {!confirmDelete ? (
-                  <Button variant="ghost" className="!text-danger !border-danger/30 hover:!bg-danger/10" onClick={() => setConfirmDelete(true)}>
+                  <Button variant="danger" onClick={() => setConfirmDelete(true)}>
                     <Icon icon="solar:trash-bin-trash-bold" width={16} height={16} />
                     Löschen
                   </Button>
@@ -114,8 +114,7 @@ export function InstanceSettingsModal({ instance, onClose, initialTab }: Instanc
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-white/60">Wirklich löschen?</span>
                     <Button
-                      variant="ghost"
-                      className="!text-danger !border-danger/30 hover:!bg-danger/10"
+                      variant="danger"
                       disabled={busy}
                       onClick={async () => {
                         setBusy(true);
@@ -210,7 +209,7 @@ function LogsTab({ instanceId }: { instanceId: string }) {
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <span className="text-xs uppercase tracking-wide text-white/40">latest.log</span>
-        <Button variant="ghost" onClick={load} disabled={loading}>
+        <Button variant="ghost" size="sm" onClick={load} disabled={loading}>
           <Icon icon="solar:refresh-bold" width={14} height={14} />
           Aktualisieren
         </Button>

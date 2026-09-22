@@ -23,7 +23,7 @@ export function InstanceCard({ instance, selected, onSelect, onSettings, onLogs,
       )}
       style={selected ? { boxShadow: "0 0 12px rgba(79,142,255,0.25)" } : undefined}
     >
-      <button onClick={onSelect} className="w-full text-left px-3 py-3 pr-12 cursor-pointer flex items-center gap-2">
+      <button onClick={onSelect} className="w-full text-left px-3 py-3 pr-14 cursor-pointer flex items-center gap-2">
         <div className="w-7 h-7 shrink-0 rounded-md bg-black/40 border border-white/10 flex items-center justify-center">
           <Icon icon="solar:box-bold" width={14} height={14} className="text-accent" />
         </div>
@@ -43,9 +43,9 @@ export function InstanceCard({ instance, selected, onSelect, onSettings, onLogs,
               onPlay();
             }}
             title="Starten"
-            className="w-6 h-6 flex items-center justify-center rounded-md text-white/0 group-hover:text-accent hover:!bg-accent/20 transition-all cursor-pointer"
+            className="w-7 h-7 flex items-center justify-center rounded-md text-white/0 group-hover:text-accent hover:!bg-accent/20 transition-all cursor-pointer"
           >
-            <Icon icon="solar:play-bold" width={14} height={14} />
+            <Icon icon="solar:play-bold" width={16} height={16} />
           </button>
         )}
         {onLogs && (
@@ -55,9 +55,9 @@ export function InstanceCard({ instance, selected, onSelect, onSettings, onLogs,
               onLogs();
             }}
             title="Logs"
-            className="w-6 h-6 flex items-center justify-center rounded-md text-white/0 group-hover:text-white/50 hover:!text-white hover:bg-white/10 transition-all cursor-pointer"
+            className="w-7 h-7 flex items-center justify-center rounded-md text-white/0 group-hover:text-white/50 hover:!text-white hover:bg-white/10 transition-all cursor-pointer"
           >
-            <Icon icon="solar:document-text-bold" width={14} height={14} />
+            <Icon icon="solar:document-text-bold" width={16} height={16} />
           </button>
         )}
         {onSettings && (
@@ -67,9 +67,9 @@ export function InstanceCard({ instance, selected, onSelect, onSettings, onLogs,
               onSettings();
             }}
             title="Instanz-Einstellungen"
-            className="w-6 h-6 flex items-center justify-center rounded-md text-white/0 group-hover:text-white/50 hover:!text-white hover:bg-white/10 transition-all cursor-pointer"
+            className="w-7 h-7 flex items-center justify-center rounded-md text-white/0 group-hover:text-white/50 hover:!text-white hover:bg-white/10 transition-all cursor-pointer"
           >
-            <Icon icon="solar:settings-bold" width={14} height={14} />
+            <Icon icon="solar:settings-bold" width={16} height={16} />
           </button>
         )}
       </div>

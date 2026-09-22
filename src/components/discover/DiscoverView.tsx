@@ -152,7 +152,7 @@ export function DiscoverView() {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && search()}
           placeholder={`${TABS.find((t) => t.id === tab)?.label} durchsuchen…`}
-          className="flex-1 rounded-lg bg-black/40 border border-white/10 px-3 py-2 text-sm focus:outline-none focus:border-accent/50"
+          className="flex-1 h-10 rounded-lg bg-black/40 border border-white/10 px-3 text-sm focus:outline-none focus:border-accent/50"
         />
         <Button variant="ghost" onClick={search} disabled={loading}>
           <Icon icon="solar:magnifer-bold" width={16} height={16} />
@@ -165,7 +165,7 @@ export function DiscoverView() {
             <select
               value={targetInstance?.id ?? ""}
               onChange={(e) => setTargetInstanceId(e.target.value)}
-              className="rounded-lg bg-black/40 border border-white/10 px-2 py-2 text-xs focus:outline-none focus:border-accent/50"
+              className="h-10 rounded-lg bg-black/40 border border-white/10 px-2 text-xs focus:outline-none focus:border-accent/50"
             >
               {instances.map((i) => (
                 <option key={i.id} value={i.id}>

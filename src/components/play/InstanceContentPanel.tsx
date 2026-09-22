@@ -110,27 +110,23 @@ export function InstanceContentPanel({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex gap-2">
-        <Button variant="ghost" onClick={onBrowse}>
+      <div className="flex flex-wrap gap-2">
+        <Button variant="ghost" size="sm" onClick={onBrowse}>
           <Icon icon="solar:compass-bold" width={16} height={16} />
           Mods durchsuchen
         </Button>
-        <Button variant="ghost" onClick={onLoadModpack}>
+        <Button variant="ghost" size="sm" onClick={onLoadModpack}>
           <Icon icon="solar:download-minimalistic-bold" width={16} height={16} />
           Modpack laden
         </Button>
-        <Button variant="ghost" onClick={exportPack} disabled={exporting}>
+        <Button variant="ghost" size="sm" onClick={exportPack} disabled={exporting}>
           <Icon icon="solar:upload-minimalistic-bold" width={16} height={16} />
           {exporting ? "Exportiert…" : "Modpack exportieren"}
         </Button>
         {onSettings && (
-          <button
-            onClick={onSettings}
-            title="Instanz-Einstellungen"
-            className="w-9 h-9 flex items-center justify-center rounded-lg border border-white/10 text-white/50 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-          >
+          <Button variant="ghost" size="icon" onClick={onSettings} title="Instanz-Einstellungen" className="ml-auto">
             <Icon icon="solar:settings-bold" width={16} height={16} />
-          </button>
+          </Button>
         )}
       </div>
 

@@ -76,21 +76,12 @@ export function PlayView() {
                 </p>
               </div>
               {busy || isRunning ? (
-                <Button
-                  variant="stop"
-                  onClick={() => stop()}
-                  className="ml-auto !px-8 !py-4 !text-lg"
-                >
+                <Button variant="stop" size="lg" onClick={() => stop()} className="ml-auto">
                   <Icon icon="solar:stop-bold" width={26} height={26} />
                   Stop
                 </Button>
               ) : (
-                <Button
-                  variant="play"
-                  disabled={!account}
-                  onClick={() => account && play(account)}
-                  className="ml-auto !px-8 !py-4 !text-lg"
-                >
+                <Button variant="play" size="lg" disabled={!account} onClick={() => account && play(account)} className="ml-auto">
                   <Icon icon="solar:play-bold" width={26} height={26} />
                   Play
                 </Button>

@@ -6,6 +6,7 @@ import { useInstanceStore } from "../../store/useInstanceStore";
 import { InstanceSettingsModal, type Tab } from "./InstanceSettingsModal";
 import { AddInstanceModal } from "./AddInstanceModal";
 import { ModCountBadge } from "./ModCountBadge";
+import { Button } from "../ui/Button";
 
 /** Full-grid overview of every instance - the "instances" nav tab, separate from
  * Play's compact sidebar list. */
@@ -27,13 +28,10 @@ export function InstancesView() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold tracking-wide">Instanzen</h2>
-        <button
-          onClick={() => setAdding(true)}
-          className="flex items-center gap-2 rounded-lg bg-accent/15 border border-accent/40 text-accent px-3 py-1.5 text-sm hover:bg-accent/25 transition-colors cursor-pointer"
-        >
+        <Button variant="accent" size="sm" onClick={() => setAdding(true)}>
           <Icon icon="solar:add-circle-bold" width={16} height={16} />
           Neue Instanz
-        </button>
+        </Button>
       </div>
       <div className="grid grid-cols-3 gap-4">
         {instances.map((instance) => (
