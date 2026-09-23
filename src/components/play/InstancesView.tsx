@@ -37,7 +37,7 @@ export function InstancesView() {
         {instances.map((instance) => (
           <div
             key={instance.id}
-            className="group relative flex flex-col items-start gap-3 bg-black/30 border-2 border-accent/30 backdrop-blur p-5 hover:border-accent/40 hover:bg-accent/10 transition-all"
+            className="group relative flex flex-col items-start gap-3 bg-black/30 border border-accent/30 backdrop-blur p-5 hover:border-accent/40 hover:bg-accent/10 transition-all"
           >
             <button
               onClick={() => {

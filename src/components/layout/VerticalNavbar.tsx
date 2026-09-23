@@ -21,7 +21,7 @@ interface VerticalNavbarProps {
 export function VerticalNavbar({ items, activeItem, onItemClick, onAddInstance }: VerticalNavbarProps) {
   const labels = useThemeStore((s) => s.sidebarLabels);
   return (
-    <div className="h-full w-24 flex flex-col items-center border-r-2 border-accent/40 bg-accent/10 backdrop-blur-lg py-4 gap-3 relative z-10">
+    <div className="h-full w-24 flex flex-col items-center border-r border-accent/40 bg-accent/10 backdrop-blur-lg py-4 gap-3 relative z-10">
       <button onClick={onAddInstance} title="Neues Profil" className="mb-3 cursor-pointer transition-transform hover:scale-105">
         <LarpMark size={34} />
       </button>
@@ -46,12 +46,13 @@ function NavButton({ item, active, labels, onClick }: { item: NavItem; active: b
       onClick={onClick}
       title={item.label}
       className={clsx(
-        "flex flex-col items-center justify-center gap-1.5 w-16 transition-colors cursor-pointer border-2",
+        "relative flex flex-col items-center justify-center gap-1.5 w-16 transition-colors cursor-pointer",
         labels ? "h-16" : "h-12",
-        active ? "text-white border-accent border-b-4 bg-accent/25" : "text-white/55 border-transparent hover:text-white hover:bg-white/5",
+        active ? "text-white bg-accent/20" : "text-white/50 hover:text-white hover:bg-white/5",
       )}
     >
-      <Icon icon={item.icon} width={26} height={26} />
+      {active && <span className="absolute -left-4 top-2 bottom-2 w-1 bg-accent" />}
+      <Icon icon={item.icon} width={24} height={24} className={active ? "text-accent" : ""} />
       {labels && <span className="label-mc text-[9px]">{item.label}</span>}
     </button>
   );

@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { Icon } from "@iconify/react";
 
 interface ModalProps {
@@ -9,7 +10,9 @@ interface ModalProps {
   width?: number;
 }
 
-/** Shared overlay+panel shell for every modal in the app (instance settings, add instance, …). */
+/** Shared overlay+panel shell for every modal in the app (instance settings, add instance, …).
+ * Rendered into <body> through a portal: opened from inside a blurred bar (header, dropdown), a
+ * "fixed" overlay would otherwise be positioned inside that bar instead of centered on the window. */
 export function Modal({ title, subtitle, onClose, children, width = 560 }: ModalProps) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -17,17 +20,17 @@ export function Modal({ title, subtitle, onClose, children, width = 560 }: Modal
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       onClick={onClose}
     >
       <div
-        className="w-full bg-[#110f19]/95 border-2 border-accent/50 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.5)] overflow-hidden"
+        className="w-full bg-[#110f19]/95 border border-accent/50 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.5)] overflow-hidden"
         style={{ maxWidth: width }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b-2 border-accent/30 bg-accent/10">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-accent/30 bg-accent/10">
           <div>
             <h3 className="label-mc text-sm">{title}</h3>
             {subtitle && <p className="text-xs text-white/40 mt-0.5">{subtitle}</p>}
@@ -41,6 +44,7 @@ export function Modal({ title, subtitle, onClose, children, width = 560 }: Modal
         </div>
         <div className="max-h-[70vh] overflow-y-auto">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

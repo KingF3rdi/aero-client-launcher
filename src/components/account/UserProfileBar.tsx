@@ -13,7 +13,7 @@ export function UserProfileBar() {
     <div className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="label-mc h-10 flex items-center gap-2.5 border-2 border-accent/50 bg-black/30 pl-1.5 pr-3 text-[11px] hover:bg-accent/15 transition-colors cursor-pointer"
+        className="label-mc h-10 flex items-center gap-2.5 border border-accent/50 bg-black/30 pl-1.5 pr-3 text-[11px] hover:bg-accent/15 transition-colors cursor-pointer"
       >
         <img src={`https://mc-heads.net/avatar/${account.uuid}/24`} alt="" className="h-6 w-6" style={{ imageRendering: "pixelated" }} />
         {account.name}

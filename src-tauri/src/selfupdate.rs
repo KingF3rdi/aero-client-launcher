@@ -1,26 +1,23 @@
-//! Launcher self-update: on start, compares the newest GitHub release of the launcher repo with this
-//! build's version and, if newer, swaps the exe in place (a small script waits for this process to exit).
+//! Launcher self-update. The release repo is shared with the mod (tags follow the mod's version), so the
+//! launcher doesn't compare tags: it takes the newest stable .exe asset across recent releases and compares
+//! that asset's id with the one it last installed (stamp file next to the exe). A newer asset is swapped in
+//! place; a small script waits for this process to exit.
 
 use std::path::PathBuf;
 
-const RELEASE_API: &str = "https://api.github.com/repos/KingF3rdi/aero-client-launcher/releases/latest";
+const RELEASES_API: &str = "https://api.github.com/repos/KingF3rdi/aero-client-launcher/releases?per_page=30";
+const STAMP: &str = ".aero-launcher.version";
 
-fn parse(v: &str) -> Vec<u64> {
-    v.trim_start_matches(['v', 'V'])
-        .split('.')
-        .map(|p| p.chars().take_while(|c| c.is_ascii_digit()).collect::<String>().parse().unwrap_or(0))
-        .collect()
-}
-
-fn is_newer(remote: &str, local: &str) -> bool {
-    let (r, l) = (parse(remote), parse(local));
-    for i in 0..r.len().max(l.len()) {
-        let (a, b) = (r.get(i).copied().unwrap_or(0), l.get(i).copied().unwrap_or(0));
-        if a != b {
-            return a > b;
-        }
-    }
-    false
+/// (asset id, download url) of the most recently uploaded launcher exe in a stable (non-prerelease) release.
+fn newest_exe(releases: &serde_json::Value) -> Option<(u64, String)> {
+    releases
+        .as_array()?
+        .iter()
+        .filter(|r| !r["draft"].as_bool().unwrap_or(false) && !r["prerelease"].as_bool().unwrap_or(false))
+        .flat_map(|r| r["assets"].as_array().cloned().unwrap_or_default())
+        .filter(|a| a["name"].as_str().map(|n| n.to_lowercase().ends_with(".exe")).unwrap_or(false))
+        .max_by(|a, b| a["updated_at"].as_str().unwrap_or("").cmp(b["updated_at"].as_str().unwrap_or("")))
+        .and_then(|a| Some((a["id"].as_u64()?, a["browser_download_url"].as_str()?.to_string())))
 }
 
 async fn try_update() -> Result<bool, String> {
@@ -29,31 +26,34 @@ async fn try_update() -> Result<bool, String> {
         .timeout(std::time::Duration::from_secs(120))
         .build()
         .map_err(|e| e.to_string())?;
-    let rel: serde_json::Value = http
-        .get(RELEASE_API)
+    let releases: serde_json::Value = http
+        .get(RELEASES_API)
         .send().await.map_err(|e| e.to_string())?
         .error_for_status().map_err(|e| e.to_string())?
         .json().await.map_err(|e| e.to_string())?;
-    let tag = rel["tag_name"].as_str().unwrap_or("");
-    if !is_newer(tag, env!("CARGO_PKG_VERSION")) {
-        return Ok(false);
-    }
-    let Some(url) = rel["assets"].as_array().and_then(|a| {
-        a.iter()
-            .find(|x| x["name"].as_str().map(|n| n.to_lowercase().ends_with(".exe")).unwrap_or(false))
-            .and_then(|x| x["browser_download_url"].as_str())
-    }) else {
+    let Some((asset_id, url)) = newest_exe(&releases) else {
         return Ok(false);
     };
-    let bytes = http.get(url).send().await.map_err(|e| e.to_string())?
+    let current: PathBuf = std::env::current_exe().map_err(|e| e.to_string())?;
+    let dir = current.parent().ok_or("kein Ordner")?.to_path_buf();
+    let stamp = dir.join(STAMP);
+    match std::fs::read_to_string(&stamp) {
+        Ok(s) if s.trim() == asset_id.to_string() => return Ok(false),
+        // No stamp yet: a freshly downloaded launcher is the current release, so just remember it.
+        Err(_) => {
+            let _ = std::fs::write(&stamp, asset_id.to_string());
+            return Ok(false);
+        }
+        Ok(_) => {}
+    }
+    let bytes = http.get(&url).send().await.map_err(|e| e.to_string())?
         .error_for_status().map_err(|e| e.to_string())?
         .bytes().await.map_err(|e| e.to_string())?;
     // A launcher exe is many MB; anything tiny is an error page, never replace ourselves with it.
     if bytes.len() < 1_000_000 || &bytes[..2] != b"MZ" {
         return Err("Update-Datei ist keine gueltige exe".to_string());
     }
-    let current: PathBuf = std::env::current_exe().map_err(|e| e.to_string())?;
-    let dir = current.parent().ok_or("kein Ordner")?.to_path_buf();
+    std::fs::write(&stamp, asset_id.to_string()).map_err(|e| e.to_string())?;
     let new_exe = dir.join("Aero Client.update.exe");
     std::fs::write(&new_exe, &bytes).map_err(|e| e.to_string())?;
     let script = dir.join("aero-update.cmd");
@@ -82,5 +82,22 @@ pub async fn check(app: tauri::AppHandle) {
     }
     if let Ok(true) = try_update().await {
         app.exit(0);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::newest_exe;
+
+    #[test]
+    fn picks_newest_stable_exe_across_releases() {
+        let rels = serde_json::json!([
+            {"draft": false, "prerelease": false, "assets": [{"id": 1, "name": "aero-client.jar", "updated_at": "2026-09-23", "browser_download_url": "j"}]},
+            {"draft": false, "prerelease": true, "assets": [{"id": 2, "name": "Aero-Client.exe", "updated_at": "2026-09-24", "browser_download_url": "beta"}]},
+            {"draft": false, "prerelease": false, "assets": [{"id": 3, "name": "Aero-Client.exe", "updated_at": "2026-09-22", "browser_download_url": "new"}]},
+            {"draft": false, "prerelease": false, "assets": [{"id": 4, "name": "Aero-Client.exe", "updated_at": "2026-09-01", "browser_download_url": "old"}]}
+        ]);
+        assert_eq!(newest_exe(&rels), Some((3, "new".to_string())));
+        assert_eq!(newest_exe(&serde_json::json!([])), None);
     }
 }

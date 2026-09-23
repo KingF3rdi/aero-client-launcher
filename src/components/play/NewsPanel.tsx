@@ -54,8 +54,8 @@ export function NewsPanel() {
   }, []);
 
   return (
-    <aside className="w-80 shrink-0 border-l-2 border-accent/40 bg-black/25 backdrop-blur flex flex-col">
-      <div className="label-mc flex items-center gap-2 px-4 h-12 border-b-2 border-accent/30 text-xs">
+    <aside className="w-80 shrink-0 border-l border-accent/40 bg-black/25 backdrop-blur flex flex-col">
+      <div className="label-mc flex items-center gap-2 px-4 h-12 border-b border-accent/30 text-xs">
         <Icon icon="solar:document-text-bold" width={16} height={16} className="text-accent" />
         News
       </div>
@@ -74,7 +74,7 @@ export function NewsPanel() {
                 openUrl(n.url);
               }
             }}
-            className="block border-2 border-accent/30 bg-black/30 hover:border-accent/70 hover:bg-accent/10 transition-colors p-3"
+            className="block border border-accent/30 bg-black/30 hover:border-accent/70 hover:bg-accent/10 transition-colors p-3"
           >
             <div className="flex items-center gap-2 mb-1.5">
               <span className="label-mc text-[11px] text-white truncate flex-1">{n.title}</span>

@@ -79,7 +79,10 @@ pub async fn login_with_browser(app: tauri::AppHandle) -> Result<Account, String
         .append_pair("scope", SCOPE)
         .append_pair("state", &csrf_state)
         .append_pair("code_challenge", &challenge)
-        .append_pair("code_challenge_method", "S256");
+        .append_pair("code_challenge_method", "S256")
+        // Always show Microsoft's account picker instead of silently reusing the account that is already
+        // signed in in this webview (otherwise "Add account" just logs the same account in again).
+        .append_pair("prompt", "select_account");
 
     let (tx, rx) = tokio::sync::oneshot::channel::<Result<HashMap<String, String>, String>>();
     let tx = Arc::new(Mutex::new(Some(tx)));

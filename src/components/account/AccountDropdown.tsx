@@ -16,13 +16,14 @@ export function AccountDropdown({ open, onClose }: AccountDropdownProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!open) return;
+    // While the "add account" modal is up, clicks land in it (outside this dropdown) - don't close then.
+    if (!open || adding) return;
     const onClick = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) onClose();
     };
     window.addEventListener("mousedown", onClick);
     return () => window.removeEventListener("mousedown", onClick);
-  }, [open, onClose]);
+  }, [open, adding, onClose]);
 
   if (!open) return null;
 
@@ -30,7 +31,7 @@ export function AccountDropdown({ open, onClose }: AccountDropdownProps) {
     <>
       <div
         ref={ref}
-        className="absolute right-0 top-[calc(100%+10px)] w-72 bg-[#110f19]/95 border-2 border-accent/50 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.5)] overflow-hidden z-40"
+        className="absolute right-0 top-[calc(100%+10px)] w-72 bg-[#110f19]/95 border border-accent/50 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.5)] overflow-hidden z-40"
       >
         <div className="px-4 py-3 border-b border-white/10">
           <span className="text-xs label-mc text-white/40">Accounts</span>

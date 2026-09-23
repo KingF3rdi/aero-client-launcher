@@ -14,24 +14,23 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const SIZE = {
   sm: "h-9 px-3.5 text-[11px] gap-1.5",
   md: "h-10 px-5 text-xs gap-2",
-  lg: "h-16 px-10 text-lg gap-3",
-  icon: "h-9 w-9 p-0 justify-center",
+  lg: "h-14 px-10 text-base gap-3",
+  icon: "h-9 w-9 p-0",
 };
 
-/** Blocky launcher button: pixel-font caps, thin frame and a thicker bottom edge in the frame color. */
+/** Flat launcher button: pixel-font caps, 1px frame, solid accent for the main actions. */
 export function Button({ variant = "ghost", size = "md", className, children, ...rest }: ButtonProps) {
   return (
     <button
       className={clsx(
-        "label-mc inline-flex items-center justify-center whitespace-nowrap border-2 border-b-4 transition-all cursor-pointer",
-        "active:translate-y-px active:border-b-2 disabled:cursor-not-allowed disabled:opacity-50",
+        "label-mc inline-flex items-center justify-center whitespace-nowrap border transition-colors cursor-pointer",
+        "disabled:cursor-not-allowed disabled:opacity-50",
         SIZE[size],
-        variant === "primary" && "bg-accent border-white/30 text-white hover:brightness-110",
-        variant === "ghost" && "bg-black/30 border-accent/40 text-text hover:bg-accent/15 hover:border-accent/70",
-        variant === "accent" && "bg-accent/15 border-accent/60 text-text hover:bg-accent/25",
-        variant === "danger" && "bg-black/30 border-danger/50 text-danger hover:bg-danger/10",
-        variant === "play" && "bg-accent/25 border-accent text-white hover:bg-accent/35",
-        variant === "stop" && "bg-danger/25 border-danger text-white hover:bg-danger/35",
+        (variant === "primary" || variant === "play") && "bg-accent border-accent text-white hover:brightness-110",
+        variant === "ghost" && "bg-white/5 border-white/15 text-text hover:border-accent/60 hover:bg-accent/10",
+        variant === "accent" && "bg-accent/15 border-accent/50 text-text hover:bg-accent/25",
+        variant === "danger" && "bg-transparent border-danger/50 text-danger hover:bg-danger/10",
+        variant === "stop" && "bg-danger border-danger text-white hover:brightness-110",
         className,
       )}
       {...rest}

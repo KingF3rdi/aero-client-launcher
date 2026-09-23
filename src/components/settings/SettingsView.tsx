@@ -64,7 +64,7 @@ export function SettingsView() {
                     onClick={() => theme.set({ accent: c })}
                     title={c}
                     className={clsx(
-                      "w-12 h-12 border-2 flex items-center justify-center cursor-pointer transition-transform hover:scale-105",
+                      "w-12 h-12 border flex items-center justify-center cursor-pointer transition-transform hover:scale-105",
                       theme.accent.toLowerCase() === c ? "border-white" : "border-transparent",
                     )}
                     style={{ background: c }}
@@ -73,7 +73,7 @@ export function SettingsView() {
                   </button>
                 ))}
               </div>
-              <label className="flex items-center gap-3 border-2 border-dashed border-accent/50 p-3 cursor-pointer">
+              <label className="flex items-center gap-3 border border-dashed border-accent/50 p-3 cursor-pointer">
                 <input
                   type="color"
                   value={theme.accent}
@@ -131,8 +131,8 @@ export function SettingsView() {
                     key={fx.id}
                     onClick={() => theme.set({ background: fx.id })}
                     className={clsx(
-                      "relative h-36 border-2 flex flex-col items-center justify-center gap-3 cursor-pointer transition-colors",
-                      on ? "border-accent bg-accent/20 border-b-4" : "border-accent/30 bg-black/30 hover:border-accent/60",
+                      "relative h-36 border flex flex-col items-center justify-center gap-3 cursor-pointer transition-colors",
+                      on ? "border-accent bg-accent/20" : "border-accent/30 bg-black/30 hover:border-accent/60",
                     )}
                   >
                     {on && <Icon icon="solar:check-circle-bold" width={18} height={18} className="absolute top-2 right-2 text-accent" />}
@@ -181,21 +181,21 @@ export function SettingsView() {
 
   return (
     <div className="h-full p-6">
-      <div className="h-full flex flex-col border-2 border-accent/40 bg-black/30 backdrop-blur">
-        <div className="h-14 shrink-0 flex items-center gap-3 px-5 border-b-2 border-accent/40 bg-accent/10">
+      <div className="h-full flex flex-col border border-accent/40 bg-black/30 backdrop-blur">
+        <div className="h-14 shrink-0 flex items-center gap-3 px-5 border-b border-accent/40 bg-accent/10">
           <Icon icon="solar:settings-bold" width={22} height={22} />
           <span className="label-mc text-sm">Optionen</span>
         </div>
 
         <div className="flex-1 flex min-h-0">
-          <nav className="w-60 shrink-0 border-r-2 border-accent/20 p-4 flex flex-col gap-1 overflow-y-auto">
+          <nav className="w-60 shrink-0 border-r border-accent/20 p-4 flex flex-col gap-1 overflow-y-auto">
             <div className="relative mb-3">
               <Icon icon="solar:magnifer-linear" width={14} height={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Suchen…"
-                className="font-mc w-full h-9 bg-black/40 border-2 border-white/10 pl-8 pr-2 text-[11px] outline-none focus:border-accent/60"
+                className="font-mc w-full h-9 bg-black/40 border border-white/10 pl-8 pr-2 text-[11px] outline-none focus:border-accent/60"
               />
             </div>
             {GROUPS.map((g) => (
@@ -214,7 +214,7 @@ export function SettingsView() {
                   {g.label}
                 </button>
                 {activeGroup === g.id && (
-                  <div className="ml-5 my-1 border-l-2 border-accent/30">
+                  <div className="ml-5 my-1 border-l border-accent/30">
                     {sections
                       .filter((s) => s.group === g.id)
                       .map((s) => (
@@ -238,7 +238,7 @@ export function SettingsView() {
               <section key={s.id} ref={(el) => {
                   refs.current[s.id] = el;
                 }} className="mb-10">
-                <h3 className="label-mc flex items-center gap-2.5 text-sm text-accent pb-2 border-b-2 border-white/10">
+                <h3 className="label-mc flex items-center gap-2.5 text-sm text-accent pb-2 border-b border-white/10">
                   <Icon icon={s.icon} width={20} height={20} />
                   {s.title}
                 </h3>

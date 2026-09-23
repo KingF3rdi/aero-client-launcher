@@ -136,7 +136,7 @@ export function DiscoverView() {
             key={t.id}
             onClick={() => setTab(t.id)}
             className={
-              "flex items-center gap-2 label-mc flex items-center h-9 px-4 text-[11px] border-2 transition-colors cursor-pointer " +
+              "flex items-center gap-2 label-mc flex items-center h-9 px-4 text-[11px] border transition-colors cursor-pointer " +
               (tab === t.id ? "bg-accent/25 border-accent text-white" : "bg-black/30 border-accent/30 text-white/60 hover:bg-accent/10")
             }
           >
@@ -152,7 +152,7 @@ export function DiscoverView() {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && search()}
           placeholder={`${TABS.find((t) => t.id === tab)?.label} durchsuchen…`}
-          className="flex-1 h-10 rounded-lg bg-black/40 border-2 border-white/10 px-3 text-sm focus:outline-none focus:border-accent/50"
+          className="flex-1 h-10 rounded-lg bg-black/40 border border-white/10 px-3 text-sm focus:outline-none focus:border-accent/50"
         />
         <Button variant="ghost" onClick={search} disabled={loading}>
           <Icon icon="solar:magnifer-bold" width={16} height={16} />
@@ -165,7 +165,7 @@ export function DiscoverView() {
             <select
               value={targetInstance?.id ?? ""}
               onChange={(e) => setTargetInstanceId(e.target.value)}
-              className="h-10 rounded-lg bg-black/40 border-2 border-white/10 px-2 text-xs focus:outline-none focus:border-accent/50"
+              className="h-10 rounded-lg bg-black/40 border border-white/10 px-2 text-xs focus:outline-none focus:border-accent/50"
             >
               {instances.map((i) => (
                 <option key={i.id} value={i.id}>
@@ -183,7 +183,7 @@ export function DiscoverView() {
         {results.map((item) => (
           <div
             key={item.id}
-            className="flex items-center gap-3 bg-black/30 border-2 border-accent/30 backdrop-blur p-4"
+            className="flex items-center gap-3 bg-black/30 border border-accent/30 backdrop-blur p-4"
           >
             {item.iconUrl ? (
               <img src={item.iconUrl} alt="" className="w-12 h-12 rounded-lg shrink-0 object-cover" />

@@ -43,7 +43,7 @@ export function AddInstanceModal({ onClose }: AddInstanceModalProps) {
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && create()}
             placeholder="z.B. Fabric 1.21.11 - Test"
-            className="mt-1.5 w-full rounded-lg bg-black/40 border-2 border-white/10 px-3 py-2 text-sm focus:outline-none focus:border-accent/50"
+            className="mt-1.5 w-full rounded-lg bg-black/40 border border-white/10 px-3 py-2 text-sm focus:outline-none focus:border-accent/50"
           />
         </div>
 
@@ -52,7 +52,7 @@ export function AddInstanceModal({ onClose }: AddInstanceModalProps) {
           <select
             value={mcVersion}
             onChange={(e) => setMcVersion(e.target.value)}
-            className="mt-1.5 w-full rounded-lg bg-black/40 border-2 border-white/10 px-3 py-2 text-sm focus:outline-none focus:border-accent/50"
+            className="mt-1.5 w-full rounded-lg bg-black/40 border border-white/10 px-3 py-2 text-sm focus:outline-none focus:border-accent/50"
           >
             {VERSIONS.map((v) => (
               <option key={v} value={v}>

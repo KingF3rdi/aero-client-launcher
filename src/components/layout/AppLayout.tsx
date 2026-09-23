@@ -20,11 +20,11 @@ interface AppLayoutProps {
 /** Window frame: accent border, icon rail on the left, header on top, scrollable page, background effect behind. */
 export function AppLayout({ activeTab, onNavChange, onAddInstance, children }: AppLayoutProps) {
   return (
-    <div className="h-screen w-screen flex overflow-hidden relative border-2 border-accent/40 bg-bg">
+    <div className="h-screen w-screen flex overflow-hidden relative border border-accent/40 bg-bg">
       <Background />
       <VerticalNavbar items={NAV_ITEMS} activeItem={activeTab} onItemClick={onNavChange} onAddInstance={onAddInstance} />
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">
-        <HeaderBar onNavChange={onNavChange} />
+        <HeaderBar />
         <div className="flex-1 overflow-y-auto">{children}</div>
       </div>
     </div>
