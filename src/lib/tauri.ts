@@ -31,6 +31,7 @@ const mockInstances: Array<Record<string, unknown>> = [
 
 const mockAccounts: Array<{ name: string; uuid: string; mcToken: string; skinUrl: string | null }> = [];
 let mockActiveUuid: string | null = null;
+const mockEquippedCapes: Record<string, string> = {};
 
 const DEV_MOCKS: Record<string, MockFn> = {
   get_saved_account: () => mockAccounts.find((a) => a.uuid === mockActiveUuid) ?? null,
@@ -142,4 +143,17 @@ const DEV_MOCKS: Record<string, MockFn> = {
   launch_instance: () => null,
   stop_instance: () => null,
   logout: () => null,
+  list_capes: () =>
+    fetch("https://aero.gamekni9ht.workers.dev/api/capes")
+      .then((r) => r.json())
+      .then((j) => j.capes),
+  publish_cape: () => {
+    throw new Error("Cape-Upload braucht die native App (nicht im Browser-Vorschau).");
+  },
+  delete_cape: () => null,
+  equipped_cape: (args) => mockEquippedCapes[String(args?.instanceId)] ?? "none",
+  equip_cape: (args) => {
+    mockEquippedCapes[String(args?.instanceId)] = (args?.capeId as string | null) ?? "none";
+    return null;
+  },
 };

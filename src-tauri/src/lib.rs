@@ -1,4 +1,5 @@
 mod auth;
+mod capes;
 mod content;
 mod instances;
 mod launch;
@@ -50,6 +51,11 @@ pub fn run() {
             content::import_modpack_file,
             content::export_modpack,
             content::fetch_content_icons,
+            capes::list_capes,
+            capes::publish_cape,
+            capes::delete_cape,
+            capes::equipped_cape,
+            capes::equip_cape,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -8,6 +8,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: "instances", label: "Profile", icon: "solar:box-bold" },
   { id: "discover", label: "Mods", icon: "solar:widget-5-bold" },
   { id: "skins", label: "Skins", icon: "solar:t-shirt-bold" },
+  { id: "capes", label: "Capes", icon: "solar:magic-stick-3-bold" },
 ];
 
 interface AppLayoutProps {
