@@ -13,15 +13,11 @@ export function UserProfileBar() {
     <div className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-3 rounded-xl bg-white/5 border border-white/10 pl-2 pr-3 py-1.5 backdrop-blur hover:bg-white/10 transition-colors cursor-pointer"
+        className="label-mc h-10 flex items-center gap-2.5 border-2 border-accent/50 bg-black/30 pl-1.5 pr-3 text-[11px] hover:bg-accent/15 transition-colors cursor-pointer"
       >
-        <img
-          src={`https://mc-heads.net/avatar/${account.uuid}/28`}
-          alt=""
-          className="h-7 w-7 rounded-md border border-white/10"
-        />
-        <span className="text-sm font-medium">{account.name}</span>
-        <Icon icon="solar:alt-arrow-down-bold" width={12} height={12} className="text-white/40" />
+        <img src={`https://mc-heads.net/avatar/${account.uuid}/24`} alt="" className="h-6 w-6" style={{ imageRendering: "pixelated" }} />
+        {account.name}
+        <Icon icon="solar:alt-arrow-down-bold" width={12} height={12} className="text-white/50" />
       </button>
       <AccountDropdown open={open} onClose={() => setOpen(false)} />
     </div>

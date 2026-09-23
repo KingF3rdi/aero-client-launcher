@@ -2,21 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Monocraft (OFL, see assets/fonts/Monocraft-LICENSE.txt) - a monospace font
-   drawn in Minecraft's own glyph shapes, bundled locally so it works offline,
-   same reason NoRiskClient ships its own font files instead of a Google Fonts
-   CDN link. NoRiskClient itself bundles the real Minecraft/SmallCaps font
-   files, which are Mojang-owned and not freely redistributable; Monocraft is
-   the closest openly-licensed equivalent. Body text stays in the regular UI
-   font: this is only for short headings, not paragraph-length text. */
+/* Monocraft (OFL, see assets/fonts/Monocraft-LICENSE.txt) - a monospace font drawn in Minecraft's
+   own glyph shapes, bundled locally so it works offline. Used for headings, labels and buttons;
+   longer descriptions stay in the regular UI font for readability. */
 @font-face {
   font-family: "Monocraft";
   src: url("./assets/fonts/Monocraft.ttf") format("truetype");
   font-display: swap;
 }
 
+:root {
+  --accent: 79 142 255;
+  --accent-hex: #4f8eff;
+}
+
 .font-mc {
   font-family: "Monocraft", monospace;
+}
+
+/* Small uppercase pixel label (section titles, nav captions, button text). */
+.label-mc {
+  font-family: "Monocraft", monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 html,
@@ -24,7 +32,7 @@ body,
 #root {
   height: 100%;
   margin: 0;
-  background: #121212;
+  background: #0c0b12;
   color: #eceaf2;
 }
 
@@ -33,12 +41,11 @@ body,
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(79, 142, 255, 0.25);
-  border-radius: 8px;
+  background: rgb(var(--accent) / 0.35);
 }
 
 ::-webkit-scrollbar-track {

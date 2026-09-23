@@ -143,7 +143,7 @@ export function InstanceContentPanel({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Suchen…"
-            className="w-full rounded-lg bg-black/30 border border-white/10 pl-9 pr-3 py-2 text-sm text-text placeholder:text-white/30 outline-none focus:border-accent/50"
+            className="w-full bg-black/30 border-2 border-white/10 pl-9 pr-3 py-2 text-sm text-text placeholder:text-white/30 outline-none focus:border-accent/50"
           />
         </div>
       )}
@@ -160,14 +160,14 @@ export function InstanceContentPanel({
         ({ kind, items }) =>
           items.length > 0 && (
             <div key={kind}>
-              <label className="text-xs uppercase tracking-wide text-white/40">{KIND_LABEL[kind]}</label>
+              <label className="text-xs label-mc text-white/40">{KIND_LABEL[kind]}</label>
               <div className="mt-1.5 flex flex-col gap-1">
                 {items.map((file) => (
                   <div
                     key={file.relPath}
-                    className="flex items-center gap-3 rounded-lg bg-black/30 border border-white/10 px-4 py-3"
+                    className="flex items-center gap-3 bg-black/30 border-2 border-white/10 px-4 py-3"
                   >
-                    <div className="w-9 h-9 shrink-0 rounded-md bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden">
+                    <div className="w-9 h-9 shrink-0 rounded-md bg-black/40 border-2 border-white/10 flex items-center justify-center overflow-hidden">
                       {icons[file.relPath] ? (
                         <img src={icons[file.relPath]} alt="" className="w-full h-full object-cover" />
                       ) : (

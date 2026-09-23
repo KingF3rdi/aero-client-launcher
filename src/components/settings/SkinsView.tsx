@@ -62,10 +62,10 @@ export function SkinsView() {
 
   return (
     <div className="p-10 max-w-2xl flex flex-col gap-6">
-      <h2 className="text-2xl font-bold tracking-wide">Skin</h2>
+      <h2 className="label-mc text-lg">Skin</h2>
 
       <div className="flex gap-8 items-start">
-        <div className="rounded-xl bg-black/30 border border-white/10 backdrop-blur p-3 flex flex-col items-center gap-2">
+        <div className="bg-black/30 border-2 border-accent/30 backdrop-blur p-3 flex flex-col items-center gap-2">
           <canvas ref={canvasRef} className="cursor-grab active:cursor-grabbing" />
           <span className="text-xs text-white/40">{account.name}</span>
           <span className="text-[10px] text-white/25">Zum Drehen ziehen</span>
@@ -73,17 +73,17 @@ export function SkinsView() {
 
         <div className="flex-1 flex flex-col gap-5">
           <div>
-            <label className="text-xs uppercase tracking-wide text-white/40">Modell</label>
+            <label className="text-xs label-mc text-white/40">Modell</label>
             <div className="flex gap-2 mt-1.5">
               {(["classic", "slim"] as const).map((v) => (
                 <button
                   key={v}
                   onClick={() => setVariant(v)}
                   className={
-                    "px-4 py-2 rounded-lg text-sm border transition-colors cursor-pointer " +
+                    "label-mc flex items-center h-9 px-4 text-[11px] border-2 transition-colors cursor-pointer " +
                     (variant === v
-                      ? "bg-accent/15 border-accent/40 text-accent"
-                      : "bg-white/5 border-white/10 text-white/50 hover:bg-white/10")
+                      ? "bg-accent/25 border-accent text-white"
+                      : "bg-black/30 border-accent/30 text-white/60 hover:bg-accent/10")
                   }
                 >
                   {v === "classic" ? "Classic (Steve)" : "Slim (Alex)"}

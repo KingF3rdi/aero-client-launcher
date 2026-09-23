@@ -65,25 +65,25 @@ export function InstanceSettingsModal({ instance, onClose, initialTab }: Instanc
             <div className="flex flex-col gap-6">
               <div className="flex items-start gap-4">
                 <div className="flex-1">
-                  <label className="text-xs uppercase tracking-wide text-white/40">Name</label>
+                  <label className="text-xs label-mc text-white/40">Name</label>
                   <input
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     onBlur={commitName}
                     onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
-                    className="mt-1.5 w-full rounded-lg bg-black/40 border border-white/10 px-3 py-2 text-sm focus:outline-none focus:border-accent/50"
+                    className="mt-1.5 w-full rounded-lg bg-black/40 border-2 border-white/10 px-3 py-2 text-sm focus:outline-none focus:border-accent/50"
                   />
                 </div>
                 <div className="shrink-0">
-                  <label className="text-xs uppercase tracking-wide text-white/40">Icon</label>
-                  <div className="mt-1.5 w-11 h-11 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center">
+                  <label className="text-xs label-mc text-white/40">Icon</label>
+                  <div className="mt-1.5 w-11 h-11 rounded-lg bg-black/40 border-2 border-white/10 flex items-center justify-center">
                     <Icon icon="solar:box-bold" width={22} height={22} className="text-accent" />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="text-xs uppercase tracking-wide text-white/40">Instanz duplizieren</label>
+                <label className="text-xs label-mc text-white/40">Instanz duplizieren</label>
                 <p className="text-xs text-white/40 mt-1 mb-2">Erstellt eine Kopie dieser Instanz inklusive Welten, Mods und Configs.</p>
                 <Button
                   variant="ghost"
@@ -101,7 +101,7 @@ export function InstanceSettingsModal({ instance, onClose, initialTab }: Instanc
               </div>
 
               <div className="pt-4 border-t border-white/10">
-                <label className="text-xs uppercase tracking-wide text-danger">Instanz löschen</label>
+                <label className="text-xs label-mc text-danger">Instanz löschen</label>
                 <p className="text-xs text-white/40 mt-1 mb-2">
                   Löscht diese Instanz dauerhaft, inklusive Welten, Mods und Configs. Kann nicht rückgängig gemacht werden.
                 </p>
@@ -148,7 +148,7 @@ export function InstanceSettingsModal({ instance, onClose, initialTab }: Instanc
               </div>
 
               <div>
-                <label className="text-xs uppercase tracking-wide text-white/40">RAM</label>
+                <label className="text-xs label-mc text-white/40">RAM</label>
                 <p className="text-xs text-white/40 mt-1 mb-2">Wie viel Arbeitsspeicher diese Instanz beim Start bekommt.</p>
                 <div className="flex items-center gap-3">
                   <input
@@ -208,7 +208,7 @@ function LogsTab({ instanceId }: { instanceId: string }) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <span className="text-xs uppercase tracking-wide text-white/40">latest.log</span>
+        <span className="text-xs label-mc text-white/40">latest.log</span>
         <Button variant="ghost" size="sm" onClick={load} disabled={loading}>
           <Icon icon="solar:refresh-bold" width={14} height={14} />
           Aktualisieren

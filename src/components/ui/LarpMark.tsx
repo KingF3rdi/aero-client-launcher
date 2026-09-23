@@ -1,4 +1,4 @@
-/** Brand mark: a plain bold blue "A", same as the Fabric mod's UiDraw.aeroMark. */
+/** Brand mark: a bold "A" in the accent color, same as the Fabric mod's UiDraw.aeroMark. */
 export function LarpMark({ size = 36, className }: { size?: number; className?: string }) {
   return (
     <div
@@ -9,11 +9,12 @@ export function LarpMark({ size = 36, className }: { size?: number; className?: 
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        color: "#4f8eff",
+        color: "var(--accent-hex)",
+        fontFamily: "Monocraft, monospace",
         fontSize: size * 0.95,
         fontWeight: 900,
         lineHeight: 1,
-        textShadow: "0 0 16px rgba(79,142,255,0.55)",
+        textShadow: "0 0 16px rgb(var(--accent) / 0.55)",
       }}
     >
       A

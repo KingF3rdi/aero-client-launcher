@@ -4,15 +4,9 @@ import { isTauri } from "@tauri-apps/api/core";
 import { useAuthStore } from "../../store/useAuthStore";
 import { Button } from "../ui/Button";
 import { LarpMark } from "../ui/LarpMark";
-import { ParticleField } from "../effects/ParticleField";
+import { Background } from "../effects/Background";
 
-const ACCENT = "#4f8eff";
-
-/**
- * Microsoft sign-in: opens the system browser straight at Microsoft's login
- * page (authorization code + PKCE, redirected to a local one-shot listener) -
- * no device code to type on a separate page.
- */
+/** Microsoft sign-in screen, shown until an account is saved. */
 export function LoginScreen() {
   const { loggingIn, loginError, login } = useAuthStore();
   const win = isTauri() ? getCurrentWindow() : null;
@@ -20,50 +14,32 @@ export function LoginScreen() {
   return (
     <div
       data-tauri-drag-region
-      className="h-screen w-screen flex items-center justify-center text-text relative overflow-hidden border-2 bg-black/50 backdrop-blur-lg"
-      style={{
-        backgroundImage: [
-          `radial-gradient(ellipse at 50% 40%, ${ACCENT}16, transparent 60%)`,
-          "linear-gradient(to bottom right, rgb(7,14,25), rgba(0,0,0,0.92))",
-        ].join(", "),
-        borderColor: `${ACCENT}30`,
-      }}
+      className="h-screen w-screen flex items-center justify-center text-text relative overflow-hidden border-2 border-accent/40 bg-bg"
     >
+      <Background count={80} />
       <div className="absolute top-0 right-0 flex items-center gap-3 px-5 py-4 z-20">
-        <button
-          onClick={() => win?.minimize()}
-          title="Minimieren"
-          className="text-white/50 hover:text-white transition-colors cursor-pointer"
-        >
+        <button onClick={() => win?.minimize()} title="Minimieren" className="text-white/50 hover:text-white transition-colors cursor-pointer">
           <Icon icon="pixel:minus-solid" width={14} height={14} />
         </button>
-        <button
-          onClick={() => win?.close()}
-          title="Schließen"
-          className="text-white/50 hover:text-danger transition-colors cursor-pointer"
-        >
+        <button onClick={() => win?.close()} title="Schließen" className="text-white/50 hover:text-danger transition-colors cursor-pointer">
           <Icon icon="pixel:window-close-solid" width={14} height={14} />
         </button>
       </div>
 
-      <div className="absolute inset-0 opacity-60">
-        <ParticleField color={ACCENT} count={80} />
-      </div>
-
-      <div className="relative z-10 flex flex-col items-center gap-4 text-center max-w-sm">
+      <div className="relative z-10 flex flex-col items-center gap-5 text-center w-[26rem] border-2 border-accent/40 bg-black/40 backdrop-blur-lg px-10 py-10">
         <LarpMark size={64} />
-        <h1 className="font-mc text-lg tracking-wide" style={{ textShadow: `0 0 20px ${ACCENT}80` }}>
+        <h1 className="label-mc text-xl" style={{ textShadow: "0 0 20px rgb(var(--accent) / 0.6)" }}>
           Aero Client
         </h1>
         <p className="text-white/50 text-sm">Mit deinem Minecraft-Account anmelden</p>
 
-        <Button variant="primary" onClick={() => login()} disabled={loggingIn} className="mt-2">
-          {loggingIn ? "Warte auf Anmeldung im Browser…" : "Mit Microsoft anmelden"}
+        <Button variant="play" onClick={() => login()} disabled={loggingIn} className="w-full h-12 mt-2">
+          {loggingIn ? "Warte auf Anmeldung…" : "Mit Microsoft anmelden"}
         </Button>
 
-        {loginError && <p className="text-sm text-danger">{loginError}</p>}
+        {loginError && <p className="text-sm text-danger break-words">{loginError}</p>}
 
-        <p className="text-xs text-white/30 mt-4">Nur Accounts mit gekaufter Minecraft: Java Edition.</p>
+        <p className="text-xs text-white/30">Nur Accounts mit gekaufter Minecraft: Java Edition.</p>
       </div>
     </div>
   );

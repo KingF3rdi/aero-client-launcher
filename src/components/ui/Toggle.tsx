@@ -6,6 +6,7 @@ interface ToggleProps {
   disabled?: boolean;
 }
 
+/** Square pixel switch: framed track, white block knob. */
 export function Toggle({ on, onChange, disabled }: ToggleProps) {
   return (
     <button
@@ -13,16 +14,11 @@ export function Toggle({ on, onChange, disabled }: ToggleProps) {
       disabled={disabled}
       onClick={() => onChange(!on)}
       className={clsx(
-        "relative w-11 h-6 rounded-full transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 shrink-0",
-        on ? "bg-accent" : "bg-white/15",
+        "relative w-10 h-5 border-2 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 shrink-0",
+        on ? "bg-accent/70 border-accent" : "bg-black/40 border-white/25",
       )}
     >
-      <span
-        className={clsx(
-          "absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform",
-          on && "translate-x-full",
-        )}
-      />
+      <span className={clsx("absolute top-0 left-0 w-4 h-4 bg-white transition-transform", on && "translate-x-5")} />
     </button>
   );
 }

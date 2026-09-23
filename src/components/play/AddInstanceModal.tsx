@@ -36,23 +36,23 @@ export function AddInstanceModal({ onClose }: AddInstanceModalProps) {
     <Modal title="Neue Instanz" subtitle="Fabric" onClose={onClose} width={420}>
       <div className="p-6 flex flex-col gap-5">
         <div>
-          <label className="text-xs uppercase tracking-wide text-white/40">Name</label>
+          <label className="text-xs label-mc text-white/40">Name</label>
           <input
             autoFocus
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && create()}
             placeholder="z.B. Fabric 1.21.11 - Test"
-            className="mt-1.5 w-full rounded-lg bg-black/40 border border-white/10 px-3 py-2 text-sm focus:outline-none focus:border-accent/50"
+            className="mt-1.5 w-full rounded-lg bg-black/40 border-2 border-white/10 px-3 py-2 text-sm focus:outline-none focus:border-accent/50"
           />
         </div>
 
         <div>
-          <label className="text-xs uppercase tracking-wide text-white/40">Minecraft-Version</label>
+          <label className="text-xs label-mc text-white/40">Minecraft-Version</label>
           <select
             value={mcVersion}
             onChange={(e) => setMcVersion(e.target.value)}
-            className="mt-1.5 w-full rounded-lg bg-black/40 border border-white/10 px-3 py-2 text-sm focus:outline-none focus:border-accent/50"
+            className="mt-1.5 w-full rounded-lg bg-black/40 border-2 border-white/10 px-3 py-2 text-sm focus:outline-none focus:border-accent/50"
           >
             {VERSIONS.map((v) => (
               <option key={v} value={v}>

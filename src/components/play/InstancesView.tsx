@@ -27,17 +27,17 @@ export function InstancesView() {
   return (
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold tracking-wide">Instanzen</h2>
+        <h2 className="label-mc text-lg">Profile</h2>
         <Button variant="accent" size="sm" onClick={() => setAdding(true)}>
           <Icon icon="solar:add-circle-bold" width={16} height={16} />
-          Neue Instanz
+          Neues Profil
         </Button>
       </div>
       <div className="grid grid-cols-3 gap-4">
         {instances.map((instance) => (
           <div
             key={instance.id}
-            className="group relative flex flex-col items-start gap-3 rounded-xl bg-black/30 border border-white/10 backdrop-blur p-5 hover:border-accent/40 hover:bg-accent/10 transition-all"
+            className="group relative flex flex-col items-start gap-3 bg-black/30 border-2 border-accent/30 backdrop-blur p-5 hover:border-accent/40 hover:bg-accent/10 transition-all"
           >
             <button
               onClick={() => {

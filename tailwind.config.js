@@ -4,17 +4,14 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Same palette as the Larp Launcher Fabric mod's ClickGUI (UiDraw.ACCENT etc.),
-        // itself matched to NoRiskClient's actual blue/cyan tokens (tailwind.config.js
-        // "norisk"/"cyan" swatches in their repo) - so both apps and the mod read as one product.
-        bg: "#121212",
-        bar: "#1a1a1a",
-        card: "#1e1e1e",
-        pill: "#262626",
+        bg: "#0c0b12",
+        bar: "#15131d",
+        card: "#1a1824",
+        pill: "#23202e",
         text: "#eceaf2",
         muted: "#8e8a9a",
-        accent: "#4f8eff",
-        "accent-dim": "#2e5a8a",
+        // Runtime-switchable (Settings -> Accent color): see store/useThemeStore.ts applyAccent().
+        accent: "rgb(var(--accent) / <alpha-value>)",
         green: "#3dff8a",
         danger: "#e05555",
       },
@@ -23,8 +20,19 @@ export default {
         mc: ["Monocraft", "monospace"],
       },
       boxShadow: {
-        glow: "0 0 20px rgba(79,142,255,0.25)",
+        glow: "0 0 20px rgb(var(--accent) / 0.25)",
       },
+    },
+    // Blocky, NoRisk-style look everywhere: near-square corners (full stays round for dots).
+    borderRadius: {
+      none: "0",
+      sm: "2px",
+      DEFAULT: "2px",
+      md: "2px",
+      lg: "3px",
+      xl: "3px",
+      "2xl": "4px",
+      full: "9999px",
     },
   },
   plugins: [],
