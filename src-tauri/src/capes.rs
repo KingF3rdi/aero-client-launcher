@@ -35,7 +35,7 @@ pub async fn list_capes() -> Result<Vec<CapeSummary>, String> {
 /// Same handshake the Fabric mod does: prove the active account's identity to Mojang's session
 /// server with the Minecraft access token this launcher already holds for it, then trade that
 /// proof for an Aero server bearer token.
-async fn aero_token(http: &reqwest::Client) -> Result<String, String> {
+pub(crate) async fn aero_token(http: &reqwest::Client) -> Result<String, String> {
     let account = load_active_account().ok_or("Kein Account angemeldet.")?;
     let start: serde_json::Value = http
         .post(format!("{API_BASE}/api/auth/start"))
@@ -125,11 +125,11 @@ pub async fn delete_cape(cape_id: i64) -> Result<(), String> {
     Ok(())
 }
 
-fn mod_config_path(instance_id: &str) -> std::path::PathBuf {
+pub(crate) fn mod_config_path(instance_id: &str) -> std::path::PathBuf {
     instances::instance_dir(instance_id).join("config").join("aero-client.json")
 }
 
-fn read_mod_config(instance_id: &str) -> serde_json::Value {
+pub(crate) fn read_mod_config(instance_id: &str) -> serde_json::Value {
     std::fs::read_to_string(mod_config_path(instance_id))
         .ok()
         .and_then(|s| serde_json::from_str(&s).ok())

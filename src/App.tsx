@@ -10,6 +10,7 @@ import { SettingsView } from "./components/settings/SettingsView";
 import { SkinsView } from "./components/settings/SkinsView";
 import { DiscoverView } from "./components/discover/DiscoverView";
 import { CapesView } from "./components/capes/CapesView";
+import { PresetsView } from "./components/presets/PresetsView";
 import { useAuthStore } from "./store/useAuthStore";
 import { useInstanceStore } from "./store/useInstanceStore";
 
@@ -48,6 +49,7 @@ export function App() {
           <Route path="/skins" element={<SkinsView />} />
           <Route path="/discover" element={<DiscoverView />} />
           <Route path="/capes" element={<CapesView />} />
+          <Route path="/presets" element={<PresetsView />} />
           <Route path="/settings" element={<SettingsView />} />
           <Route path="*" element={<Navigate to="/play" replace />} />
         </Routes>

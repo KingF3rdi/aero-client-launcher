@@ -3,6 +3,7 @@ mod capes;
 mod content;
 mod instances;
 mod launch;
+mod presets;
 mod selfupdate;
 mod skin;
 mod state;
@@ -56,6 +57,10 @@ pub fn run() {
             capes::delete_cape,
             capes::equipped_cape,
             capes::equip_cape,
+            presets::list_presets,
+            presets::publish_preset,
+            presets::delete_preset,
+            presets::apply_preset,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

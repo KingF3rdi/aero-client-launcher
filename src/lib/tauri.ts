@@ -156,4 +156,15 @@ const DEV_MOCKS: Record<string, MockFn> = {
     mockEquippedCapes[String(args?.instanceId)] = (args?.capeId as string | null) ?? "none";
     return null;
   },
+  list_presets: () =>
+    fetch("https://aero.gamekni9ht.workers.dev/api/presets")
+      .then((r) => r.json())
+      .then((j) => j.presets),
+  publish_preset: () => {
+    throw new Error("Preset-Upload braucht die native App (nicht im Browser-Vorschau).");
+  },
+  delete_preset: () => null,
+  apply_preset: () => {
+    throw new Error("Preset anwenden braucht die native App (nicht im Browser-Vorschau).");
+  },
 };
