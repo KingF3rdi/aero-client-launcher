@@ -173,7 +173,7 @@ async fn launch_inner(
     if instance.loader == "fabric" {
         log_line(log_path, "Installiere Fabric Loader...");
         main_class = install_fabric(&http, dir, &instance.mc_version, &mut classpath).await?;
-        ensure_sodium(dir, &instance, log_path).await;
+        ensure_performance_mods(dir, &instance, log_path).await;
     }
 
     ensure_mod_jar(dir, &instance, log_path).await?;
@@ -618,26 +618,36 @@ async fn update_mod_from_github(dir: &Path, log_path: &Path) -> Result<bool, Str
     Ok(true)
 }
 
-/// Downloads Sodium from Modrinth into the instance the first time it launches - skipped if a
-/// sodium jar (enabled or user-disabled) is already there, so this only ever seeds it once rather
-/// than fighting a player who deliberately removed or disabled it. Best-effort: a failed download
-/// (offline, Modrinth down, no matching version for this mc_version) just means the instance
-/// launches without it rather than failing the whole launch.
-async fn ensure_sodium(dir: &Path, instance: &Instance, log_path: &Path) {
+/// The standard safe-performance set: rendering (Sodium), general tick/logic optimizations
+/// (Lithium), memory footprint (FerriteCore) and render-batching (ImmediatelyFast) - all four are
+/// widely used, don't change how the game looks or plays, and (unlike e.g. Starlight, which
+/// Modrinth stopped updating past 1.20.4) are kept current for every version this launcher offers.
+const PERFORMANCE_MODS: &[(&str, &str)] = &[
+    ("sodium", "sodium"),
+    ("lithium", "lithium"),
+    ("ferrite-core", "ferritecore"),
+    ("immediatelyfast", "immediatelyfast"),
+];
+
+/// Downloads the performance mods above into the instance the first time it launches - skipped per
+/// mod if a matching jar (enabled or user-disabled) is already there, so this only ever seeds each
+/// one once rather than fighting a player who deliberately removed or disabled it. Runs for every
+/// Fabric instance regardless of whether the Aero Client mod itself is enabled. Best-effort per
+/// mod: a failed download (offline, Modrinth down, no matching version) just skips that one mod
+/// rather than failing the whole launch.
+async fn ensure_performance_mods(dir: &Path, instance: &Instance, log_path: &Path) {
     let mods_dir = dir.join("mods");
-    let already_present = std::fs::read_dir(&mods_dir)
-        .map(|entries| {
-            entries
-                .flatten()
-                .any(|e| e.file_name().to_string_lossy().to_lowercase().contains("sodium"))
-        })
-        .unwrap_or(false);
-    if already_present {
-        return;
-    }
-    log_line(log_path, "Installiere Sodium (Performance)...");
-    if let Err(e) = crate::content::install_content("sodium".to_string(), "mod".to_string(), instance.id.clone()).await {
-        log_line(log_path, &format!("Sodium-Installation übersprungen: {e}"));
+    let existing: Vec<String> = std::fs::read_dir(&mods_dir)
+        .map(|entries| entries.flatten().map(|e| e.file_name().to_string_lossy().to_lowercase()).collect())
+        .unwrap_or_default();
+    for (project_id, needle) in PERFORMANCE_MODS {
+        if existing.iter().any(|name| name.contains(needle)) {
+            continue;
+        }
+        log_line(log_path, &format!("Installiere {project_id} (Performance)..."));
+        if let Err(e) = crate::content::install_content(project_id.to_string(), "mod".to_string(), instance.id.clone()).await {
+            log_line(log_path, &format!("{project_id}-Installation übersprungen: {e}"));
+        }
     }
 }
 
