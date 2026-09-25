@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useInstanceStore } from "../../store/useInstanceStore";
@@ -11,9 +10,8 @@ import { Button } from "../ui/Button";
 /** Full-grid overview of every instance - the "instances" nav tab, separate from
  * Play's compact sidebar list. */
 export function InstancesView() {
-  const navigate = useNavigate();
   const { account } = useAuthStore();
-  const { instances, loadInstances, select, play } = useInstanceStore();
+  const { instances, loadInstances, play } = useInstanceStore();
   const [settingsFor, setSettingsFor] = useState<string | null>(null);
   const [modalTab, setModalTab] = useState<Tab>("content");
   const [adding, setAdding] = useState(false);
@@ -41,8 +39,8 @@ export function InstancesView() {
           >
             <button
               onClick={() => {
-                select(instance.id);
-                navigate("/play");
+                setModalTab("content");
+                setSettingsFor(instance.id);
               }}
               className="flex flex-col items-start gap-3 w-full text-left cursor-pointer"
             >
