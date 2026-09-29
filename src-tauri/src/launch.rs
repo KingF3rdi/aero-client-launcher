@@ -531,7 +531,8 @@ async fn ensure_mod_jar(dir: &Path, instance: &Instance, log_path: &Path) -> Res
         Ok(false) => {}
         Err(e) => log_line(log_path, &format!("Mod-Update von GitHub fehlgeschlagen: {e}")),
     }
-    // Offline / no release yet: fall back to a jar shipped next to the exe (or the dev build).
+    // Offline / no release yet: fall back to a jar shipped next to the exe (or the dev build), else the
+    // copy built into the launcher.
     let dev_relative = PathBuf::from("../liteclient/build/libs/aero-client-1.21-1.0.0.jar");
     let next_to_exe = std::env::current_exe()
         .ok()
@@ -540,14 +541,22 @@ async fn ensure_mod_jar(dir: &Path, instance: &Instance, log_path: &Path) -> Res
         .into_iter()
         .flatten()
         .find(|p| p.is_file());
-    let Some(source) = source else {
-        return Ok(());
-    };
     let mods_dir = dir.join("mods");
-    std::fs::create_dir_all(&mods_dir).map_err(|e| e.to_string())?;
-    std::fs::copy(&source, mods_dir.join("aero-client.jar")).map_err(|e| e.to_string())?;
+    let jar = mods_dir.join("aero-client.jar");
+    if let Some(source) = source {
+        std::fs::create_dir_all(&mods_dir).map_err(|e| e.to_string())?;
+        std::fs::copy(&source, &jar).map_err(|e| e.to_string())?;
+    } else if !jar.is_file() {
+        // Never replaces a (newer) downloaded jar: the built-in copy only covers a first start offline.
+        std::fs::create_dir_all(&mods_dir).map_err(|e| e.to_string())?;
+        std::fs::write(&jar, BUNDLED_MOD).map_err(|e| e.to_string())?;
+        log_line(log_path, "Offline: mitgelieferte Aero-Client-Mod installiert");
+    }
     Ok(())
 }
+
+/// The mod release this launcher was built with (liteclient's build output at build time).
+const BUNDLED_MOD: &[u8] = include_bytes!("../../../liteclient/build/libs/aero-client-1.21-1.0.0.jar");
 
 const MOD_COUNTED_URL: &str = "https://aero.gamekni9ht.workers.dev/download/mod";
 const MOD_RELEASE_API: &str = "https://api.github.com/repos/KingF3rdi/aero-client-launcher/releases/latest";
