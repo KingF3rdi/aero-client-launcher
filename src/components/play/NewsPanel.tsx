@@ -54,8 +54,8 @@ export function NewsPanel() {
   }, []);
 
   return (
-    <aside className="w-80 shrink-0 border-l border-accent/40 bg-black/25 backdrop-blur flex flex-col">
-      <div className="label-mc flex items-center gap-2 px-4 h-12 border-b border-accent/30 text-xs">
+    <aside className="w-80 shrink-0 border-l border-white/10 bg-black/25 backdrop-blur flex flex-col">
+      <div className="label-mc flex items-center gap-2 px-4 h-12 border-b border-white/10 text-xs">
         <Icon icon="solar:document-text-bold" width={16} height={16} className="text-accent" />
         News
       </div>
@@ -74,11 +74,11 @@ export function NewsPanel() {
                 openUrl(n.url);
               }
             }}
-            className="block border border-accent/30 bg-black/30 hover:border-accent/70 hover:bg-accent/10 transition-colors p-3"
+            className="block rounded-xl border border-white/10 bg-white/[0.04] hover:border-accent/60 hover:bg-accent/10 transition-colors p-3"
           >
             <div className="flex items-center gap-2 mb-1.5">
-              <span className="label-mc text-[11px] text-white truncate flex-1">{n.title}</span>
-              {n.preview && <span className="label-mc text-[9px] px-1.5 py-0.5 bg-accent/30 text-white shrink-0">Beta</span>}
+              <span className="text-[13px] font-semibold text-white truncate flex-1">{n.title}</span>
+              {n.preview && <span className="label-mc text-[9px] px-1.5 py-0.5 rounded bg-accent/30 text-white shrink-0">Beta</span>}
             </div>
             <div className="text-[10px] text-white/40 mb-1.5">{n.date ? new Date(n.date).toLocaleDateString("de-DE") : ""}</div>
             <p className="text-xs text-white/60 line-clamp-3 whitespace-pre-line">{n.body || "Neue Version verfügbar."}</p>

@@ -2,12 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Monocraft (OFL, see assets/fonts/Monocraft-LICENSE.txt) - a monospace font drawn in Minecraft's
-   own glyph shapes, bundled locally so it works offline. Used for headings, labels and buttons;
-   longer descriptions stay in the regular UI font for readability. */
+/* Inter (OFL, see assets/fonts/Inter-LICENSE.txt) - the same smooth font the Aero Client mod uses
+   in its menus, bundled locally so it works offline. */
 @font-face {
-  font-family: "Monocraft";
-  src: url("./assets/fonts/Monocraft.ttf") format("truetype");
+  font-family: "Inter";
+  src: url("./assets/fonts/Inter-Medium.ttf") format("truetype");
+  font-weight: 400 700;
   font-display: swap;
 }
 
@@ -17,14 +17,26 @@
 }
 
 .font-mc {
-  font-family: "Monocraft", monospace;
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Small uppercase pixel label (section titles, nav captions, button text). */
+/* Small caps label (section titles, nav captions, button text). */
 .label-mc {
-  font-family: "Monocraft", monospace;
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
+}
+
+@layer base {
+  /* Soft corners by default on everything clickable or typed into; utilities still override. */
+  button,
+  input,
+  select,
+  textarea {
+    border-radius: 10px;
+  }
 }
 
 html,
@@ -34,6 +46,7 @@ body,
   margin: 0;
   background: #0c0b12;
   color: #eceaf2;
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
 }
 
 * {
@@ -46,6 +59,7 @@ body,
 
 ::-webkit-scrollbar-thumb {
   background: rgb(var(--accent) / 0.35);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-track {

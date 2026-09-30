@@ -27,33 +27,34 @@ export function HeaderBar() {
   }, []);
 
   return (
-    <div
-      data-tauri-drag-region
-      className="h-16 flex-shrink-0 border-b border-accent/40 bg-accent/5 backdrop-blur-lg flex items-center gap-3 px-6 relative z-10"
-    >
-      <div data-tauri-drag-region className="flex flex-col mr-auto">
-        <h1 className="label-mc text-base text-white" style={{ textShadow: "0 0 16px rgb(var(--accent) / 0.6)" }}>
-          Aero Client
-        </h1>
-        <span data-tauri-drag-region className="flex items-center gap-1.5 text-[11px] text-white/50 font-mc">
-          <i className="w-1.5 h-1.5 bg-green inline-block" />
-          {online === null ? "–" : `${online.toLocaleString("de-DE")} online`}
-        </span>
-      </div>
+    <div data-tauri-drag-region className="h-14 flex-shrink-0 border-b border-white/10 bg-black/20 backdrop-blur-lg flex items-center gap-3 pl-6 pr-3 relative z-10">
+      <h1 data-tauri-drag-region className="text-[15px] font-bold text-white">
+        Aero Client
+      </h1>
+      <span data-tauri-drag-region className="flex items-center gap-1.5 h-6 px-2.5 rounded-full bg-white/5 text-[11px] text-white/60 mr-auto">
+        <i className="w-1.5 h-1.5 rounded-full bg-green inline-block" />
+        {online === null ? "–" : `${online.toLocaleString("de-DE")} online`}
+      </span>
 
       <UserProfileBar />
 
-      <div className="flex items-center gap-3 ml-3">
-        <button onClick={() => win?.minimize()} title="Minimieren" className="text-white/50 hover:text-white transition-colors cursor-pointer">
-          <Icon icon="pixel:minus-solid" width={14} height={14} />
-        </button>
-        <button onClick={() => win?.toggleMaximize()} title="Maximieren" className="text-white/50 hover:text-white transition-colors cursor-pointer">
-          <Icon icon="pixel:expand-solid" width={14} height={14} />
-        </button>
-        <button onClick={() => win?.close()} title="Schließen" className="text-white/50 hover:text-danger transition-colors cursor-pointer">
-          <Icon icon="pixel:window-close-solid" width={14} height={14} />
-        </button>
+      <div className="flex items-center ml-1">
+        <WindowButton icon="solar:minus-square-linear" title="Minimieren" onClick={() => win?.minimize()} />
+        <WindowButton icon="solar:maximize-square-linear" title="Maximieren" onClick={() => win?.toggleMaximize()} />
+        <WindowButton icon="solar:close-square-linear" title="Schließen" danger onClick={() => win?.close()} />
       </div>
     </div>
+  );
+}
+
+function WindowButton({ icon, title, danger, onClick }: { icon: string; title: string; danger?: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      className={`w-9 h-9 flex items-center justify-center text-white/50 transition-colors cursor-pointer ${danger ? "hover:bg-danger hover:text-white" : "hover:bg-white/10 hover:text-white"}`}
+    >
+      <Icon icon={icon} width={18} height={18} />
+    </button>
   );
 }

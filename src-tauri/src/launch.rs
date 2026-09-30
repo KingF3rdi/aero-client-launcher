@@ -81,11 +81,16 @@ fn log_line(log_path: &Path, line: &str) {
     }
 }
 
+fn is_server_address(a: &str) -> bool {
+    !a.is_empty() && a.len() <= 255 && !a.starts_with('-') && a.chars().all(|c| c.is_ascii_alphanumeric() || ".-_:[]".contains(c))
+}
+
 #[tauri::command]
 pub async fn launch_instance(
     instance_id: String,
     ram_gb: u32,
     account: LaunchAccount,
+    server: Option<String>,
     app: tauri::AppHandle,
     state: tauri::State<'_, GameState>,
 ) -> Result<(), String> {
@@ -94,7 +99,7 @@ pub async fn launch_instance(
     let log_path = dir.join("launcher.log");
     let _ = std::fs::write(&log_path, "");
 
-    match launch_inner(&instance_id, ram_gb, &account, &dir, &log_path, &app, &state).await {
+    match launch_inner(&instance_id, ram_gb, &account, server.as_deref(), &dir, &log_path, &app, &state).await {
         Ok(()) => Ok(()),
         Err(e) => {
             log_line(&log_path, &format!("Start fehlgeschlagen: {e}"));
@@ -107,6 +112,7 @@ async fn launch_inner(
     instance_id: &str,
     ram_gb: u32,
     account: &LaunchAccount,
+    server: Option<&str>,
     dir: &Path,
     log_path: &Path,
     app: &tauri::AppHandle,
@@ -242,6 +248,10 @@ async fn launch_inner(
         .stdout(Stdio::from(launcher_log))
         .stderr(Stdio::from(launcher_log_err))
         .kill_on_drop(true);
+    // Quick join: start straight into a server. Only a plain host[:port] is ever passed on.
+    if let Some(addr) = server.map(str::trim).filter(|a| is_server_address(a)) {
+        cmd.arg("--quickPlayMultiplayer").arg(addr);
+    }
     #[cfg(windows)]
     {
         prefer_high_performance_gpu(&java);

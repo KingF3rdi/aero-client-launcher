@@ -4,6 +4,7 @@ mod content;
 mod instances;
 mod launch;
 mod presets;
+mod screenshots;
 mod selfupdate;
 mod skin;
 mod state;
@@ -57,6 +58,11 @@ pub fn run() {
             capes::delete_cape,
             capes::equipped_cape,
             capes::equip_cape,
+            capes::get_cosmetics,
+            capes::equip_cosmetic,
+            screenshots::list_screenshots,
+            screenshots::read_screenshot,
+            screenshots::screenshots_dir,
             presets::list_presets,
             presets::publish_preset,
             presets::delete_preset,

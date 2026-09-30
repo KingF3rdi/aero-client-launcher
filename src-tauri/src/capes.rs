@@ -136,6 +136,44 @@ pub(crate) fn read_mod_config(instance_id: &str) -> serde_json::Value {
         .unwrap_or_else(|| serde_json::json!({}))
 }
 
+/// Cosmetic kind -> its field in the mod config. Only these fields are ever written.
+fn cosmetic_field(kind: &str) -> Option<&'static str> {
+    Some(match kind {
+        "cape" => "equippedCape",
+        "wings" => "equippedWings",
+        "trail" => "equippedTrail",
+        "head" => "equippedHead",
+        "pet" => "equippedPet",
+        _ => return None,
+    })
+}
+
+/// What this instance's mod config has equipped, per kind ("none" when unset).
+#[tauri::command]
+pub fn get_cosmetics(instance_id: String) -> serde_json::Value {
+    let config = read_mod_config(&instance_id);
+    let mut out = serde_json::Map::new();
+    for kind in ["cape", "wings", "trail", "head", "pet"] {
+        let id = config[cosmetic_field(kind).unwrap()].as_str().unwrap_or("none");
+        out.insert(kind.to_string(), serde_json::Value::String(id.to_string()));
+    }
+    serde_json::Value::Object(out)
+}
+
+/// Equips a cosmetic for the next start of this instance (same caveat as equip_cape).
+#[tauri::command]
+pub fn equip_cosmetic(instance_id: String, kind: String, id: String) -> Result<(), String> {
+    let field = cosmetic_field(&kind).ok_or("Unbekannte Kosmetik-Art.")?;
+    if id.is_empty() || id.len() > 40 || !id.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {
+        return Err("Ungültige Kosmetik.".to_string());
+    }
+    let path = mod_config_path(&instance_id);
+    std::fs::create_dir_all(path.parent().unwrap()).map_err(|e| e.to_string())?;
+    let mut config = read_mod_config(&instance_id);
+    config[field] = serde_json::Value::String(id);
+    std::fs::write(&path, serde_json::to_string_pretty(&config).map_err(|e| e.to_string())?).map_err(|e| e.to_string())
+}
+
 /// The cape id ("none" or e.g. "custom_17") this instance's mod config currently has equipped.
 #[tauri::command]
 pub fn equipped_cape(instance_id: String) -> String {

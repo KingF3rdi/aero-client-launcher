@@ -7,6 +7,8 @@ interface ThemeState {
   animations: boolean;
   skinAnimation: boolean;
   sidebarLabels: boolean;
+  /** Minimize the launcher window once the game has started. */
+  minimizeOnLaunch: boolean;
   background: BackgroundEffect;
   set: (patch: Partial<Omit<ThemeState, "set">>) => void;
 }
@@ -23,6 +25,7 @@ const DEFAULTS = {
   animations: true,
   skinAnimation: true,
   sidebarLabels: true,
+  minimizeOnLaunch: false,
   background: "particles" as BackgroundEffect,
 };
 

@@ -17,11 +17,11 @@ interface VerticalNavbarProps {
   onAddInstance: () => void;
 }
 
-/** Icon rail: logo on top, pages in the middle, settings pinned to the bottom. Active page gets a framed block. */
+/** Icon rail: logo on top, pages in the middle, settings pinned to the bottom. The active page is a filled pill. */
 export function VerticalNavbar({ items, activeItem, onItemClick, onAddInstance }: VerticalNavbarProps) {
   const labels = useThemeStore((s) => s.sidebarLabels);
   return (
-    <div className="h-full w-24 flex flex-col items-center border-r border-accent/40 bg-accent/10 backdrop-blur-lg py-4 gap-3 relative z-10">
+    <div className="h-full w-[88px] flex flex-col items-center border-r border-white/10 bg-black/30 backdrop-blur-lg py-4 gap-1.5 relative z-10">
       <button onClick={onAddInstance} title="Neues Profil" className="mb-3 cursor-pointer transition-transform hover:scale-105">
         <LarpMark size={34} />
       </button>
@@ -46,14 +46,13 @@ function NavButton({ item, active, labels, onClick }: { item: NavItem; active: b
       onClick={onClick}
       title={item.label}
       className={clsx(
-        "relative flex flex-col items-center justify-center gap-1.5 w-16 transition-colors cursor-pointer",
-        labels ? "h-16" : "h-12",
-        active ? "text-white bg-accent/20" : "text-white/50 hover:text-white hover:bg-white/5",
+        "flex flex-col items-center justify-center gap-1 w-[68px] rounded-xl transition-colors cursor-pointer",
+        labels ? "h-[58px]" : "h-12",
+        active ? "text-white bg-accent/20 shadow-glow" : "text-white/45 hover:text-white hover:bg-white/5",
       )}
     >
-      {active && <span className="absolute -left-4 top-2 bottom-2 w-1 bg-accent" />}
-      <Icon icon={item.icon} width={24} height={24} className={active ? "text-accent" : ""} />
-      {labels && <span className="label-mc text-[9px]">{item.label}</span>}
+      <Icon icon={item.icon} width={22} height={22} className={active ? "text-accent" : ""} />
+      {labels && <span className="text-[10px] font-semibold">{item.label}</span>}
     </button>
   );
 }

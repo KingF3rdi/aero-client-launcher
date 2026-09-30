@@ -9,7 +9,8 @@ import { AddInstanceModal } from "./components/play/AddInstanceModal";
 import { SettingsView } from "./components/settings/SettingsView";
 import { SkinsView } from "./components/settings/SkinsView";
 import { DiscoverView } from "./components/discover/DiscoverView";
-import { CapesView } from "./components/capes/CapesView";
+import { CosmeticsView } from "./components/cosmetics/CosmeticsView";
+import { ScreenshotsView } from "./components/screenshots/ScreenshotsView";
 import { PresetsView } from "./components/presets/PresetsView";
 import { useAuthStore } from "./store/useAuthStore";
 import { useInstanceStore } from "./store/useInstanceStore";
@@ -48,7 +49,8 @@ export function App() {
           <Route path="/instances" element={<InstancesView />} />
           <Route path="/skins" element={<SkinsView />} />
           <Route path="/discover" element={<DiscoverView />} />
-          <Route path="/capes" element={<CapesView />} />
+          <Route path="/cosmetics" element={<CosmeticsView />} />
+          <Route path="/screenshots" element={<ScreenshotsView />} />
           <Route path="/presets" element={<PresetsView />} />
           <Route path="/settings" element={<SettingsView />} />
           <Route path="*" element={<Navigate to="/play" replace />} />

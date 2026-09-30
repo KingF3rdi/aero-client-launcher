@@ -1,4 +1,6 @@
 import { create } from "zustand";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import { useThemeStore } from "./useThemeStore";
 import { isTauri } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { invoke } from "../lib/tauri";
@@ -44,7 +46,8 @@ interface InstanceState {
   loadInstances: () => Promise<void>;
   select: (id: string) => void;
   setRam: (gb: number) => void;
-  play: (account: { name: string; uuid: string; mcToken: string }, instanceId?: string) => Promise<void>;
+  /** server: optional host[:port] to join right after the game starts. */
+  play: (account: { name: string; uuid: string; mcToken: string }, instanceId?: string, server?: string) => Promise<void>;
   stop: () => Promise<void>;
   initLaunchListener: () => void;
   updateInstance: (id: string, patch: InstancePatch) => Promise<void>;
@@ -86,7 +89,7 @@ export const useInstanceStore = create<InstanceState>((set, get) => ({
     }
   },
 
-  play: async (account, instanceId) => {
+  play: async (account, instanceId, server) => {
     const { ramGb } = get();
     const targetId = instanceId ?? get().selectedId;
     if (!targetId) return;
@@ -100,8 +103,12 @@ export const useInstanceStore = create<InstanceState>((set, get) => ({
         instanceId: targetId,
         ramGb,
         account,
+        server: server ?? null,
       });
       saveLastPlayedId(targetId);
+      if (useThemeStore.getState().minimizeOnLaunch && isTauri()) {
+        getCurrentWindow().minimize();
+      }
       set({ launch: { phase: "running", message: "Gestartet" } });
     } catch (e) {
       set({ launch: { phase: "error", message: String(e) }, launchedInstanceId: null });

@@ -16,22 +16,22 @@ export default {
         danger: "#e05555",
       },
       fontFamily: {
-        sans: ["Segoe UI", "Inter", "system-ui", "sans-serif"],
-        mc: ["Monocraft", "monospace"],
+        sans: ["Inter", "Segoe UI", "system-ui", "sans-serif"],
+        mc: ["Inter", "Segoe UI", "system-ui", "sans-serif"],
       },
       boxShadow: {
         glow: "0 0 20px rgb(var(--accent) / 0.25)",
       },
     },
-    // Blocky, NoRisk-style look everywhere: near-square corners (full stays round for dots).
+    // Soft, rounded look matching the Aero Client mod's menus.
     borderRadius: {
       none: "0",
-      sm: "2px",
-      DEFAULT: "2px",
-      md: "2px",
-      lg: "3px",
-      xl: "3px",
-      "2xl": "4px",
+      sm: "4px",
+      DEFAULT: "6px",
+      md: "8px",
+      lg: "10px",
+      xl: "14px",
+      "2xl": "18px",
       full: "9999px",
     },
   },

@@ -32,6 +32,7 @@ const mockInstances: Array<Record<string, unknown>> = [
 const mockAccounts: Array<{ name: string; uuid: string; mcToken: string; skinUrl: string | null }> = [];
 let mockActiveUuid: string | null = null;
 const mockEquippedCapes: Record<string, string> = {};
+const mockCosmetics: Record<string, Record<string, string>> = {};
 
 const DEV_MOCKS: Record<string, MockFn> = {
   get_saved_account: () => mockAccounts.find((a) => a.uuid === mockActiveUuid) ?? null,
@@ -151,6 +152,22 @@ const DEV_MOCKS: Record<string, MockFn> = {
     throw new Error("Cape-Upload braucht die native App (nicht im Browser-Vorschau).");
   },
   delete_cape: () => null,
+  get_cosmetics: (args) => ({
+    cape: "frost",
+    wings: "none",
+    trail: "none",
+    head: "none",
+    pet: "none",
+    ...mockCosmetics[String(args?.instanceId)],
+  }),
+  equip_cosmetic: (args) => {
+    const key = String(args?.instanceId);
+    mockCosmetics[key] = { ...mockCosmetics[key], [String(args?.kind)]: String(args?.id) };
+    return null;
+  },
+  list_screenshots: () => [],
+  read_screenshot: () => "",
+  screenshots_dir: () => "",
   equipped_cape: (args) => mockEquippedCapes[String(args?.instanceId)] ?? "none",
   equip_cape: (args) => {
     mockEquippedCapes[String(args?.instanceId)] = (args?.capeId as string | null) ?? "none";

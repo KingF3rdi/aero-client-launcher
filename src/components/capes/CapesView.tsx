@@ -15,7 +15,7 @@ import { CapeThumb } from "./CapeThumb";
  * instance, or publish your own. Equipping writes straight into that instance's Fabric mod config
  * (equippedCape) - it only reliably takes effect while the instance isn't currently running.
  */
-export function CapesView() {
+export function CapesView({ onEquipped }: { onEquipped?: () => void } = {}) {
   const { account } = useAuthStore();
   const { instances, selectedId, select } = useInstanceStore();
   const [capes, setCapes] = useState<CapeSummary[] | null>(null);
@@ -47,6 +47,7 @@ export function CapesView() {
     try {
       await invoke("equip_cape", { instanceId: target.id, capeId });
       setEquipped(capeId ?? "none");
+      onEquipped?.();
     } catch (e) {
       toast.error(String(e));
     } finally {

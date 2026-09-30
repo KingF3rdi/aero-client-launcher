@@ -10,7 +10,7 @@ export function LarpMark({ size = 36, className }: { size?: number; className?: 
         alignItems: "center",
         justifyContent: "center",
         color: "var(--accent-hex)",
-        fontFamily: "Monocraft, monospace",
+        fontFamily: "Inter, \"Segoe UI\", sans-serif",
         fontSize: size * 0.95,
         fontWeight: 900,
         lineHeight: 1,

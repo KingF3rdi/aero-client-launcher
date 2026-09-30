@@ -26,11 +26,11 @@ export function Modal({ title, subtitle, onClose, children, width = 560 }: Modal
       onClick={onClose}
     >
       <div
-        className="w-full bg-[#110f19]/95 border border-accent/50 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.5)] overflow-hidden"
+        className="w-full rounded-2xl bg-[#110f19]/95 border border-white/15 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.5)] overflow-hidden"
         style={{ maxWidth: width }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-accent/30 bg-accent/10">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-white/[0.03]">
           <div>
             <h3 className="label-mc text-sm">{title}</h3>
             {subtitle && <p className="text-xs text-white/40 mt-0.5">{subtitle}</p>}

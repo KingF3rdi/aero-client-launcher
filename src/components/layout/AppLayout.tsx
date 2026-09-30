@@ -7,9 +7,10 @@ const NAV_ITEMS: NavItem[] = [
   { id: "play", label: "Play", icon: "solar:play-bold" },
   { id: "instances", label: "Profile", icon: "solar:box-bold" },
   { id: "discover", label: "Mods", icon: "solar:widget-5-bold" },
+  { id: "cosmetics", label: "Cosmetics", icon: "solar:magic-stick-3-bold" },
   { id: "skins", label: "Skins", icon: "solar:t-shirt-bold" },
-  { id: "capes", label: "Capes", icon: "solar:magic-stick-3-bold" },
-  { id: "presets", label: "Presets", icon: "solar:settings-bold" },
+  { id: "presets", label: "Presets", icon: "solar:tuning-2-bold" },
+  { id: "screenshots", label: "Shots", icon: "solar:gallery-bold" },
 ];
 
 interface AppLayoutProps {
@@ -19,10 +20,10 @@ interface AppLayoutProps {
   children: ReactNode;
 }
 
-/** Window frame: accent border, icon rail on the left, header on top, scrollable page, background effect behind. */
+/** Window frame: icon rail on the left, header on top, scrollable page, background effect behind. */
 export function AppLayout({ activeTab, onNavChange, onAddInstance, children }: AppLayoutProps) {
   return (
-    <div className="h-screen w-screen flex overflow-hidden relative border border-accent/40 bg-bg">
+    <div className="h-screen w-screen flex overflow-hidden relative bg-bg">
       <Background />
       <VerticalNavbar items={NAV_ITEMS} activeItem={activeTab} onItemClick={onNavChange} onAddInstance={onAddInstance} />
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">

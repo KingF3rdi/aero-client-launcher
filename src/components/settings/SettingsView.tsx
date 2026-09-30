@@ -98,6 +98,11 @@ export function SettingsView() {
       desc: "Wie der Launcher Minecraft startet.",
       rows: [
         {
+          label: "Beim Spielstart minimieren",
+          desc: "Der Launcher verschwindet in die Taskleiste, sobald Minecraft läuft.",
+          control: <Toggle on={theme.minimizeOnLaunch} onChange={(v) => theme.set({ minimizeOnLaunch: v })} />,
+        },
+        {
           label: "Standard-RAM",
           desc: "Arbeitsspeicher für Profile ohne eigene RAM-Einstellung.",
           control: (
