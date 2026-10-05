@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { IdleAnimation, SkinViewer, WaveAnimation } from "skinview3d";
+import { dress, type Worn } from "../../lib/cosmetics3d";
 
 interface SkinStageProps {
   uuid: string;
@@ -9,10 +10,12 @@ interface SkinStageProps {
   capeUrl?: string | null;
   /** Show the model from behind (cape view). */
   back?: boolean;
+  /** Wings, headwear, trail and pet to show on the model. */
+  worn?: Worn;
 }
 
 /** Large rotatable 3D model of the account's skin, waving when Skin Animation is on. */
-export function SkinStage({ uuid, skinUrl, animate, capeUrl, back }: SkinStageProps) {
+export function SkinStage({ uuid, skinUrl, animate, capeUrl, back, worn }: SkinStageProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<SkinViewer | null>(null);
@@ -52,6 +55,15 @@ export function SkinStage({ uuid, skinUrl, animate, capeUrl, back }: SkinStagePr
       viewer.resetCape();
     }
   }, [capeUrl, back, uuid, skinUrl, animate]);
+
+  const wornKey = JSON.stringify(worn ?? {});
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    if (!viewer || !worn) return;
+    viewer.zoom = 0.55; // room for wing tips and the pet
+    return dress(viewer, worn);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wornKey, uuid, skinUrl, animate]);
 
   return (
     <div ref={boxRef} className="absolute inset-0">

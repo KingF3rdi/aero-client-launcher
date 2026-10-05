@@ -31,6 +31,7 @@ export function CosmeticsView() {
   const { instances, selectedId, select } = useInstanceStore();
   const [tab, setTab] = useState<Tab>("cape");
   const [equipped, setEquipped] = useState(NONE);
+  const [trying, setTrying] = useState<{ kind: CosmeticKind; id: string } | null>(null);
 
   const modInstances = instances.filter((i) => i.mcVersion === "1.21.11" && i.modEnabled);
   const target = modInstances.find((i) => i.id === selectedId) ?? modInstances[0] ?? null;
@@ -69,8 +70,9 @@ export function CosmeticsView() {
               uuid={account.uuid}
               skinUrl={account.skinUrl ?? null}
               animate={false}
-              capeUrl={capeTexture(equipped.cape)}
-              back={tab === "cape" || tab === "custom"}
+              capeUrl={capeTexture(trying?.kind === "cape" ? trying.id : equipped.cape)}
+              back={tab === "cape" || tab === "custom" || tab === "wings"}
+              worn={{ ...equipped, ...(trying && trying.kind !== "cape" ? { [trying.kind]: trying.id } : {}) }}
             />
           )}
         </div>
@@ -82,7 +84,7 @@ export function CosmeticsView() {
               <span className="text-white">{nameOf(t.id as CosmeticKind)}</span>
             </div>
           ))}
-          <p className="text-[11px] text-white/35 mt-2">Wings, Trails, Headwear und Pets siehst du im Spiel (F5) und in der Garderobe des Clients.</p>
+          <p className="text-[11px] text-white/35 mt-2">Maus über ein Item hält es zur Probe an. Im Spiel sehen die Modelle genauer aus.</p>
         </div>
       </aside>
 
@@ -130,7 +132,9 @@ export function CosmeticsView() {
             )}
             <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-3">
               {COSMETICS[tab].map((item) => (
-                <Card key={item.id} kind={tab} item={item} icon={TABS.find((t) => t.id === tab)!.icon} on={equipped[tab] === item.id} disabled={!target} onClick={() => equip(tab, item.id)} />
+                <div key={item.id} onMouseEnter={() => setTrying({ kind: tab, id: item.id })} onMouseLeave={() => setTrying(null)}>
+                  <Card kind={tab} item={item} icon={TABS.find((t) => t.id === tab)!.icon} on={equipped[tab] === item.id} disabled={!target} onClick={() => equip(tab, item.id)} />
+                </div>
               ))}
             </div>
           </div>
@@ -148,7 +152,7 @@ function Card({ kind, item, icon, on, disabled, onClick }: { kind: CosmeticKind;
       onClick={onClick}
       disabled={disabled}
       className={clsx(
-        "relative flex flex-col items-center gap-2 p-3 border text-left transition-all cursor-pointer disabled:cursor-not-allowed disabled:opacity-60",
+        "relative w-full h-full flex flex-col items-center gap-2 p-3 border text-left transition-all cursor-pointer disabled:cursor-not-allowed disabled:opacity-60",
         on ? "border-accent bg-accent/15 shadow-glow" : "border-white/10 bg-white/[0.04] hover:border-accent/50 hover:-translate-y-0.5",
       )}
     >
