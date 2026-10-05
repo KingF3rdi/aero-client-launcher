@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
+import clsx from "clsx";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useInstanceStore } from "../../store/useInstanceStore";
 import { InstanceSettingsModal, type Tab } from "./InstanceSettingsModal";
@@ -11,7 +12,7 @@ import { Button } from "../ui/Button";
  * Play's compact sidebar list. */
 export function InstancesView() {
   const { account } = useAuthStore();
-  const { instances, loadInstances, play } = useInstanceStore();
+  const { instances, loadInstances, play, updateInstance } = useInstanceStore();
   const [settingsFor, setSettingsFor] = useState<string | null>(null);
   const [modalTab, setModalTab] = useState<Tab>("content");
   const [adding, setAdding] = useState(false);
@@ -57,6 +58,19 @@ export function InstancesView() {
               </div>
             </button>
             <div className="absolute top-3 right-3 flex items-center gap-0.5">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  updateInstance(instance.id, { pinned: !instance.pinned });
+                }}
+                title={instance.pinned ? "Lösen" : "Oben anheften"}
+                className={clsx(
+                  "w-7 h-7 flex items-center justify-center rounded-md hover:bg-white/10 transition-all cursor-pointer",
+                  instance.pinned ? "text-accent" : "text-white/0 group-hover:text-white/50 hover:!text-white",
+                )}
+              >
+                <Icon icon={instance.pinned ? "solar:pin-bold" : "solar:pin-linear"} width={16} height={16} />
+              </button>
               <button
                 onClick={(e) => {
                   e.stopPropagation();

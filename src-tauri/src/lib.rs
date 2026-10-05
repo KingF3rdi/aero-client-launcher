@@ -1,5 +1,7 @@
 mod auth;
 mod capes;
+mod configs;
+mod importer;
 mod content;
 mod instances;
 mod launch;
@@ -7,6 +9,8 @@ mod presets;
 mod screenshots;
 mod selfupdate;
 mod skin;
+mod modcheck;
+mod name;
 mod state;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -47,6 +51,14 @@ pub fn run() {
             launch::launch_instance,
             launch::stop_instance,
             skin::upload_skin,
+            name::check_name,
+            name::name_change_lock,
+            name::change_name,
+            configs::list_config_files,
+            configs::read_config_file,
+            configs::write_config_file,
+            importer::find_foreign_instances,
+            importer::import_foreign_instance,
             content::search_content,
             content::install_content,
             content::install_modpack,

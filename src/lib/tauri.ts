@@ -57,6 +57,7 @@ const DEV_MOCKS: Record<string, MockFn> = {
     if (typeof patch.name === "string") inst.name = patch.name;
     if (typeof patch.modEnabled === "boolean") inst.modEnabled = patch.modEnabled;
     if ("ramGb" in patch) inst.ramGb = patch.ramGb;
+    if (typeof patch.pinned === "boolean") inst.pinned = patch.pinned;
     return inst;
   },
   delete_instance: (args) => {
@@ -103,6 +104,21 @@ const DEV_MOCKS: Record<string, MockFn> = {
     "mods/sodium.jar": "https://cdn.modrinth.com/data/AANobbMI/icon.png",
   }),
   upload_skin: () => null,
+  check_name: (args) => (String(args?.name ?? "").length < 3 ? "invalid" : "free"),
+  name_change_lock: () => null,
+  change_name: () => null,
+  list_config_files: () => ["sodium-options.json", "aero/aero.json"],
+  read_config_file: () => JSON.stringify({ example: true }, null, 2),
+  write_config_file: () => null,
+  find_foreign_instances: () => [
+    { source: "Prism Launcher", name: "PvP 1.21.11", mcVersion: "1.21.11", path: "C:/prism/pvp", mods: 32 },
+    { source: "Modrinth App", name: "Mein Pack", mcVersion: null, path: "C:/modrinth/pack", mods: 57 },
+  ],
+  import_foreign_instance: (args) => {
+    const inst = { id: `import-${mockInstances.length}`, name: String(args?.name), mcVersion: String(args?.mcVersion), loader: "fabric", modEnabled: true, ramGb: null };
+    mockInstances.push(inst);
+    return inst;
+  },
   search_content: (args) => {
     const type = String(args?.projectType ?? "mod");
     const offset = Number(args?.offset ?? 0);

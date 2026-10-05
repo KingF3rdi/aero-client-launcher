@@ -70,7 +70,7 @@ export const useInstanceStore = create<InstanceState>((set, get) => ({
   launchedInstanceId: null,
 
   loadInstances: async () => {
-    const instances = await invoke<Instance[]>("get_instances");
+    const instances = pinnedFirst(await invoke<Instance[]>("get_instances"));
     set((state) => {
       if (state.selectedId) return { instances };
       const lastPlayedId = loadLastPlayedId();
@@ -136,7 +136,7 @@ export const useInstanceStore = create<InstanceState>((set, get) => ({
 
   updateInstance: async (id, patch) => {
     const updated = await invoke<Instance>("update_instance", { id, patch });
-    set((state) => ({ instances: state.instances.map((i) => (i.id === id ? updated : i)) }));
+    set((state) => ({ instances: pinnedFirst(state.instances.map((i) => (i.id === id ? updated : i))) }));
   },
 
   deleteInstance: async (id) => {
@@ -164,3 +164,8 @@ export const useInstanceStore = create<InstanceState>((set, get) => ({
   exportModpack: (id, destPath) => invoke("export_modpack", { id, destPath }),
   fetchContentIcons: (id) => invoke<Record<string, string>>("fetch_content_icons", { id }),
 }));
+
+/** Pinned instances first, otherwise the saved order (sort is stable). */
+function pinnedFirst(list: Instance[]): Instance[] {
+  return [...list].sort((a, b) => Number(!!b.pinned) - Number(!!a.pinned));
+}

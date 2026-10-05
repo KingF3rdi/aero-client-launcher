@@ -19,6 +19,9 @@ pub struct Instance {
     /// Per-instance RAM override; falls back to the launcher-wide slider when unset.
     #[serde(default)]
     pub ram_gb: Option<u32>,
+    /// Pinned instances are listed first.
+    #[serde(default)]
+    pub pinned: bool,
 }
 
 fn instances_file() -> PathBuf {
@@ -45,6 +48,7 @@ fn default_instances() -> Vec<Instance> {
             // The mod jar is only ever built for 1.21.11 today - see ensure_mod_jar in launch.rs.
             mod_enabled: mc_version == "1.21.11",
             ram_gb: None,
+            pinned: false,
         })
         .collect()
 }
@@ -88,6 +92,7 @@ pub struct InstancePatch {
     pub name: Option<String>,
     pub mod_enabled: Option<bool>,
     pub ram_gb: Option<Option<u32>>,
+    pub pinned: Option<bool>,
 }
 
 #[tauri::command]
@@ -107,6 +112,9 @@ pub fn update_instance(id: String, patch: InstancePatch) -> Result<Instance, Str
     }
     if let Some(ram_gb) = patch.ram_gb {
         instance.ram_gb = ram_gb;
+    }
+    if let Some(pinned) = patch.pinned {
+        instance.pinned = pinned;
     }
     let updated = instance.clone();
     save_instances(&instances)?;
@@ -140,6 +148,7 @@ pub fn duplicate_instance(id: String) -> Result<Instance, String> {
         loader: source.loader.clone(),
         mod_enabled: source.mod_enabled,
         ram_gb: source.ram_gb,
+        pinned: false,
     };
     if instance_dir(&source.id).is_dir() {
         copy_dir_recursive(&instance_dir(&source.id), &instance_dir(&new_id)).map_err(|e| e.to_string())?;
@@ -168,6 +177,7 @@ pub fn add_instance(name: String, mc_version: String) -> Result<Instance, String
         loader: "fabric".to_string(),
         mod_enabled: mc_version == "1.21.11",
         ram_gb: None,
+        pinned: false,
     };
     instances.push(instance.clone());
     save_instances(&instances)?;
@@ -194,6 +204,7 @@ pub struct ContentFile {
     pub name: String,
     pub kind: String,
     pub enabled: bool,
+    pub issue: Option<crate::modcheck::Issue>,
 }
 
 const CONTENT_KINDS: &[(&str, &str)] = &[("mods", "mod"), ("resourcepacks", "resourcepack"), ("shaderpacks", "shader")];
@@ -204,6 +215,7 @@ const CONTENT_KINDS: &[(&str, &str)] = &[("mods", "mod"), ("resourcepacks", "res
 #[tauri::command]
 pub fn list_instance_content(id: String) -> Result<Vec<ContentFile>, String> {
     let dir = instance_dir(&id);
+    let instance = load_instances().into_iter().find(|i| i.id == id);
     let mut out = Vec::new();
     for (folder, kind) in CONTENT_KINDS {
         let path = dir.join(folder);
@@ -220,6 +232,10 @@ pub fn list_instance_content(id: String) -> Result<Vec<ContentFile>, String> {
                 name: display_name,
                 kind: kind.to_string(),
                 enabled,
+                issue: match &instance {
+                    Some(i) if *kind == "mod" && i.loader == "fabric" => crate::modcheck::check(&entry.path(), &i.mc_version, i.mod_enabled),
+                    _ => None,
+                },
             });
         }
     }
@@ -261,6 +277,10 @@ pub fn toggle_content_file(id: String, rel_path: String) -> Result<ContentFile, 
         rel_path: format!("{folder}/{file_name}"),
         kind: kind.to_string(),
         enabled: !enabled_now,
+        issue: load_instances()
+            .into_iter()
+            .find(|i| i.id == id && i.loader == "fabric" && kind == "mod")
+            .and_then(|i| crate::modcheck::check(&new_path, &i.mc_version, i.mod_enabled)),
     })
 }
 
@@ -276,7 +296,7 @@ fn short_random_suffix() -> String {
     format!("{:x}", nanos & 0xFFFFF)
 }
 
-fn copy_dir_recursive(src: &std::path::Path, dst: &std::path::Path) -> std::io::Result<()> {
+pub(crate) fn copy_dir_recursive(src: &std::path::Path, dst: &std::path::Path) -> std::io::Result<()> {
     std::fs::create_dir_all(dst)?;
     for entry in std::fs::read_dir(src)? {
         let entry = entry?;

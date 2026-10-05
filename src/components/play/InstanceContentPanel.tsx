@@ -174,9 +174,21 @@ export function InstanceContentPanel({
                         <Icon icon={KIND_ICON[file.kind]} width={18} height={18} className="text-accent" />
                       )}
                     </div>
-                    <span className={clsx("text-base flex-1 truncate", !file.enabled && "text-white/40 line-through")}>
-                      {file.name}
-                    </span>
+                    <div className="flex-1 min-w-0 flex flex-col">
+                      <span className={clsx("text-base truncate", !file.enabled && "text-white/40 line-through")}>{file.name}</span>
+                      {file.issue && file.enabled && (
+                        <span
+                          className={clsx(
+                            "text-xs flex items-center gap-1",
+                            file.issue.kind === "version" ? "text-danger" : "text-amber-400",
+                          )}
+                        >
+                          <Icon icon="solar:danger-triangle-bold" width={12} height={12} />
+                          {file.issue.text}
+                          {file.issue.kind === "version" ? ", lädt nicht" : ", lieber ausschalten"}
+                        </span>
+                      )}
+                    </div>
                     {file.kind === "mod" && (
                       <Toggle on={file.enabled} disabled={busyPath === file.relPath} onChange={() => toggle(file)} />
                     )}

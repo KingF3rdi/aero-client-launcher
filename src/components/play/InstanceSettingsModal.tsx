@@ -8,8 +8,10 @@ import { Toggle } from "../ui/Toggle";
 import { useInstanceStore } from "../../store/useInstanceStore";
 import type { Instance } from "../../types/instance";
 import { InstanceContentPanel } from "./InstanceContentPanel";
+import { invoke } from "../../lib/tauri";
+import { toast } from "react-hot-toast";
 
-export type Tab = "content" | "general" | "installation" | "logs";
+export type Tab = "content" | "configs" | "general" | "installation" | "logs";
 
 interface InstanceSettingsModalProps {
   instance: Instance;
@@ -37,11 +39,12 @@ export function InstanceSettingsModal({ instance, onClose, initialTab }: Instanc
   };
 
   return (
-    <Modal title={instance.name} subtitle={`${instance.loader === "fabric" ? "Fabric" : "Vanilla"} · ${instance.mcVersion}`} onClose={onClose} width={640}>
+    <Modal title={instance.name} subtitle={`${instance.loader === "fabric" ? "Fabric" : "Vanilla"} · ${instance.mcVersion}`} onClose={onClose} width={760}>
       <div className="flex">
         <nav className="w-40 shrink-0 border-r border-white/10 p-3 flex flex-col gap-1">
           {([
             { id: "content", label: "Content", icon: "solar:widget-5-bold" },
+            { id: "configs", label: "Configs", icon: "solar:code-file-bold" },
             { id: "general", label: "General", icon: "solar:settings-bold" },
             { id: "installation", label: "Installation", icon: "solar:widget-bold" },
             { id: "logs", label: "Logs", icon: "solar:document-text-bold" },
@@ -180,6 +183,7 @@ export function InstanceSettingsModal({ instance, onClose, initialTab }: Instanc
             />
           )}
 
+          {tab === "configs" && <ConfigsTab instanceId={instance.id} />}
           {tab === "logs" && <LogsTab instanceId={instance.id} />}
         </div>
       </div>
@@ -217,6 +221,110 @@ function LogsTab({ instanceId }: { instanceId: string }) {
       <pre className="text-xs font-mono bg-black/50 border border-white/10 rounded-lg p-3 max-h-96 overflow-auto whitespace-pre-wrap break-all text-white/70">
         {loading ? "Lade…" : log || "Keine Log-Daten."}
       </pre>
+    </div>
+  );
+}
+
+/** Mod config files (config/**) edited as plain text. */
+function ConfigsTab({ instanceId }: { instanceId: string }) {
+  const [files, setFiles] = useState<string[] | null>(null);
+  const [filter, setFilter] = useState("");
+  const [open, setOpen] = useState<string | null>(null);
+  const [text, setText] = useState("");
+  const [saved, setSaved] = useState("");
+
+  useEffect(() => {
+    invoke<string[]>("list_config_files", { id: instanceId }).then(setFiles).catch(() => setFiles([]));
+  }, [instanceId]);
+
+  const load = async (rel: string) => {
+    if (text !== saved && !confirm("Ungespeicherte Änderungen verwerfen?")) return;
+    try {
+      const t = await invoke<string>("read_config_file", { id: instanceId, rel });
+      setOpen(rel);
+      setText(t);
+      setSaved(t);
+    } catch (e) {
+      toast.error(String(e));
+    }
+  };
+
+  const save = async () => {
+    if (!open) return;
+    if (open.endsWith(".json")) {
+      try {
+        JSON.parse(text);
+      } catch (e) {
+        toast.error(`Kein gültiges JSON: ${(e as Error).message}`);
+        return;
+      }
+    }
+    try {
+      await invoke("write_config_file", { id: instanceId, rel: open, text });
+      setSaved(text);
+      toast.success("Gespeichert. Wirkt beim nächsten Start.");
+    } catch (e) {
+      toast.error(String(e));
+    }
+  };
+
+  const shown = (files ?? []).filter((f) => f.toLowerCase().includes(filter.toLowerCase()));
+  return (
+    <div className="flex gap-3 h-[26rem]">
+      <div className="w-48 shrink-0 flex flex-col gap-2">
+        <input
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          placeholder="Configs filtern"
+          className="h-9 px-3 text-xs bg-black/40 border border-white/15 focus:border-accent outline-none"
+        />
+        <div className="flex-1 overflow-y-auto flex flex-col gap-0.5">
+          {files === null && <p className="text-xs text-white/40">Lädt…</p>}
+          {files?.length === 0 && <p className="text-xs text-white/40">Noch keine Configs. Einmal starten, dann legen die Mods sie an.</p>}
+          {shown.map((f) => (
+            <button
+              key={f}
+              onClick={() => load(f)}
+              title={f}
+              className={clsx(
+                "text-left text-xs px-2 py-1.5 rounded-md truncate cursor-pointer",
+                open === f ? "bg-accent/20 text-white" : "text-white/60 hover:bg-white/5 hover:text-white",
+              )}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="flex-1 min-w-0 flex flex-col gap-2">
+        {open ? (
+          <>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-white/60 truncate flex-1">{open}</span>
+              <Button variant="ghost" size="sm" onClick={() => setText(saved)} disabled={text === saved}>
+                Zurücksetzen
+              </Button>
+              <Button variant="primary" size="sm" onClick={save} disabled={text === saved}>
+                Speichern
+              </Button>
+            </div>
+            <textarea
+              value={text}
+              spellCheck={false}
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={(e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+                  e.preventDefault();
+                  save();
+                }
+              }}
+              className="flex-1 resize-none text-xs font-mono bg-black/50 border border-white/10 focus:border-accent/60 outline-none p-3 text-white/80"
+            />
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center text-xs text-white/40">Links eine Config wählen</div>
+        )}
+      </div>
     </div>
   );
 }
