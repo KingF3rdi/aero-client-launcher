@@ -30,6 +30,7 @@ const GROUPS = [
 ];
 
 const EFFECTS: { id: BackgroundEffect; label: string; icon: string }[] = [
+  { id: "dusk", label: "Abendhimmel", icon: "solar:sunset-bold" },
   { id: "particles", label: "Partikel", icon: "solar:stars-bold" },
   { id: "grid", label: "Raster", icon: "solar:widget-bold" },
   { id: "plain", label: "Einfarbig", icon: "solar:pallete-2-bold" },
@@ -123,7 +124,7 @@ export function SettingsView() {
       rows: [
         { label: "Animationen", desc: "Bewegte Hintergrund-Effekte.", control: <Toggle on={theme.animations} onChange={(v) => theme.set({ animations: v })} /> },
         { label: "Skin-Animation", desc: "Dein Skin winkt auf der Play-Seite.", control: <Toggle on={theme.skinAnimation} onChange={(v) => theme.set({ skinAnimation: v })} /> },
-        { label: "Sidebar-Beschriftung", desc: "Text unter den Icons in der Seitenleiste.", control: <Toggle on={theme.sidebarLabels} onChange={(v) => theme.set({ sidebarLabels: v })} /> },
+        { label: "Sidebar-Beschriftung", desc: "Breite Seitenleiste mit Namen neben den Icons; aus = schmale Icon-Leiste.", control: <Toggle on={theme.sidebarLabels} onChange={(v) => theme.set({ sidebarLabels: v })} /> },
         {
           label: "",
           wide: true,

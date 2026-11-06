@@ -27,11 +27,8 @@ export function HeaderBar() {
   }, []);
 
   return (
-    <div data-tauri-drag-region className="h-14 flex-shrink-0 border-b border-white/10 bg-black/20 backdrop-blur-lg flex items-center gap-3 pl-6 pr-3 relative z-10">
-      <h1 data-tauri-drag-region className="text-[15px] font-bold text-white">
-        Aero Client
-      </h1>
-      <span data-tauri-drag-region className="flex items-center gap-1.5 h-6 px-2.5 rounded-full bg-white/5 text-[11px] text-white/60 mr-auto">
+    <div data-tauri-drag-region className="h-14 flex-shrink-0 flex items-center gap-3 pl-6 pr-3 relative z-10">
+      <span data-tauri-drag-region className="flex items-center gap-1.5 h-7 px-3 rounded-full bg-[#0e0d14]/70 border border-white/[0.08] text-[11.5px] font-medium text-white/70 mr-auto">
         <i className="w-1.5 h-1.5 rounded-full bg-green inline-block" />
         {online === null ? "–" : `${online.toLocaleString("de-DE")} online`}
       </span>

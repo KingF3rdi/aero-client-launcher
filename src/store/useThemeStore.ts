@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type BackgroundEffect = "particles" | "grid" | "plain";
+export type BackgroundEffect = "dusk" | "particles" | "grid" | "plain";
 
 interface ThemeState {
   accent: string;
@@ -26,12 +26,18 @@ const DEFAULTS = {
   skinAnimation: true,
   sidebarLabels: true,
   minimizeOnLaunch: false,
-  background: "particles" as BackgroundEffect,
+  background: "dusk" as BackgroundEffect,
 };
 
 function load(): typeof DEFAULTS {
   try {
-    return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY) ?? "{}") };
+    const saved = JSON.parse(localStorage.getItem(KEY) ?? "{}");
+    // 1.7.0 redesign: everyone starts once on the new dusk sky; a later pick sticks.
+    if (saved.look !== 2) {
+      saved.look = 2;
+      saved.background = "dusk";
+    }
+    return { ...DEFAULTS, ...saved };
   } catch {
     return DEFAULTS;
   }

@@ -5,9 +5,9 @@ export default {
     extend: {
       colors: {
         bg: "#0c0b12",
-        bar: "#15131d",
-        card: "#1a1824",
-        pill: "#23202e",
+        bar: "#121119",
+        card: "#16151e",
+        pill: "#201f2a",
         text: "#eceaf2",
         muted: "#8e8a9a",
         // Runtime-switchable (Settings -> Accent color): see store/useThemeStore.ts applyAccent().

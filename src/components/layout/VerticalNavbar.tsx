@@ -17,42 +17,59 @@ interface VerticalNavbarProps {
   onAddInstance: () => void;
 }
 
-/** Icon rail: logo on top, pages in the middle, settings pinned to the bottom. The active page is a filled pill. */
+/**
+ * Sidebar: brand on top, pages in the middle, new profile and settings at the bottom. With labels on it is a
+ * wide list of rows (icon + name); with labels off it folds into a slim icon rail.
+ */
 export function VerticalNavbar({ items, activeItem, onItemClick, onAddInstance }: VerticalNavbarProps) {
-  const labels = useThemeStore((s) => s.sidebarLabels);
+  const wide = useThemeStore((s) => s.sidebarLabels);
   return (
-    <div className="h-full w-[88px] flex flex-col items-center border-r border-white/10 bg-black/30 backdrop-blur-lg py-4 gap-1.5 relative z-10">
-      <button onClick={onAddInstance} title="Neues Profil" className="mb-3 cursor-pointer transition-transform hover:scale-105">
-        <LarpMark size={34} />
-      </button>
+    <nav
+      aria-label="Seiten"
+      className={clsx(
+        "h-full flex flex-col border-r border-white/[0.08] bg-[#0e0d14]/80 backdrop-blur-xl py-5 gap-1 relative z-10 shrink-0",
+        wide ? "w-[216px] px-3" : "w-[76px] px-2.5 items-center",
+      )}
+    >
+      <div data-tauri-drag-region className={clsx("flex items-center gap-2.5 mb-5", wide ? "px-2" : "justify-center")}>
+        <LarpMark size={30} />
+        {wide && (
+          <div data-tauri-drag-region className="flex flex-col leading-tight">
+            <span className="text-[15px] font-bold text-white tracking-tight">Aero Client</span>
+            <span className="text-[11px] text-white/45">Launcher</span>
+          </div>
+        )}
+      </div>
       {items.map((item) => (
-        <NavButton key={item.id} item={item} active={activeItem === item.id} labels={labels} onClick={() => onItemClick(item.id)} />
+        <NavButton key={item.id} item={item} active={activeItem === item.id} wide={wide} onClick={() => onItemClick(item.id)} />
       ))}
-      <div className="mt-auto">
+      <div className={clsx("mt-auto flex flex-col gap-1", !wide && "items-center")}>
+        <NavButton item={{ id: "new", label: "Neues Profil", icon: "solar:add-square-bold" }} active={false} wide={wide} onClick={onAddInstance} />
         <NavButton
           item={{ id: "settings", label: "Optionen", icon: "solar:settings-bold" }}
           active={activeItem === "settings"}
-          labels={false}
+          wide={wide}
           onClick={() => onItemClick("settings")}
         />
       </div>
-    </div>
+    </nav>
   );
 }
 
-function NavButton({ item, active, labels, onClick }: { item: NavItem; active: boolean; labels: boolean; onClick: () => void }) {
+function NavButton({ item, active, wide, onClick }: { item: NavItem; active: boolean; wide: boolean; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
       title={item.label}
+      aria-current={active ? "page" : undefined}
       className={clsx(
-        "flex flex-col items-center justify-center gap-1 w-[68px] rounded-xl transition-colors cursor-pointer",
-        labels ? "h-[58px]" : "h-12",
-        active ? "text-white bg-accent/20 shadow-glow" : "text-white/45 hover:text-white hover:bg-white/5",
+        "flex items-center rounded-xl transition-colors cursor-pointer h-11",
+        wide ? "w-full gap-3 px-3 text-[13.5px] font-semibold" : "w-12 justify-center",
+        active ? "text-white bg-white/[0.09] border border-white/10" : "text-white/55 border border-transparent hover:text-white hover:bg-white/[0.05]",
       )}
     >
-      <Icon icon={item.icon} width={22} height={22} className={active ? "text-accent" : ""} />
-      {labels && <span className="text-[10px] font-semibold">{item.label}</span>}
+      <Icon icon={item.icon} width={20} height={20} className={active ? "text-accent" : ""} />
+      {wide && <span>{item.label}</span>}
     </button>
   );
 }

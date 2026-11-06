@@ -68,12 +68,12 @@ export function PlayView() {
             <div className="absolute inset-x-0 top-16 bottom-44">
               <SkinStage uuid={account.uuid} skinUrl={account.skinUrl ?? null} animate={skinAnimation} />
             </div>
-            <div className="relative z-10 mt-8 px-4 py-1.5 rounded-full bg-black/50 border border-white/10 text-white text-lg font-semibold">{account.name}</div>
+            <div className="relative z-10 mt-6 px-5 py-2 rounded-2xl bg-[#0e0d14]/80 border border-white/[0.08] backdrop-blur text-white text-lg font-semibold tracking-tight">{account.name}</div>
           </>
         )}
 
         <div className="mt-auto mb-8 relative z-10 flex flex-col items-center gap-2.5" ref={pickerRef}>
-          <div className="flex items-stretch h-14 rounded-2xl border border-white/15 bg-black/50 backdrop-blur overflow-hidden shadow-glow">
+          <div className="flex items-stretch h-16 rounded-2xl border border-white/10 bg-[#0e0d14]/85 backdrop-blur-xl overflow-hidden shadow-[0_18px_40px_rgba(0,0,0,.45)]">
             <button
               onClick={() => setPicker((v) => !v)}
               title="Profil wählen"
@@ -90,7 +90,7 @@ export function PlayView() {
               disabled={!account || !selected}
               onClick={() => (busy || running ? stop() : start())}
               className={clsx(
-                "label-mc w-52 flex items-center justify-center gap-2.5 rounded-none text-lg text-white transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
+                "label-mc w-56 flex items-center justify-center gap-2.5 rounded-none text-lg text-white transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
                 busy || running ? "bg-danger hover:brightness-110" : "bg-accent hover:brightness-110",
               )}
             >
@@ -100,7 +100,7 @@ export function PlayView() {
           </div>
 
           {/* Quick join: with an address here, Launch goes straight onto that server. */}
-          <label className="flex items-center gap-2 h-9 w-[29rem] max-w-full px-3 rounded-full border border-white/10 bg-black/40 text-white/50 focus-within:border-accent/60">
+          <label className="flex items-center gap-2 h-9 w-[29rem] max-w-full px-3 rounded-full border border-white/[0.08] bg-[#0e0d14]/75 backdrop-blur text-white/50 focus-within:border-accent/60">
             <Icon icon="solar:server-bold" width={15} height={15} className={server.trim() ? "text-accent" : ""} />
             <input
               value={server}

@@ -98,7 +98,7 @@ export function NewsPanel() {
   }, []);
 
   return (
-    <aside className="w-80 shrink-0 border-l border-white/10 bg-black/25 backdrop-blur flex flex-col">
+    <aside className="w-80 shrink-0 border-l border-white/[0.08] bg-[#0e0d14]/75 backdrop-blur-xl flex flex-col">
       <div className="label-mc flex items-center gap-2 px-4 h-12 border-b border-white/10 text-xs">
         <Icon icon="solar:document-text-bold" width={16} height={16} className="text-accent" />
         <span className="flex-1">News</span>
@@ -132,7 +132,7 @@ export function NewsPanel() {
                 openUrl(n.url);
               }
             }}
-            className="block rounded-xl border border-white/10 bg-white/[0.04] hover:border-accent/60 hover:bg-accent/10 transition-colors p-3"
+            className="block rounded-2xl border border-white/[0.08] bg-white/[0.035] hover:border-accent/50 hover:bg-white/[0.06] transition-colors p-3.5"
           >
             {n.image && <img src={n.image} alt="" loading="lazy" className="w-full aspect-[3/2] object-cover rounded-lg mb-2" />}
             <div className="flex items-center gap-2 mb-1.5">
@@ -140,10 +140,39 @@ export function NewsPanel() {
               {n.preview && <span className="label-mc text-[9px] px-1.5 py-0.5 rounded bg-accent/30 text-white shrink-0">Beta</span>}
             </div>
             <div className="text-[10px] text-white/40 mb-1.5">{n.date ? new Date(n.date).toLocaleDateString("de-DE") : ""}</div>
-            <p className="text-xs text-white/60 line-clamp-3 whitespace-pre-line">{n.body || "Neue Version verfügbar."}</p>
+            <NewsBody body={n.body || "Neue Version verfügbar."} />
           </a>
         ))}
       </div>
     </aside>
   );
+}
+
+/**
+ * Release notes are Markdown: show the first few bullets as a real list with bold lead-ins instead of the
+ * raw "## What's new" / "**...**" text. Headings are dropped (the card title already names the version).
+ */
+function NewsBody({ body }: { body: string }) {
+  const lines = body
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith("#"));
+  const bullets = lines.filter((l) => /^[-*] /.test(l)).slice(0, 3);
+  if (bullets.length === 0) {
+    return <p className="text-xs text-white/60 line-clamp-3">{inline(lines.join(" "))}</p>;
+  }
+  return (
+    <ul className="flex flex-col gap-1.5 text-xs text-white/60">
+      {bullets.map((b, i) => (
+        <li key={i} className="flex gap-2">
+          <i className="mt-[6px] w-1 h-1 rounded-full bg-accent shrink-0" />
+          <span className="line-clamp-2">{inline(b.slice(2))}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function inline(text: string) {
+  return text.split(/\*\*(.+?)\*\*/g).map((part, i) => (i % 2 ? <b key={i} className="font-semibold text-white/85">{part}</b> : part));
 }
