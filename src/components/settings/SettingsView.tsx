@@ -83,7 +83,7 @@ export function SettingsView() {
                 />
                 <span className="flex flex-col">
                   <span className="label-mc text-xs">Eigene</span>
-                  <span className="font-mc text-[11px] text-white/50">{theme.accent}</span>
+                  <span className="font-mc text-[11px] text-white/70">{theme.accent}</span>
                 </span>
               </label>
             </div>
@@ -194,7 +194,7 @@ export function SettingsView() {
         <div className="flex-1 flex min-h-0">
           <nav className="w-60 shrink-0 border-r border-accent/20 p-4 flex flex-col gap-1 overflow-y-auto">
             <div className="relative mb-3">
-              <Icon icon="solar:magnifer-linear" width={14} height={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
+              <Icon icon="solar:magnifer-linear" width={14} height={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/62" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -211,7 +211,7 @@ export function SettingsView() {
                   }}
                   className={clsx(
                     "label-mc w-full flex items-center gap-3 px-3 h-10 text-xs cursor-pointer transition-colors",
-                    activeGroup === g.id ? "bg-accent/20 text-white" : "text-white/60 hover:bg-white/5 hover:text-white",
+                    activeGroup === g.id ? "bg-accent/20 text-white" : "text-white/78 hover:bg-white/5 hover:text-white",
                   )}
                 >
                   <Icon icon={g.icon} width={18} height={18} className={activeGroup === g.id ? "text-accent" : ""} />
@@ -225,7 +225,7 @@ export function SettingsView() {
                         <button
                           key={s.id}
                           onClick={() => jump(s.id, g.id)}
-                          className="label-mc block w-full text-left pl-4 py-1.5 text-[10px] text-white/50 hover:text-white cursor-pointer"
+                          className="label-mc block w-full text-left pl-4 py-1.5 text-[10px] text-white/70 hover:text-white cursor-pointer"
                         >
                           {s.title}
                         </button>
@@ -237,7 +237,7 @@ export function SettingsView() {
           </nav>
 
           <div className="flex-1 overflow-y-auto px-8 py-6">
-            {visible.length === 0 && <p className="text-sm text-white/40">Keine Treffer für "{query}".</p>}
+            {visible.length === 0 && <p className="text-sm text-white/62">Keine Treffer für "{query}".</p>}
             {visible.map((s) => (
               <section key={s.id} ref={(el) => {
                   refs.current[s.id] = el;
@@ -246,7 +246,7 @@ export function SettingsView() {
                   <Icon icon={s.icon} width={20} height={20} />
                   {s.title}
                 </h3>
-                <p className="text-xs text-white/40 mt-2 mb-3">{s.desc}</p>
+                <p className="text-xs text-white/62 mt-2 mb-3">{s.desc}</p>
                 {s.rows.map((r, i) =>
                   r.wide ? (
                     <div key={i} className="py-3">
@@ -256,7 +256,7 @@ export function SettingsView() {
                     <div key={i} className="flex items-center gap-6 py-3.5 border-b border-white/5">
                       <div className="flex-1">
                         <div className="font-mc text-sm">{r.label}</div>
-                        {r.desc && <div className="text-xs text-white/40 mt-0.5">{r.desc}</div>}
+                        {r.desc && <div className="text-xs text-white/62 mt-0.5">{r.desc}</div>}
                       </div>
                       {r.control}
                     </div>

@@ -25,7 +25,7 @@ export function AddAccountModal({ onClose }: AddAccountModalProps) {
   return (
     <Modal title="Account hinzufügen" subtitle="Mit Microsoft anmelden" onClose={onClose} width={380}>
       <div className="p-6 flex flex-col items-center gap-4 text-center">
-        {loggingIn && <p className="text-sm text-white/50">Browser öffnet sich - schließe die Anmeldung dort ab…</p>}
+        {loggingIn && <p className="text-sm text-white/70">Browser öffnet sich - schließe die Anmeldung dort ab…</p>}
 
         {loginError && (
           <>

@@ -53,7 +53,7 @@ export function HeaderBar({ activeTab, onHome }: { activeTab: string; onHome: ()
           Aero
         </span>
       )}
-      <span data-tauri-drag-region className="flex items-center gap-1.5 h-7 px-3 rounded-full bg-[#0f0e15]/80 border border-white/[0.08] text-[11.5px] font-medium text-white/70 mr-auto ml-2">
+      <span data-tauri-drag-region className="flex items-center gap-1.5 h-7 px-3 rounded-full bg-[#0f0e15]/80 border border-white/[0.08] text-[11.5px] font-medium text-white/85 mr-auto ml-2">
         <i className="w-1.5 h-1.5 rounded-full bg-green inline-block" />
         {online === null ? "–" : `${online.toLocaleString("de-DE")} online`}
       </span>
@@ -74,7 +74,7 @@ function WindowButton({ icon, title, danger, onClick }: { icon: string; title: s
     <button
       onClick={onClick}
       title={title}
-      className={`w-9 h-9 flex items-center justify-center text-white/50 transition-colors cursor-pointer ${danger ? "hover:bg-danger hover:text-white" : "hover:bg-white/10 hover:text-white"}`}
+      className={`w-9 h-9 flex items-center justify-center text-white/70 transition-colors cursor-pointer ${danger ? "hover:bg-danger hover:text-white" : "hover:bg-white/10 hover:text-white"}`}
     >
       <Icon icon={icon} width={18} height={18} />
     </button>

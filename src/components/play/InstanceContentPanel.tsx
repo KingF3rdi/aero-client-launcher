@@ -136,31 +136,31 @@ export function InstanceContentPanel({
             icon="solar:magnifer-linear"
             width={16}
             height={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-white/55"
           />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Suchen…"
-            className="w-full bg-black/30 border border-white/10 pl-9 pr-3 py-2 text-sm text-text placeholder:text-white/30 outline-none focus:border-accent/50"
+            className="w-full bg-black/30 border border-white/10 pl-9 pr-3 py-2 text-sm text-text placeholder:text-white/55 outline-none focus:border-accent/50"
           />
         </div>
       )}
 
-      {files === null && <p className="text-sm text-white/40">Lädt…</p>}
+      {files === null && <p className="text-sm text-white/62">Lädt…</p>}
       {files !== null && files.length === 0 && (
-        <p className="text-sm text-white/40">Noch keine Mods, Resource Packs oder Shader installiert.</p>
+        <p className="text-sm text-white/62">Noch keine Mods, Resource Packs oder Shader installiert.</p>
       )}
       {files !== null && files.length > 0 && grouped.every((g) => g.items.length === 0) && (
-        <p className="text-sm text-white/40">Keine Treffer für "{query}".</p>
+        <p className="text-sm text-white/62">Keine Treffer für "{query}".</p>
       )}
 
       {grouped.map(
         ({ kind, items }) =>
           items.length > 0 && (
             <div key={kind}>
-              <label className="text-xs label-mc text-white/40">{KIND_LABEL[kind]}</label>
+              <label className="text-xs label-mc text-white/62">{KIND_LABEL[kind]}</label>
               <div className="mt-1.5 flex flex-col gap-1">
                 {items.map((file) => (
                   <div
@@ -175,7 +175,7 @@ export function InstanceContentPanel({
                       )}
                     </div>
                     <div className="flex-1 min-w-0 flex flex-col">
-                      <span className={clsx("text-base truncate", !file.enabled && "text-white/40 line-through")}>{file.name}</span>
+                      <span className={clsx("text-base truncate", !file.enabled && "text-white/62 line-through")}>{file.name}</span>
                       {file.issue && file.enabled && (
                         <span
                           className={clsx(
@@ -196,7 +196,7 @@ export function InstanceContentPanel({
                       onClick={() => remove(file)}
                       disabled={busyPath === file.relPath}
                       title="Entfernen"
-                      className="text-white/30 hover:text-danger transition-colors cursor-pointer disabled:opacity-40"
+                      className="text-white/55 hover:text-danger transition-colors cursor-pointer disabled:opacity-40"
                     >
                       <Icon icon="solar:trash-bin-trash-linear" width={16} height={16} />
                     </button>

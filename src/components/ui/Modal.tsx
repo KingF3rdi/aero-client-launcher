@@ -33,11 +33,11 @@ export function Modal({ title, subtitle, onClose, children, width = 560 }: Modal
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-white/[0.03]">
           <div>
             <h3 className="label-mc text-sm">{title}</h3>
-            {subtitle && <p className="text-xs text-white/40 mt-0.5">{subtitle}</p>}
+            {subtitle && <p className="text-xs text-white/62 mt-0.5">{subtitle}</p>}
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
           >
             <Icon icon="solar:close-circle-linear" width={20} height={20} />
           </button>

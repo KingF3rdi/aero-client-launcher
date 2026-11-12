@@ -78,13 +78,13 @@ export function CosmeticsView() {
         </div>
         <div className="p-4 border-t border-white/10 flex flex-col gap-1.5 text-xs">
           {TABS.filter((t) => t.id !== "custom").map((t) => (
-            <div key={t.id} className="flex items-center gap-2 text-white/50">
+            <div key={t.id} className="flex items-center gap-2 text-white/70">
               <Icon icon={t.icon} width={14} height={14} className="text-accent" />
               <span className="flex-1">{t.label}</span>
               <span className="text-white">{nameOf(t.id as CosmeticKind)}</span>
             </div>
           ))}
-          <p className="text-[11px] text-white/35 mt-2">Maus über ein Item hält es zur Probe an. Im Spiel sehen die Modelle genauer aus.</p>
+          <p className="text-[11px] text-white/55 mt-2">Maus über ein Item hält es zur Probe an. Im Spiel sehen die Modelle genauer aus.</p>
         </div>
       </aside>
 
@@ -96,7 +96,7 @@ export function CosmeticsView() {
               onClick={() => setTab(t.id)}
               className={clsx(
                 "label-mc h-9 px-3.5 flex items-center gap-2 text-[11px] border transition-colors cursor-pointer",
-                tab === t.id ? "bg-accent border-accent text-white" : "bg-white/5 border-white/10 text-white/60 hover:text-white hover:border-accent/50",
+                tab === t.id ? "bg-accent border-accent text-white" : "bg-white/5 border-white/10 text-white/78 hover:text-white hover:border-accent/50",
               )}
             >
               <Icon icon={t.icon} width={15} height={15} />
@@ -126,7 +126,7 @@ export function CosmeticsView() {
         ) : (
           <div className="flex-1 min-h-0 overflow-y-auto px-8 pb-8">
             {!target && (
-              <p className="text-xs text-white/40 mb-4">
+              <p className="text-xs text-white/62 mb-4">
                 Kein Profil mit aktiviertem Aero Client (Fabric 1.21.11) – aktiviere ihn in einem Profil, um Cosmetics auszurüsten.
               </p>
             )}

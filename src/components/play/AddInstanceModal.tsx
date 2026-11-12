@@ -71,7 +71,7 @@ export function AddInstanceModal({ onClose }: AddInstanceModalProps) {
     <Modal title="Neue Instanz" subtitle="Fabric" onClose={onClose} width={520}>
       <div className="p-6 flex flex-col gap-5">
         <div>
-          <label className="text-xs label-mc text-white/40">Name</label>
+          <label className="text-xs label-mc text-white/62">Name</label>
           <input
             autoFocus
             value={name}
@@ -83,7 +83,7 @@ export function AddInstanceModal({ onClose }: AddInstanceModalProps) {
         </div>
 
         <div>
-          <label className="text-xs label-mc text-white/40">Minecraft-Version</label>
+          <label className="text-xs label-mc text-white/62">Minecraft-Version</label>
           <select
             value={mcVersion}
             onChange={(e) => setMcVersion(e.target.value)}
@@ -95,18 +95,18 @@ export function AddInstanceModal({ onClose }: AddInstanceModalProps) {
               </option>
             ))}
           </select>
-          <p className="text-xs text-white/30 mt-1">Loader ist immer Fabric - passend zum Aero Client Mod.</p>
+          <p className="text-xs text-white/55 mt-1">Loader ist immer Fabric - passend zum Aero Client Mod.</p>
         </div>
 
         {foreign && foreign.length > 0 && (
           <div>
-            <label className="text-xs label-mc text-white/40">Von anderen Launchern übernehmen</label>
+            <label className="text-xs label-mc text-white/62">Von anderen Launchern übernehmen</label>
             <div className="mt-1.5 flex flex-col gap-1 max-h-56 overflow-y-auto">
               {foreign.map((f) => (
                 <div key={f.path} className="flex items-center gap-3 rounded-lg bg-black/30 border border-white/10 px-3 py-2">
                   <div className="flex-1 min-w-0">
                     <div className="text-sm truncate">{f.name}</div>
-                    <div className="text-xs text-white/40">
+                    <div className="text-xs text-white/62">
                       {f.source} · {f.mcVersion ?? `Version unbekannt (nimmt ${mcVersion})`} · {f.mods} Mods
                     </div>
                   </div>
@@ -116,7 +116,7 @@ export function AddInstanceModal({ onClose }: AddInstanceModalProps) {
                 </div>
               ))}
             </div>
-            <p className="text-xs text-white/30 mt-1">Kopiert Mods, Configs, Resource- und Shader-Packs, Optionen und Serverliste. Welten bleiben, wo sie sind.</p>
+            <p className="text-xs text-white/55 mt-1">Kopiert Mods, Configs, Resource- und Shader-Packs, Optionen und Serverliste. Welten bleiben, wo sie sind.</p>
           </div>
         )}
 

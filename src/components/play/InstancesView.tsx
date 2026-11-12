@@ -48,7 +48,7 @@ export function InstancesView() {
               <Icon icon="solar:box-linear" className="text-accent" width={28} height={28} />
               <div>
                 <div className="font-medium pr-6">{instance.name}</div>
-                <div className="text-xs text-white/40 flex items-center gap-1.5">
+                <div className="text-xs text-white/62 flex items-center gap-1.5">
                   <span>
                     {instance.loader === "fabric" ? "Fabric" : "Vanilla"} · {instance.mcVersion}
                     {instance.modEnabled && " · Aero Client"}
@@ -66,7 +66,7 @@ export function InstancesView() {
                 title={instance.pinned ? "Lösen" : "Oben anheften"}
                 className={clsx(
                   "w-7 h-7 flex items-center justify-center rounded-md hover:bg-white/10 transition-all cursor-pointer",
-                  instance.pinned ? "text-accent" : "text-white/0 group-hover:text-white/50 hover:!text-white",
+                  instance.pinned ? "text-accent" : "text-white/0 group-hover:text-white/70 hover:!text-white",
                 )}
               >
                 <Icon icon={instance.pinned ? "solar:pin-bold" : "solar:pin-linear"} width={16} height={16} />
@@ -88,7 +88,7 @@ export function InstancesView() {
                   setSettingsFor(instance.id);
                 }}
                 title="Logs"
-                className="w-7 h-7 flex items-center justify-center rounded-md text-white/0 group-hover:text-white/50 hover:!text-white hover:bg-white/10 transition-all cursor-pointer"
+                className="w-7 h-7 flex items-center justify-center rounded-md text-white/0 group-hover:text-white/70 hover:!text-white hover:bg-white/10 transition-all cursor-pointer"
               >
                 <Icon icon="solar:document-text-linear" width={16} height={16} />
               </button>
@@ -99,7 +99,7 @@ export function InstancesView() {
                   setSettingsFor(instance.id);
                 }}
                 title="Instanz-Einstellungen"
-                className="w-7 h-7 flex items-center justify-center rounded-md text-white/0 group-hover:text-white/50 hover:!text-white hover:bg-white/10 transition-all cursor-pointer"
+                className="w-7 h-7 flex items-center justify-center rounded-md text-white/0 group-hover:text-white/70 hover:!text-white hover:bg-white/10 transition-all cursor-pointer"
               >
                 <Icon icon="solar:settings-linear" width={16} height={16} />
               </button>

@@ -109,7 +109,7 @@ export function NewsPanel() {
               onClick={() => setSource(k)}
               className={
                 "px-2 h-6 text-[11px] font-semibold rounded-md cursor-pointer transition-colors " +
-                (source === k ? "bg-white/15 text-white" : "text-white/50 hover:text-white")
+                (source === k ? "bg-white/15 text-white" : "text-white/70 hover:text-white")
               }
             >
               {k === "aero" ? "Aero" : "Minecraft"}
@@ -118,8 +118,8 @@ export function NewsPanel() {
         </div>
       </div>
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
-        {shown === null && <p className="text-xs text-white/40">Lädt…</p>}
-        {shown?.length === 0 && <p className="text-xs text-white/40">Keine News verfügbar.</p>}
+        {shown === null && <p className="text-xs text-white/62">Lädt…</p>}
+        {shown?.length === 0 && <p className="text-xs text-white/62">Keine News verfügbar.</p>}
         {shown?.map((n) => (
           <a
             key={n.id}
@@ -139,7 +139,7 @@ export function NewsPanel() {
               <span className="text-[13px] font-semibold text-white truncate flex-1">{n.title}</span>
               {n.preview && <span className="label-mc text-[9px] px-1.5 py-0.5 rounded bg-accent/30 text-white shrink-0">Beta</span>}
             </div>
-            <div className="text-[10px] text-white/40 mb-1.5">{n.date ? new Date(n.date).toLocaleDateString("de-DE") : ""}</div>
+            <div className="text-[10px] text-white/62 mb-1.5">{n.date ? new Date(n.date).toLocaleDateString("de-DE") : ""}</div>
             <NewsBody body={n.body || "Neue Version verfügbar."} />
           </a>
         ))}
@@ -159,10 +159,10 @@ function NewsBody({ body }: { body: string }) {
     .filter((l) => l && !l.startsWith("#"));
   const bullets = lines.filter((l) => /^[-*] /.test(l)).slice(0, 3);
   if (bullets.length === 0) {
-    return <p className="text-xs text-white/60 line-clamp-3">{inline(lines.join(" "))}</p>;
+    return <p className="text-xs text-white/78 line-clamp-3">{inline(lines.join(" "))}</p>;
   }
   return (
-    <ul className="flex flex-col gap-1.5 text-xs text-white/60">
+    <ul className="flex flex-col gap-1.5 text-xs text-white/78">
       {bullets.map((b, i) => (
         <li key={i} className="flex gap-2">
           <i className="mt-[6px] w-1 h-1 rounded-full bg-accent shrink-0" />

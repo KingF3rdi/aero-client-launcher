@@ -9,7 +9,7 @@ export default {
         card: "#16151e",
         pill: "#201f2a",
         text: "#eceaf2",
-        muted: "#8e8a9a",
+        muted: "#b6b2c2",
         // Runtime-switchable (Settings -> Accent color): see store/useThemeStore.ts applyAccent().
         accent: "rgb(var(--accent) / <alpha-value>)",
         green: "#3dff8a",

@@ -59,8 +59,8 @@ export function ScreenshotsView() {
         </Button>
       </div>
 
-      {shots === null && <p className="text-xs text-white/40">Lädt…</p>}
-      {shots?.length === 0 && <p className="text-xs text-white/40">Noch keine Screenshots in diesem Profil. Im Spiel: F2.</p>}
+      {shots === null && <p className="text-xs text-white/62">Lädt…</p>}
+      {shots?.length === 0 && <p className="text-xs text-white/62">Noch keine Screenshots in diesem Profil. Im Spiel: F2.</p>}
       <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3 overflow-y-auto">
         {target && shots?.map((s) => <Tile key={s.name} instanceId={target.id} shot={s} onOpen={() => setOpen(s)} />)}
       </div>
@@ -78,7 +78,7 @@ function Tile({ instanceId, shot, onOpen }: { instanceId: string; shot: Shot; on
   return (
     <button onClick={onOpen} className="group border border-white/10 bg-white/[0.04] hover:border-accent/60 overflow-hidden cursor-pointer text-left">
       <Image instanceId={instanceId} name={shot.name} className="w-full aspect-video object-cover group-hover:scale-105 transition-transform" />
-      <div className="px-3 py-2 text-[11px] text-white/50">{new Date(shot.modified * 1000).toLocaleString("de-DE")}</div>
+      <div className="px-3 py-2 text-[11px] text-white/70">{new Date(shot.modified * 1000).toLocaleString("de-DE")}</div>
     </button>
   );
 }

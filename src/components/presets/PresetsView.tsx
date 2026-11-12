@@ -90,7 +90,7 @@ export function PresetsView() {
         />
         {modInstances.length > 0 && (
           <div className="flex items-center gap-2 shrink-0">
-            <span className="text-xs text-white/40">Für Profil</span>
+            <span className="text-xs text-white/62">Für Profil</span>
             <select
               value={target?.id ?? ""}
               onChange={(e) => select(e.target.value)}
@@ -107,7 +107,7 @@ export function PresetsView() {
       </div>
 
       {modInstances.length === 0 ? (
-        <p className="text-xs text-white/40 -mt-2">
+        <p className="text-xs text-white/62 -mt-2">
           Kein Profil mit aktiviertem Aero Client (nur für Fabric 1.21.11) - Presets können angesehen, aber nicht
           veröffentlicht oder angewendet werden.
         </p>
@@ -128,10 +128,10 @@ export function PresetsView() {
       )}
 
       <div className="flex-1 overflow-y-auto grid grid-cols-3 gap-3 content-start">
-        {presets === null && <p className="text-sm text-white/40 col-span-3">Lädt…</p>}
-        {presets?.length === 0 && <p className="text-sm text-white/40 col-span-3">Noch keine Presets veröffentlicht.</p>}
+        {presets === null && <p className="text-sm text-white/62 col-span-3">Lädt…</p>}
+        {presets?.length === 0 && <p className="text-sm text-white/62 col-span-3">Noch keine Presets veröffentlicht.</p>}
         {presets && presets.length > 0 && results.length === 0 && (
-          <p className="text-sm text-white/40 col-span-3">Keine Treffer für "{query}".</p>
+          <p className="text-sm text-white/62 col-span-3">Keine Treffer für "{query}".</p>
         )}
         {results.map((preset) => {
           const isMine = account && preset.ownerUuid.replace(/-/g, "").toLowerCase() === account.uuid.replace(/-/g, "").toLowerCase();
@@ -139,11 +139,11 @@ export function PresetsView() {
           return (
             <div key={preset.id} className="flex items-center gap-3 bg-black/30 border border-white/15 p-4">
               <div className="w-10 h-10 shrink-0 bg-black/40 flex items-center justify-center">
-                <Icon icon="solar:settings-linear" width={20} height={20} className="text-white/40" />
+                <Icon icon="solar:settings-linear" width={20} height={20} className="text-white/62" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="font-medium truncate">{preset.name}</div>
-                <p className="text-xs text-white/40 truncate">von {preset.owner}</p>
+                <p className="text-xs text-white/62 truncate">von {preset.owner}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <Button variant="ghost" size="sm" disabled={!target || busy} onClick={() => apply(preset)}>
                     Anwenden
@@ -153,7 +153,7 @@ export function PresetsView() {
                       onClick={() => removePreset(preset)}
                       disabled={busy}
                       title="Löschen"
-                      className="text-white/30 hover:text-danger transition-colors cursor-pointer disabled:opacity-40"
+                      className="text-white/55 hover:text-danger transition-colors cursor-pointer disabled:opacity-40"
                     >
                       <Icon icon="solar:trash-bin-trash-linear" width={16} height={16} />
                     </button>

@@ -48,7 +48,7 @@ export function App() {
     <>
       <Toaster position="bottom-right" toastOptions={{ style: { background: "#12121c", color: "#eceaf2" } }} />
       <AppLayout activeTab={activeTab} onNavChange={open}>
-        <Suspense fallback={<div className="p-8 text-sm text-white/50">Wird geladen…</div>}>
+        <Suspense fallback={<div className="p-8 text-sm text-white/70">Wird geladen…</div>}>
           <Routes>
             <Route path="/play" element={<PlayView onOpen={open} onAddInstance={() => setAddingInstance(true)} />} />
             <Route path="/instances" element={<InstancesView />} />

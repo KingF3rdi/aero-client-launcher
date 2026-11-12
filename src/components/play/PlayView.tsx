@@ -67,7 +67,7 @@ export function PlayView({ onOpen, onAddInstance }: { onOpen: (id: string) => vo
         <LarpMark size={46} />
         <h1 className="m-0 text-[54px] font-bold leading-none tracking-tight text-white">Aero</h1>
       </div>
-      <p className="mt-3 text-sm text-white/55">{account ? `Willkommen zurück, ${account.name}` : " "}</p>
+      <p className="mt-3 text-sm text-white/75">{account ? `Willkommen zurück, ${account.name}` : " "}</p>
 
       {/* The launch card: the "selected" card of the home row, bigger and with the accent rim. */}
       <div ref={pickerRef} className="relative mt-10 w-[34rem] max-w-full rounded-xl border border-accent/70 bg-[#0f0e15]/95 p-4 shadow-[0_0_0_1px_rgba(0,0,0,.35)]">
@@ -80,9 +80,9 @@ export function PlayView({ onOpen, onAddInstance }: { onOpen: (id: string) => vo
             <Icon icon="box" width={20} height={20} className="text-accent shrink-0" />
             <span className="flex-1 min-w-0">
               <span className="block text-[14px] font-semibold truncate text-white">{selected ? selected.name : "Kein Profil"}</span>
-              <span className="block text-[12px] text-white/45">{selected ? `Fabric ${selected.mcVersion}` : "Profil wählen"}</span>
+              <span className="block text-[12px] text-white/66">{selected ? `Fabric ${selected.mcVersion}` : "Profil wählen"}</span>
             </span>
-            <Icon icon="alt-arrow-down" width={16} height={16} className={clsx("text-white/50 transition-transform", picker && "rotate-180")} />
+            <Icon icon="alt-arrow-down" width={16} height={16} className={clsx("text-white/70 transition-transform", picker && "rotate-180")} />
           </button>
           <button
             disabled={!account || !selected}
@@ -98,7 +98,7 @@ export function PlayView({ onOpen, onAddInstance }: { onOpen: (id: string) => vo
         </div>
 
         {/* Quick join: with an address here, Spielen goes straight onto that server. */}
-        <label className="mt-3 flex items-center gap-2 h-10 px-3 rounded-lg border border-white/10 bg-white/[0.03] text-white/50 focus-within:border-accent/70">
+        <label className="mt-3 flex items-center gap-2 h-10 px-3 rounded-lg border border-white/10 bg-white/[0.03] text-white/70 focus-within:border-accent/70">
           <Icon icon="server" width={16} height={16} className={server.trim() ? "text-accent" : ""} />
           <input
             value={server}
@@ -106,10 +106,10 @@ export function PlayView({ onOpen, onAddInstance }: { onOpen: (id: string) => vo
             list="recent-servers"
             spellCheck={false}
             placeholder="Direkt auf einen Server (optional), z. B. play.example.net"
-            className="flex-1 min-w-0 bg-transparent text-[13px] text-white placeholder:text-white/35 focus:outline-none"
+            className="flex-1 min-w-0 bg-transparent text-[13px] text-white placeholder:text-white/55 focus:outline-none"
           />
           {server && (
-            <button onClick={() => setServer("")} title="Leeren" className="text-white/40 hover:text-white cursor-pointer">
+            <button onClick={() => setServer("")} title="Leeren" className="text-white/62 hover:text-white cursor-pointer">
               <Icon icon="close-circle" width={16} height={16} />
             </button>
           )}
@@ -120,7 +120,7 @@ export function PlayView({ onOpen, onAddInstance }: { onOpen: (id: string) => vo
           </datalist>
         </label>
 
-        <p className={clsx("mt-2 mb-0 text-xs h-4", launch.phase === "error" && isThisLaunching ? "text-danger" : "text-white/50")}>{status ?? ""}</p>
+        <p className={clsx("mt-2 mb-0 text-xs h-4", launch.phase === "error" && isThisLaunching ? "text-danger" : "text-white/70")}>{status ?? ""}</p>
 
         {picker && (
           <div className="absolute left-4 right-4 top-[4.75rem] z-20 rounded-lg border border-white/15 bg-[#121119] max-h-72 overflow-y-auto shadow-[0_12px_30px_rgba(0,0,0,.5)]">
@@ -138,7 +138,7 @@ export function PlayView({ onOpen, onAddInstance }: { onOpen: (id: string) => vo
               >
                 <Icon icon="box" width={18} height={18} className="text-accent" />
                 <span className="text-[13px] font-semibold flex-1">{i.name}</span>
-                <span className="text-xs text-white/40">{i.mcVersion}</span>
+                <span className="text-xs text-white/62">{i.mcVersion}</span>
               </button>
             ))}
             <div className="flex border-t border-white/10">
@@ -179,7 +179,7 @@ export function PlayView({ onOpen, onAddInstance }: { onOpen: (id: string) => vo
               <Icon icon={p.icon} width={24} height={24} />
             </span>
             <span className="text-[14px] font-semibold">{p.label}</span>
-            <span className="text-[11.5px] text-white/45">{p.desc}</span>
+            <span className="text-[11.5px] text-white/66">{p.desc}</span>
           </button>
         ))}
       </nav>

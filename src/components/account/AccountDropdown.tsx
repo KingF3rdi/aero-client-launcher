@@ -34,11 +34,11 @@ export function AccountDropdown({ open, onClose }: AccountDropdownProps) {
         className="absolute right-0 top-[calc(100%+10px)] w-72 bg-[#110f19]/95 border border-accent/50 shadow-[0_0_30px_rgba(0,0,0,0.5)] overflow-hidden z-40"
       >
         <div className="px-4 py-3 border-b border-white/10">
-          <span className="text-xs label-mc text-white/40">Accounts</span>
+          <span className="text-xs label-mc text-white/62">Accounts</span>
         </div>
         <div className="max-h-72 overflow-y-auto">
           {accounts.length === 0 && (
-            <p className="text-xs text-white/40 px-4 py-4">Kein Account angemeldet.</p>
+            <p className="text-xs text-white/62 px-4 py-4">Kein Account angemeldet.</p>
           )}
           {accounts.map((a) => (
             <div
@@ -56,7 +56,7 @@ export function AccountDropdown({ open, onClose }: AccountDropdownProps) {
               <button
                 onClick={() => removeAccount(a.uuid)}
                 title="Entfernen"
-                className="text-white/0 group-hover:text-white/40 hover:!text-danger transition-colors cursor-pointer shrink-0"
+                className="text-white/0 group-hover:text-white/62 hover:!text-danger transition-colors cursor-pointer shrink-0"
               >
                 <Icon icon="solar:trash-bin-trash-linear" width={14} height={14} />
               </button>

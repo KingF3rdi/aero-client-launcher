@@ -120,7 +120,7 @@ export function SkinsView() {
                 onClick={() => setVariant(v)}
                 className={clsx(
                   "h-8 rounded-lg text-[13px] font-semibold transition-colors cursor-pointer border",
-                  variant === v ? "bg-white/[0.14] border-white/40" : "border-transparent text-white/60 hover:text-white",
+                  variant === v ? "bg-white/[0.14] border-white/40" : "border-transparent text-white/78 hover:text-white",
                 )}
               >
                 {v === "classic" ? "Breit" : "Schmal"}
@@ -138,7 +138,7 @@ export function SkinsView() {
       <div className={clsx(CARD, "flex flex-col gap-3")}>
         <div>
           <div className="text-lg font-semibold">Benutzername</div>
-          <div className="text-[13px] text-white/60 mt-1">Ändert den Namen deines Minecraft-Accounts</div>
+          <div className="text-[13px] text-white/78 mt-1">Ändert den Namen deines Minecraft-Accounts</div>
         </div>
         <div className="flex gap-2">
           <input

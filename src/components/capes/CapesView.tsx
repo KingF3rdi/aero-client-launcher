@@ -111,7 +111,7 @@ export function CapesView({ onEquipped }: { onEquipped?: () => void } = {}) {
         />
         {modInstances.length > 0 && (
           <div className="flex items-center gap-2 shrink-0">
-            <span className="text-xs text-white/40">Für Profil</span>
+            <span className="text-xs text-white/62">Für Profil</span>
             <select
               value={target?.id ?? ""}
               onChange={(e) => select(e.target.value)}
@@ -128,15 +128,15 @@ export function CapesView({ onEquipped }: { onEquipped?: () => void } = {}) {
       </div>
 
       {modInstances.length === 0 && (
-        <p className="text-xs text-white/40 -mt-2">
+        <p className="text-xs text-white/62 -mt-2">
           Kein Profil mit aktiviertem Aero Client (nur für Fabric 1.21.11) - Capes können angesehen, aber nicht angezogen werden.
         </p>
       )}
 
       <div className="flex-1 overflow-y-auto grid grid-cols-3 gap-3 content-start">
-        {capes === null && <p className="text-sm text-white/40 col-span-3">Lädt…</p>}
-        {capes?.length === 0 && <p className="text-sm text-white/40 col-span-3">Noch keine Capes veröffentlicht.</p>}
-        {capes && capes.length > 0 && results.length === 0 && <p className="text-sm text-white/40 col-span-3">Keine Treffer für "{query}".</p>}
+        {capes === null && <p className="text-sm text-white/62 col-span-3">Lädt…</p>}
+        {capes?.length === 0 && <p className="text-sm text-white/62 col-span-3">Noch keine Capes veröffentlicht.</p>}
+        {capes && capes.length > 0 && results.length === 0 && <p className="text-sm text-white/62 col-span-3">Keine Treffer für "{query}".</p>}
         {results.map((cape) => {
           const capeId = `custom_${cape.id}`;
           const isEquipped = equipped === capeId;
@@ -152,7 +152,7 @@ export function CapesView({ onEquipped }: { onEquipped?: () => void } = {}) {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="font-medium truncate">{cape.name}</div>
-                <p className="text-xs text-white/40 truncate">von {cape.owner}</p>
+                <p className="text-xs text-white/62 truncate">von {cape.owner}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <Button
                     variant={isEquipped ? "accent" : "ghost"}
@@ -167,7 +167,7 @@ export function CapesView({ onEquipped }: { onEquipped?: () => void } = {}) {
                       onClick={() => removeCape(cape)}
                       disabled={busy}
                       title="Löschen"
-                      className="text-white/30 hover:text-danger transition-colors cursor-pointer disabled:opacity-40"
+                      className="text-white/55 hover:text-danger transition-colors cursor-pointer disabled:opacity-40"
                     >
                       <Icon icon="solar:trash-bin-trash-linear" width={16} height={16} />
                     </button>

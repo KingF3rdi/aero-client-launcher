@@ -137,7 +137,7 @@ export function DiscoverView() {
             onClick={() => setTab(t.id)}
             className={
               "flex items-center gap-2 label-mc flex items-center h-9 px-4 text-[11px] border transition-colors cursor-pointer " +
-              (tab === t.id ? "bg-accent/25 border-accent text-white" : "bg-black/30 border-accent/30 text-white/60 hover:bg-accent/10")
+              (tab === t.id ? "bg-accent/25 border-accent text-white" : "bg-black/30 border-accent/30 text-white/78 hover:bg-accent/10")
             }
           >
             <Icon icon={t.icon} width={16} height={16} />
@@ -161,7 +161,7 @@ export function DiscoverView() {
 
         {tab !== "modpack" && (
           <div className="flex items-center gap-2 shrink-0">
-            <span className="text-xs text-white/40">Installieren in</span>
+            <span className="text-xs text-white/62">Installieren in</span>
             <select
               value={targetInstance?.id ?? ""}
               onChange={(e) => setTargetInstanceId(e.target.value)}
@@ -178,8 +178,8 @@ export function DiscoverView() {
       </div>
 
       <div className="flex-1 overflow-y-auto grid grid-cols-2 gap-3 content-start">
-        {loading && <p className="text-sm text-white/40 col-span-2">Lädt…</p>}
-        {!loading && results.length === 0 && <p className="text-sm text-white/40 col-span-2">Keine Ergebnisse.</p>}
+        {loading && <p className="text-sm text-white/62 col-span-2">Lädt…</p>}
+        {!loading && results.length === 0 && <p className="text-sm text-white/62 col-span-2">Keine Ergebnisse.</p>}
         {results.map((item) => (
           <div
             key={item.id}
@@ -189,12 +189,12 @@ export function DiscoverView() {
               <img src={item.iconUrl} alt="" className="w-12 h-12 rounded-lg shrink-0 object-cover" />
             ) : (
               <div className="w-12 h-12 rounded-lg bg-white/10 shrink-0 flex items-center justify-center">
-                <Icon icon="solar:box-linear" width={22} height={22} className="text-white/40" />
+                <Icon icon="solar:box-linear" width={22} height={22} className="text-white/62" />
               </div>
             )}
             <div className="flex-1 min-w-0">
               <div className="font-medium truncate">{item.title}</div>
-              <p className="text-xs text-white/40 line-clamp-2">{item.description}</p>
+              <p className="text-xs text-white/62 line-clamp-2">{item.description}</p>
             </div>
             <Button variant="ghost" onClick={() => install(item)} disabled={installing === item.id} className="shrink-0">
               {installing === item.id ? "…" : "Install"}
