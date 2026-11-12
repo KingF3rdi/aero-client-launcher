@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { save } from "@tauri-apps/plugin-dialog";
 import { isTauri } from "@tauri-apps/api/core";
-import { Icon } from "@iconify/react";
+import { Icon } from "../ui/Icon";
 import { toast } from "react-hot-toast";
 import { Button } from "../ui/Button";
 import { Toggle } from "../ui/Toggle";
@@ -16,9 +16,9 @@ const KIND_LABEL: Record<ContentFile["kind"], string> = {
 };
 
 const KIND_ICON: Record<ContentFile["kind"], string> = {
-  mod: "solar:widget-bold",
-  resourcepack: "solar:gallery-bold",
-  shader: "solar:sun-bold",
+  mod: "solar:widget-linear",
+  resourcepack: "solar:gallery-linear",
+  shader: "solar:sun-linear",
 };
 
 /** Installed mods/resourcepacks/shader list with toggle/delete, plus quick
@@ -112,20 +112,20 @@ export function InstanceContentPanel({
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap gap-2">
         <Button variant="ghost" size="sm" onClick={onBrowse}>
-          <Icon icon="solar:compass-bold" width={16} height={16} />
+          <Icon icon="solar:compass-linear" width={16} height={16} />
           Mods durchsuchen
         </Button>
         <Button variant="ghost" size="sm" onClick={onLoadModpack}>
-          <Icon icon="solar:download-minimalistic-bold" width={16} height={16} />
+          <Icon icon="solar:download-minimalistic-linear" width={16} height={16} />
           Modpack laden
         </Button>
         <Button variant="ghost" size="sm" onClick={exportPack} disabled={exporting}>
-          <Icon icon="solar:upload-minimalistic-bold" width={16} height={16} />
+          <Icon icon="solar:upload-minimalistic-linear" width={16} height={16} />
           {exporting ? "Exportiert…" : "Modpack exportieren"}
         </Button>
         {onSettings && (
           <Button variant="ghost" size="icon" onClick={onSettings} title="Instanz-Einstellungen" className="ml-auto">
-            <Icon icon="solar:settings-bold" width={16} height={16} />
+            <Icon icon="solar:settings-linear" width={16} height={16} />
           </Button>
         )}
       </div>
@@ -183,7 +183,7 @@ export function InstanceContentPanel({
                             file.issue.kind === "version" ? "text-danger" : "text-amber-400",
                           )}
                         >
-                          <Icon icon="solar:danger-triangle-bold" width={12} height={12} />
+                          <Icon icon="solar:danger-triangle-linear" width={12} height={12} />
                           {file.issue.text}
                           {file.issue.kind === "version" ? ", lädt nicht" : ", lieber ausschalten"}
                         </span>
@@ -198,7 +198,7 @@ export function InstanceContentPanel({
                       title="Entfernen"
                       className="text-white/30 hover:text-danger transition-colors cursor-pointer disabled:opacity-40"
                     >
-                      <Icon icon="solar:trash-bin-trash-bold" width={16} height={16} />
+                      <Icon icon="solar:trash-bin-trash-linear" width={16} height={16} />
                     </button>
                   </div>
                 ))}

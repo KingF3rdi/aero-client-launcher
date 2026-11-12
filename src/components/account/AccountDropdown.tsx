@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "../ui/Icon";
 import { useAuthStore } from "../../store/useAuthStore";
 import { AddAccountModal } from "./AddAccountModal";
 
@@ -31,7 +31,7 @@ export function AccountDropdown({ open, onClose }: AccountDropdownProps) {
     <>
       <div
         ref={ref}
-        className="absolute right-0 top-[calc(100%+10px)] w-72 bg-[#110f19]/95 border border-accent/50 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.5)] overflow-hidden z-40"
+        className="absolute right-0 top-[calc(100%+10px)] w-72 bg-[#110f19]/95 border border-accent/50 shadow-[0_0_30px_rgba(0,0,0,0.5)] overflow-hidden z-40"
       >
         <div className="px-4 py-3 border-b border-white/10">
           <span className="text-xs label-mc text-white/40">Accounts</span>
@@ -58,7 +58,7 @@ export function AccountDropdown({ open, onClose }: AccountDropdownProps) {
                 title="Entfernen"
                 className="text-white/0 group-hover:text-white/40 hover:!text-danger transition-colors cursor-pointer shrink-0"
               >
-                <Icon icon="solar:trash-bin-trash-bold" width={14} height={14} />
+                <Icon icon="solar:trash-bin-trash-linear" width={14} height={14} />
               </button>
             </div>
           ))}
@@ -67,7 +67,7 @@ export function AccountDropdown({ open, onClose }: AccountDropdownProps) {
           onClick={() => setAdding(true)}
           className="w-full flex items-center gap-2 px-4 py-3 text-sm text-accent hover:bg-accent/10 transition-colors cursor-pointer border-t border-white/10"
         >
-          <Icon icon="solar:add-circle-bold" width={16} height={16} />
+          <Icon icon="solar:add-circle-linear" width={16} height={16} />
           Account hinzufügen
         </button>
       </div>

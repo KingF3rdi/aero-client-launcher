@@ -10,7 +10,7 @@ import { invoke } from "../../lib/tauri";
 type Variant = "classic" | "slim";
 type NameState = "idle" | "checking" | "free" | "taken" | "invalid" | "confirm" | "changing";
 
-const CARD = "rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-5";
+const CARD = "rounded-2xl border border-white/10 bg-black/40 p-5";
 const SOFT_BTN =
   "h-9 px-3.5 text-[13px] font-semibold rounded-lg border border-white/10 bg-white/[0.06] hover:bg-white/[0.12] transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
 const STRONG_BTN =

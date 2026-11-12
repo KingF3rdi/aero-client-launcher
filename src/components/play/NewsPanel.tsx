@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "../ui/Icon";
 import { isTauri } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
@@ -98,9 +98,9 @@ export function NewsPanel() {
   }, []);
 
   return (
-    <aside className="w-80 shrink-0 border-l border-white/[0.08] bg-[#0e0d14]/75 backdrop-blur-xl flex flex-col">
+    <aside className="w-full max-w-2xl mx-auto my-4 rounded-xl border border-white/10 bg-[#0f0e15]/95 flex flex-col overflow-hidden">
       <div className="label-mc flex items-center gap-2 px-4 h-12 border-b border-white/10 text-xs">
-        <Icon icon="solar:document-text-bold" width={16} height={16} className="text-accent" />
+        <Icon icon="solar:document-text-linear" width={16} height={16} className="text-accent" />
         <span className="flex-1">News</span>
         <div className="flex gap-0.5 p-0.5 rounded-lg bg-black/40 border border-white/10 normal-case tracking-normal">
           {(["aero", "mc"] as const).map((k) => (

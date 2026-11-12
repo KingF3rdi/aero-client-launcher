@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "../ui/Icon";
 import clsx from "clsx";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useInstanceStore } from "../../store/useInstanceStore";
@@ -28,7 +28,7 @@ export function InstancesView() {
       <div className="flex items-center justify-between mb-6">
         <h2 className="label-mc text-lg">Profile</h2>
         <Button variant="accent" size="sm" onClick={() => setAdding(true)}>
-          <Icon icon="solar:add-circle-bold" width={16} height={16} />
+          <Icon icon="solar:add-circle-linear" width={16} height={16} />
           Neues Profil
         </Button>
       </div>
@@ -36,7 +36,7 @@ export function InstancesView() {
         {instances.map((instance) => (
           <div
             key={instance.id}
-            className="group relative flex flex-col items-start gap-3 bg-black/30 border border-accent/30 backdrop-blur p-5 hover:border-accent/40 hover:bg-accent/10 transition-all"
+            className="group relative flex flex-col items-start gap-3 bg-black/30 border border-accent/30 p-5 hover:border-accent/40 hover:bg-accent/10 transition-all"
           >
             <button
               onClick={() => {
@@ -45,7 +45,7 @@ export function InstancesView() {
               }}
               className="flex flex-col items-start gap-3 w-full text-left cursor-pointer"
             >
-              <Icon icon="solar:box-bold" className="text-accent" width={28} height={28} />
+              <Icon icon="solar:box-linear" className="text-accent" width={28} height={28} />
               <div>
                 <div className="font-medium pr-6">{instance.name}</div>
                 <div className="text-xs text-white/40 flex items-center gap-1.5">
@@ -90,7 +90,7 @@ export function InstancesView() {
                 title="Logs"
                 className="w-7 h-7 flex items-center justify-center rounded-md text-white/0 group-hover:text-white/50 hover:!text-white hover:bg-white/10 transition-all cursor-pointer"
               >
-                <Icon icon="solar:document-text-bold" width={16} height={16} />
+                <Icon icon="solar:document-text-linear" width={16} height={16} />
               </button>
               <button
                 onClick={(e) => {
@@ -101,7 +101,7 @@ export function InstancesView() {
                 title="Instanz-Einstellungen"
                 className="w-7 h-7 flex items-center justify-center rounded-md text-white/0 group-hover:text-white/50 hover:!text-white hover:bg-white/10 transition-all cursor-pointer"
               >
-                <Icon icon="solar:settings-bold" width={16} height={16} />
+                <Icon icon="solar:settings-linear" width={16} height={16} />
               </button>
             </div>
           </div>

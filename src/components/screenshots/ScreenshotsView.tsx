@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "../ui/Icon";
 import { isTauri } from "@tauri-apps/api/core";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { toast } from "react-hot-toast";
@@ -54,7 +54,7 @@ export function ScreenshotsView() {
           ))}
         </select>
         <Button onClick={openFolder} disabled={!target}>
-          <Icon icon="solar:folder-open-bold" width={16} height={16} />
+          <Icon icon="solar:folder-open-linear" width={16} height={16} />
           Ordner öffnen
         </Button>
       </div>

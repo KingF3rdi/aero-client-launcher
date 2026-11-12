@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "../ui/Icon";
 import { toast } from "react-hot-toast";
 import { invoke } from "../../lib/tauri";
 import { useInstanceStore } from "../../store/useInstanceStore";
@@ -121,7 +121,7 @@ export function PresetsView() {
             className="flex-1 h-10 bg-black/40 border border-white/15 px-3 text-sm focus:outline-none focus:border-accent/60"
           />
           <Button variant="accent" onClick={publish} disabled={publishing || !account}>
-            <Icon icon="solar:upload-minimalistic-bold" width={16} height={16} />
+            <Icon icon="solar:upload-minimalistic-linear" width={16} height={16} />
             {publishing ? "Lädt hoch…" : "Config veröffentlichen"}
           </Button>
         </div>
@@ -139,7 +139,7 @@ export function PresetsView() {
           return (
             <div key={preset.id} className="flex items-center gap-3 bg-black/30 border border-white/15 p-4">
               <div className="w-10 h-10 shrink-0 bg-black/40 flex items-center justify-center">
-                <Icon icon="solar:settings-bold" width={20} height={20} className="text-white/40" />
+                <Icon icon="solar:settings-linear" width={20} height={20} className="text-white/40" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="font-medium truncate">{preset.name}</div>
@@ -155,7 +155,7 @@ export function PresetsView() {
                       title="Löschen"
                       className="text-white/30 hover:text-danger transition-colors cursor-pointer disabled:opacity-40"
                     >
-                      <Icon icon="solar:trash-bin-trash-bold" width={16} height={16} />
+                      <Icon icon="solar:trash-bin-trash-linear" width={16} height={16} />
                     </button>
                   )}
                 </div>

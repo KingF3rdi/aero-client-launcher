@@ -1,23 +1,20 @@
-/** Brand mark: a bold "A" in the accent color, same as the Fabric mod's UiDraw.aeroMark. */
+/** Brand mark: the same smooth "A" (two heavy legs and a crossbar) as the mod's LineIcons "mark", in the accent color. */
 export function LarpMark({ size = 36, className }: { size?: number; className?: string }) {
   return (
-    <div
+    <svg
       className={className}
-      style={{
-        width: size,
-        height: size,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        color: "var(--accent-hex)",
-        fontFamily: "Inter, \"Segoe UI\", sans-serif",
-        fontSize: size * 0.95,
-        fontWeight: 900,
-        lineHeight: 1,
-        textShadow: "0 0 16px rgb(var(--accent) / 0.55)",
-      }}
+      width={size}
+      height={size}
+      viewBox="0 0 64 64"
+      fill="none"
+      stroke="var(--accent-hex)"
+      strokeWidth={9}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
     >
-      A
-    </div>
+      <path d="M11 56 L32 8 L53 56" />
+      <path d="M20 41 H44" />
+    </svg>
   );
 }

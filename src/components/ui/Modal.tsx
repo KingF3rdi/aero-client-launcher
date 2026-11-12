@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { Icon } from "@iconify/react";
+import { Icon } from "./Icon";
 
 interface ModalProps {
   title: string;
@@ -22,11 +22,11 @@ export function Modal({ title, subtitle, onClose, children, width = 560 }: Modal
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
       onClick={onClose}
     >
       <div
-        className="w-full rounded-2xl bg-[#110f19]/95 border border-white/15 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.5)] overflow-hidden"
+        className="w-full rounded-2xl bg-[#110f19]/95 border border-white/15 shadow-[0_0_40px_rgba(0,0,0,0.5)] overflow-hidden"
         style={{ maxWidth: width }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -39,7 +39,7 @@ export function Modal({ title, subtitle, onClose, children, width = 560 }: Modal
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
           >
-            <Icon icon="solar:close-circle-bold" width={20} height={20} />
+            <Icon icon="solar:close-circle-linear" width={20} height={20} />
           </button>
         </div>
         <div className="max-h-[70vh] overflow-y-auto">{children}</div>

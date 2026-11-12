@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { open } from "@tauri-apps/plugin-dialog";
 import { isTauri } from "@tauri-apps/api/core";
-import { Icon } from "@iconify/react";
+import { Icon } from "../ui/Icon";
 import { toast } from "react-hot-toast";
 import { invoke } from "../../lib/tauri";
 import { useInstanceStore } from "../../store/useInstanceStore";
@@ -10,10 +10,10 @@ import type { ContentPage, ContentSummary, ProjectType } from "../../types/conte
 import { Button } from "../ui/Button";
 
 const TABS: { id: ProjectType; label: string; icon: string }[] = [
-  { id: "mod", label: "Mods", icon: "solar:widget-bold" },
-  { id: "modpack", label: "Modpacks", icon: "solar:box-bold" },
-  { id: "resourcepack", label: "Resource Packs", icon: "solar:gallery-bold" },
-  { id: "shader", label: "Shader", icon: "solar:sun-bold" },
+  { id: "mod", label: "Mods", icon: "solar:widget-linear" },
+  { id: "modpack", label: "Modpacks", icon: "solar:box-linear" },
+  { id: "resourcepack", label: "Resource Packs", icon: "solar:gallery-linear" },
+  { id: "shader", label: "Shader", icon: "solar:sun-linear" },
 ];
 
 /**
@@ -124,7 +124,7 @@ export function DiscoverView() {
         <h2 className="label-mc text-lg">Mods</h2>
         {tab === "modpack" && (
           <Button variant="ghost" onClick={importLocalModpack} disabled={importing}>
-            <Icon icon="solar:import-bold" width={16} height={16} />
+            <Icon icon="solar:import-linear" width={16} height={16} />
             {importing ? "Importiert…" : "Modpack importieren (.mrpack)"}
           </Button>
         )}
@@ -155,7 +155,7 @@ export function DiscoverView() {
           className="flex-1 h-10 rounded-lg bg-black/40 border border-white/10 px-3 text-sm focus:outline-none focus:border-accent/50"
         />
         <Button variant="ghost" onClick={search} disabled={loading}>
-          <Icon icon="solar:magnifer-bold" width={16} height={16} />
+          <Icon icon="solar:magnifer-linear" width={16} height={16} />
           Suchen
         </Button>
 
@@ -183,13 +183,13 @@ export function DiscoverView() {
         {results.map((item) => (
           <div
             key={item.id}
-            className="flex items-center gap-3 bg-black/30 border border-accent/30 backdrop-blur p-4"
+            className="flex items-center gap-3 bg-black/30 border border-accent/30 p-4"
           >
             {item.iconUrl ? (
               <img src={item.iconUrl} alt="" className="w-12 h-12 rounded-lg shrink-0 object-cover" />
             ) : (
               <div className="w-12 h-12 rounded-lg bg-white/10 shrink-0 flex items-center justify-center">
-                <Icon icon="solar:box-bold" width={22} height={22} className="text-white/40" />
+                <Icon icon="solar:box-linear" width={22} height={22} className="text-white/40" />
               </div>
             )}
             <div className="flex-1 min-w-0">

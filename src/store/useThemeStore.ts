@@ -5,8 +5,6 @@ export type BackgroundEffect = "dusk" | "particles" | "grid" | "plain";
 interface ThemeState {
   accent: string;
   animations: boolean;
-  skinAnimation: boolean;
-  sidebarLabels: boolean;
   /** Minimize the launcher window once the game has started. */
   minimizeOnLaunch: boolean;
   background: BackgroundEffect;
@@ -23,8 +21,6 @@ export const ACCENT_PRESETS = [
 const DEFAULTS = {
   accent: "#4f8eff",
   animations: true,
-  skinAnimation: true,
-  sidebarLabels: true,
   minimizeOnLaunch: false,
   background: "dusk" as BackgroundEffect,
 };

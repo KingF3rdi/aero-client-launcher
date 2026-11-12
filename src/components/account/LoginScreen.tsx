@@ -1,4 +1,4 @@
-import { Icon } from "@iconify/react";
+import { Icon } from "../ui/Icon";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { isTauri } from "@tauri-apps/api/core";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -26,7 +26,7 @@ export function LoginScreen() {
         </button>
       </div>
 
-      <div className="relative z-10 flex flex-col items-center gap-5 text-center w-[26rem] border border-accent/40 bg-black/40 backdrop-blur-lg px-10 py-10">
+      <div className="relative z-10 flex flex-col items-center gap-5 text-center w-[26rem] border border-accent/40 bg-black/40 px-10 py-10">
         <LarpMark size={64} />
         <h1 className="label-mc text-xl" style={{ textShadow: "0 0 20px rgb(var(--accent) / 0.6)" }}>
           Aero Client

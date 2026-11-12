@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import clsx from "clsx";
-import { Icon } from "@iconify/react";
+import { Icon } from "../ui/Icon";
 import { toast } from "react-hot-toast";
 import { invoke } from "../../lib/tauri";
 import { COSMETICS, RARITY, capeTexture, type Cosmetic, type CosmeticKind } from "../../lib/cosmetics";
@@ -12,12 +12,12 @@ import { CapesView } from "../capes/CapesView";
 type Tab = CosmeticKind | "custom";
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: "cape", label: "Capes", icon: "solar:magic-stick-3-bold" },
-  { id: "wings", label: "Wings", icon: "solar:leaf-bold" },
-  { id: "trail", label: "Trails", icon: "solar:stars-bold" },
-  { id: "head", label: "Headwear", icon: "solar:crown-bold" },
-  { id: "pet", label: "Pets", icon: "solar:cat-bold" },
-  { id: "custom", label: "Custom Capes", icon: "solar:upload-minimalistic-bold" },
+  { id: "cape", label: "Capes", icon: "solar:magic-stick-3-linear" },
+  { id: "wings", label: "Wings", icon: "solar:leaf-linear" },
+  { id: "trail", label: "Trails", icon: "solar:stars-linear" },
+  { id: "head", label: "Headwear", icon: "solar:crown-linear" },
+  { id: "pet", label: "Pets", icon: "solar:cat-linear" },
+  { id: "custom", label: "Custom Capes", icon: "solar:upload-minimalistic-linear" },
 ];
 
 const NONE: Record<CosmeticKind, string> = { cape: "none", wings: "none", trail: "none", head: "none", pet: "none" };

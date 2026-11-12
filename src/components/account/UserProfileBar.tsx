@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Icon } from "@iconify/react";
+import { Icon } from "../ui/Icon";
 import { useAuthStore } from "../../store/useAuthStore";
 import { AccountDropdown } from "./AccountDropdown";
 
@@ -17,7 +17,7 @@ export function UserProfileBar() {
       >
         <img src={`https://mc-heads.net/avatar/${account.uuid}/24`} alt="" className="h-6 w-6 rounded-full" style={{ imageRendering: "pixelated" }} />
         {account.name}
-        <Icon icon="solar:alt-arrow-down-bold" width={12} height={12} className="text-white/50" />
+        <Icon icon="solar:alt-arrow-down-linear" width={12} height={12} className="text-white/50" />
       </button>
       <AccountDropdown open={open} onClose={() => setOpen(false)} />
     </div>

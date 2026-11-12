@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { open } from "@tauri-apps/plugin-dialog";
 import { isTauri } from "@tauri-apps/api/core";
-import { Icon } from "@iconify/react";
+import { Icon } from "../ui/Icon";
 import { toast } from "react-hot-toast";
 import { invoke } from "../../lib/tauri";
 import { useInstanceStore } from "../../store/useInstanceStore";
@@ -97,7 +97,7 @@ export function CapesView({ onEquipped }: { onEquipped?: () => void } = {}) {
       <div className="flex items-center justify-between">
         <h2 className="label-mc text-lg">Custom Capes</h2>
         <Button variant="accent" onClick={publish} disabled={publishing || !account}>
-          <Icon icon="solar:upload-minimalistic-bold" width={16} height={16} />
+          <Icon icon="solar:upload-minimalistic-linear" width={16} height={16} />
           {publishing ? "Lädt hoch…" : "Cape veröffentlichen (PNG, 64x32)"}
         </Button>
       </div>
@@ -169,7 +169,7 @@ export function CapesView({ onEquipped }: { onEquipped?: () => void } = {}) {
                       title="Löschen"
                       className="text-white/30 hover:text-danger transition-colors cursor-pointer disabled:opacity-40"
                     >
-                      <Icon icon="solar:trash-bin-trash-bold" width={16} height={16} />
+                      <Icon icon="solar:trash-bin-trash-linear" width={16} height={16} />
                     </button>
                   )}
                 </div>

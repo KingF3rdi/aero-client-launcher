@@ -20,18 +20,19 @@ export default {
         mc: ["Inter", "Segoe UI", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        glow: "0 0 20px rgb(var(--accent) / 0.25)",
+        // The mod marks the selected card with an accent rim, not a glow.
+        glow: "0 0 0 1px rgb(var(--accent) / 0.7)",
       },
     },
-    // Soft, rounded look matching the Aero Client mod's menus.
+    // Small, even corners like the Aero Client mod's menus (no big soft blobs).
     borderRadius: {
       none: "0",
-      sm: "4px",
-      DEFAULT: "6px",
-      md: "8px",
-      lg: "10px",
-      xl: "14px",
-      "2xl": "18px",
+      sm: "3px",
+      DEFAULT: "5px",
+      md: "6px",
+      lg: "8px",
+      xl: "10px",
+      "2xl": "12px",
       full: "9999px",
     },
   },

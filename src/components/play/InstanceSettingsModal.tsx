@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { useNavigate } from "react-router-dom";
-import { Icon } from "@iconify/react";
+import { Icon } from "../ui/Icon";
 import { Modal } from "../ui/Modal";
 import { Button } from "../ui/Button";
 import { Toggle } from "../ui/Toggle";
@@ -43,11 +43,11 @@ export function InstanceSettingsModal({ instance, onClose, initialTab }: Instanc
       <div className="flex">
         <nav className="w-40 shrink-0 border-r border-white/10 p-3 flex flex-col gap-1">
           {([
-            { id: "content", label: "Content", icon: "solar:widget-5-bold" },
-            { id: "configs", label: "Configs", icon: "solar:code-file-bold" },
-            { id: "general", label: "General", icon: "solar:settings-bold" },
-            { id: "installation", label: "Installation", icon: "solar:widget-bold" },
-            { id: "logs", label: "Logs", icon: "solar:document-text-bold" },
+            { id: "content", label: "Content", icon: "solar:widget-5-linear" },
+            { id: "configs", label: "Configs", icon: "solar:code-file-linear" },
+            { id: "general", label: "General", icon: "solar:settings-linear" },
+            { id: "installation", label: "Installation", icon: "solar:widget-linear" },
+            { id: "logs", label: "Logs", icon: "solar:document-text-linear" },
           ] as const).map((t) => (
             <button
               key={t.id}
@@ -80,7 +80,7 @@ export function InstanceSettingsModal({ instance, onClose, initialTab }: Instanc
                 <div className="shrink-0">
                   <label className="text-xs label-mc text-white/40">Icon</label>
                   <div className="mt-1.5 w-11 h-11 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center">
-                    <Icon icon="solar:box-bold" width={22} height={22} className="text-accent" />
+                    <Icon icon="solar:box-linear" width={22} height={22} className="text-accent" />
                   </div>
                 </div>
               </div>
@@ -98,7 +98,7 @@ export function InstanceSettingsModal({ instance, onClose, initialTab }: Instanc
                     onClose();
                   }}
                 >
-                  <Icon icon="solar:copy-bold" width={16} height={16} />
+                  <Icon icon="solar:copy-linear" width={16} height={16} />
                   Duplizieren
                 </Button>
               </div>
@@ -110,7 +110,7 @@ export function InstanceSettingsModal({ instance, onClose, initialTab }: Instanc
                 </p>
                 {!confirmDelete ? (
                   <Button variant="danger" onClick={() => setConfirmDelete(true)}>
-                    <Icon icon="solar:trash-bin-trash-bold" width={16} height={16} />
+                    <Icon icon="solar:trash-bin-trash-linear" width={16} height={16} />
                     Löschen
                   </Button>
                 ) : (
@@ -214,7 +214,7 @@ function LogsTab({ instanceId }: { instanceId: string }) {
       <div className="flex items-center justify-between">
         <span className="text-xs label-mc text-white/40">latest.log</span>
         <Button variant="ghost" size="sm" onClick={load} disabled={loading}>
-          <Icon icon="solar:refresh-bold" width={14} height={14} />
+          <Icon icon="solar:refresh-linear" width={14} height={14} />
           Aktualisieren
         </Button>
       </div>

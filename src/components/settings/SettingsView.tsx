@@ -1,6 +1,6 @@
 import { useRef, useState, type ReactNode } from "react";
 import clsx from "clsx";
-import { Icon } from "@iconify/react";
+import { Icon } from "../ui/Icon";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useInstanceStore } from "../../store/useInstanceStore";
 import { ACCENT_PRESETS, useThemeStore, type BackgroundEffect } from "../../store/useThemeStore";
@@ -24,16 +24,16 @@ interface Section {
 }
 
 const GROUPS = [
-  { id: "general", label: "Allgemein", icon: "solar:settings-bold" },
-  { id: "background", label: "Hintergrund", icon: "solar:pallete-2-bold" },
-  { id: "account", label: "Account", icon: "solar:user-id-bold" },
+  { id: "general", label: "Allgemein", icon: "solar:settings-linear" },
+  { id: "background", label: "Hintergrund", icon: "solar:pallete-2-linear" },
+  { id: "account", label: "Account", icon: "solar:user-id-linear" },
 ];
 
 const EFFECTS: { id: BackgroundEffect; label: string; icon: string }[] = [
-  { id: "dusk", label: "Abendhimmel", icon: "solar:sunset-bold" },
-  { id: "particles", label: "Partikel", icon: "solar:stars-bold" },
-  { id: "grid", label: "Raster", icon: "solar:widget-bold" },
-  { id: "plain", label: "Einfarbig", icon: "solar:pallete-2-bold" },
+  { id: "dusk", label: "Abendhimmel", icon: "solar:sunset-linear" },
+  { id: "particles", label: "Partikel", icon: "solar:stars-linear" },
+  { id: "grid", label: "Raster", icon: "solar:widget-linear" },
+  { id: "plain", label: "Einfarbig", icon: "solar:pallete-2-linear" },
 ];
 
 /** Settings: grouped sub-navigation with search on the left, sections of labelled rows on the right. */
@@ -50,7 +50,7 @@ export function SettingsView() {
       id: "accent",
       group: "general",
       title: "Akzentfarbe",
-      icon: "solar:pallete-2-bold",
+      icon: "solar:pallete-2-linear",
       desc: "Farbe für Rahmen, Buttons und Effekte im Launcher.",
       rows: [
         {
@@ -95,7 +95,7 @@ export function SettingsView() {
       id: "behaviour",
       group: "general",
       title: "Verhalten",
-      icon: "solar:tuning-2-bold",
+      icon: "solar:tuning-2-linear",
       desc: "Wie der Launcher Minecraft startet.",
       rows: [
         {
@@ -119,12 +119,10 @@ export function SettingsView() {
       id: "effect",
       group: "background",
       title: "Hintergrund-Effekt",
-      icon: "solar:stars-bold",
+      icon: "solar:stars-linear",
       desc: "Wähle den Hintergrund des Launchers.",
       rows: [
         { label: "Animationen", desc: "Bewegte Hintergrund-Effekte.", control: <Toggle on={theme.animations} onChange={(v) => theme.set({ animations: v })} /> },
-        { label: "Skin-Animation", desc: "Dein Skin winkt auf der Play-Seite.", control: <Toggle on={theme.skinAnimation} onChange={(v) => theme.set({ skinAnimation: v })} /> },
-        { label: "Sidebar-Beschriftung", desc: "Breite Seitenleiste mit Namen neben den Icons; aus = schmale Icon-Leiste.", control: <Toggle on={theme.sidebarLabels} onChange={(v) => theme.set({ sidebarLabels: v })} /> },
         {
           label: "",
           wide: true,
@@ -156,7 +154,7 @@ export function SettingsView() {
       id: "account",
       group: "account",
       title: "Account",
-      icon: "solar:user-id-bold",
+      icon: "solar:user-id-linear",
       desc: "Der Microsoft-Account, mit dem du spielst.",
       rows: [
         {
@@ -187,9 +185,9 @@ export function SettingsView() {
 
   return (
     <div className="h-full p-6">
-      <div className="h-full flex flex-col border border-accent/40 bg-black/30 backdrop-blur">
+      <div className="h-full flex flex-col border border-accent/40 bg-black/30">
         <div className="h-14 shrink-0 flex items-center gap-3 px-5 border-b border-accent/40 bg-accent/10">
-          <Icon icon="solar:settings-bold" width={22} height={22} />
+          <Icon icon="solar:settings-linear" width={22} height={22} />
           <span className="label-mc text-sm">Optionen</span>
         </div>
 
