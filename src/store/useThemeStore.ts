@@ -22,16 +22,16 @@ const DEFAULTS = {
   accent: "#4f8eff",
   animations: true,
   minimizeOnLaunch: false,
-  background: "dusk" as BackgroundEffect,
+  background: "plain" as BackgroundEffect,
 };
 
 function load(): typeof DEFAULTS {
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) ?? "{}");
-    // 1.7.0 redesign: everyone starts once on the new dusk sky; a later pick sticks.
-    if (saved.look !== 2) {
-      saved.look = 2;
-      saved.background = "dusk";
+    // Monochrome redesign: everyone starts once on the plain dark background; a later pick sticks.
+    if (saved.look !== 3) {
+      saved.look = 3;
+      saved.background = "plain";
     }
     return { ...DEFAULTS, ...saved };
   } catch {

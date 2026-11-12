@@ -7,6 +7,9 @@ export function Background({ count = 60 }: { count?: number }) {
   if (background === "dusk") {
     return <DuskSky />;
   }
+  if (background === "plain") {
+    return <div className="absolute inset-0 pointer-events-none bg-[#0b0b0d]" />;
+  }
   return (
     <div
       className="absolute inset-0 pointer-events-none"
