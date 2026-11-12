@@ -46,7 +46,23 @@ export function App() {
 
   return (
     <>
-      <Toaster position="bottom-right" toastOptions={{ style: { background: "#12121c", color: "#eceaf2" } }} />
+      {/* Small dark pills at the bottom center (above the home's status line), gone after a moment. */}
+      <Toaster
+        position="bottom-center"
+        containerStyle={{ bottom: 56 }}
+        toastOptions={{
+          duration: 2500,
+          style: {
+            background: "#141416",
+            color: "#ffffff",
+            border: "1px solid rgba(255,255,255,.08)",
+            borderRadius: 9999,
+            fontSize: 12.5,
+            padding: "6px 14px",
+            boxShadow: "0 8px 24px rgba(0,0,0,.45)",
+          },
+        }}
+      />
       <AppLayout activeTab={activeTab} onNavChange={open}>
         <Suspense fallback={<div className="p-8 text-sm text-white/70">Wird geladen…</div>}>
           <Routes>

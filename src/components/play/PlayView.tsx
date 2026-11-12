@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import clsx from "clsx";
+import { isTauri } from "@tauri-apps/api/core";
+import { getVersion } from "@tauri-apps/api/app";
 import { Icon } from "../ui/Icon";
 import { LarpMark } from "../ui/LarpMark";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -74,7 +76,7 @@ export function PlayView({ onOpen, onAddInstance }: { onOpen: (id: string) => vo
   };
 
   return (
-    <div className="min-h-full flex flex-col items-center justify-center px-6 pb-14">
+    <div className="relative min-h-full flex flex-col items-center justify-center px-6 pb-14">
       <LarpMark size={68} tone="metal" />
       <h1 className="mt-4 mb-0 text-[26px] font-semibold tracking-tight text-white">Aero Client</h1>
 
@@ -147,9 +149,66 @@ export function PlayView({ onOpen, onAddInstance }: { onOpen: (id: string) => vo
         </datalist>
       </label>
 
+      <StatusBar />
+
       {settingsTab && selected && (
         <InstanceSettingsModal key={selected.id} instance={selected} initialTab={settingsTab} onClose={() => setSettingsTab(null)} />
       )}
+    </div>
+  );
+}
+
+const STATS_URL = "https://aero.gamekni9ht.workers.dev/api/stats";
+const LATEST_URL = "https://api.github.com/repos/KingF3rdi/aero-client-launcher/releases/latest";
+const MOD_TAG_KEY = "aero-launcher.modTag";
+
+/** One slim info line at the bottom of the home: players online, newest mod release, this launcher's version. */
+function StatusBar() {
+  const [online, setOnline] = useState<number | null>(null);
+  const [mod, setMod] = useState<string | null>(() => sessionStorage.getItem(MOD_TAG_KEY));
+  const [launcher, setLauncher] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    const load = () =>
+      fetch(STATS_URL)
+        .then((r) => r.json())
+        .then((s) => alive && setOnline(s.online))
+        .catch(() => {});
+    load();
+    const t = setInterval(load, 60_000);
+    // GitHub allows 60 unauthenticated calls an hour, so the tag is fetched once per session
+    if (!sessionStorage.getItem(MOD_TAG_KEY)) {
+      fetch(LATEST_URL)
+        .then((r) => r.json())
+        .then((rel) => {
+          const tag = String(rel.tag_name ?? "").replace(/^v/, "");
+          if (tag && alive) {
+            sessionStorage.setItem(MOD_TAG_KEY, tag);
+            setMod(tag);
+          }
+        })
+        .catch(() => {});
+    }
+    if (isTauri()) {
+      getVersion().then((v) => alive && setLauncher(v)).catch(() => {});
+    }
+    return () => {
+      alive = false;
+      clearInterval(t);
+    };
+  }, []);
+
+  return (
+    <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-3 h-7 px-3.5 rounded-full bg-[#141416] border border-white/[0.07] text-[11.5px] text-white/60 whitespace-nowrap">
+      <span className="flex items-center gap-1.5">
+        <i className="w-1.5 h-1.5 rounded-full bg-green inline-block" />
+        {online === null ? "–" : `${online.toLocaleString("de-DE")} online`}
+      </span>
+      <span className="w-px h-3 bg-white/15" />
+      <span>Mod {mod ?? "–"}</span>
+      <span className="w-px h-3 bg-white/15" />
+      <span>Launcher {launcher ?? "dev"}</span>
     </div>
   );
 }
